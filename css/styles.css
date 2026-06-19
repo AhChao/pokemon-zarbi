@@ -1,0 +1,478 @@
+/* ── Design tokens ───────────────────────────────────────────── */
+:root {
+  /* 亮中性主題（Coolors: 1c1c1c / eef0f2 / fafaff / dda448 / 63768d） */
+  --c-bg: #eef0f2;
+  --c-surface: #fafaff;
+  --c-text: #1c1c1c;
+  --c-muted: #63768d;
+  --c-border: #dce0e6;
+  --c-primary: #dda448;        /* 暖金，主要強調色 */
+  --c-primary-ink: #1c1c1c;    /* 金底上用深色字確保對比 */
+  --c-accent: #63768d;         /* 板岩藍灰，次要動作 */
+  --c-header: #1c1c1c;         /* 標頭刻意用深色 */
+  --c-header-ink: #fafaff;
+  --c-good: #2e7d32;
+  --c-bad: #c62828;
+
+  --radius: 14px;
+  --radius-sm: 10px;
+  --gap: 16px;
+  --shadow: 0 1px 3px rgba(0, 0, 0, .08), 0 6px 20px rgba(0, 0, 0, .06);
+  --maxw: 640px;
+  --tap: 48px;
+
+  --font: "Noto Sans TC", system-ui, -apple-system, "PingFang TC",
+          "Microsoft JhengHei", sans-serif;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --c-bg: #16181c;
+    --c-surface: #21242a;
+    --c-text: #f2f3f5;
+    --c-muted: #9aa0a8;
+    --c-border: #343842;
+    --c-primary: #dda448;
+    --c-primary-ink: #1c1c1c;
+    --c-accent: #63768d;
+    --c-header: #0f1013;
+    --c-header-ink: #f2f3f5;
+    --shadow: 0 1px 3px rgba(0, 0, 0, .4), 0 6px 20px rgba(0, 0, 0, .35);
+  }
+}
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; } /* 勝過 .btn / .poke-speed 的 display，答題前真正隱藏 */
+.ui-icon { width: 1em; height: 1em; display: inline-block; vertical-align: -0.12em; flex: 0 0 auto; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--c-bg);
+  color: var(--c-text);
+  font-family: var(--font);
+  -webkit-text-size-adjust: 100%;
+  line-height: 1.55;
+}
+
+body {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Topbar / footer ─────────────────────────────────────────── */
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: var(--c-header);
+  color: var(--c-header-ink);
+  padding: max(env(safe-area-inset-top), 0px) var(--gap) 0;
+  box-shadow: var(--shadow);
+}
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font-size: 1.1rem;
+  font-weight: 700;
+  padding: 14px 0;
+  cursor: pointer;
+}
+.brand__mark { font-size: 1.3rem; }
+.footer {
+  margin-top: auto;
+  padding: 18px var(--gap) calc(18px + env(safe-area-inset-bottom));
+  text-align: center;
+  color: var(--c-muted);
+  font-size: .78rem;
+}
+
+/* ── App layout ──────────────────────────────────────────────── */
+.app {
+  width: 100%;
+  max-width: var(--maxw);
+  margin: 0 auto;
+  padding: var(--gap);
+  flex: 1;
+}
+
+.card {
+  background: var(--c-surface);
+  border: 1px solid var(--c-border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 20px;
+  margin-bottom: var(--gap);
+}
+
+h1 { font-size: 1.5rem; margin: 0 0 6px; }
+h2 { font-size: 1.2rem; margin: 0 0 12px; }
+.lead { color: var(--c-muted); margin: 0 0 20px; }
+
+/* ── Buttons ─────────────────────────────────────────────────── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  min-height: var(--tap);
+  padding: 12px 18px;
+  border: 1px solid var(--c-border);
+  border-radius: var(--radius-sm);
+  background: var(--c-surface);
+  color: var(--c-text);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform .05s ease, background .15s ease, border-color .15s ease;
+}
+.btn:active { transform: scale(.98); }
+.btn + .btn { margin-top: 10px; }
+.btn--primary {
+  background: var(--c-primary);
+  color: var(--c-primary-ink);
+  border-color: transparent;
+}
+.btn--accent {
+  background: var(--c-accent);
+  color: #fff;
+  border-color: transparent;
+}
+.btn--ghost { background: transparent; }
+.btn:disabled { opacity: .5; cursor: default; }
+
+/* ── Type badges ─────────────────────────────────────────────── */
+.type-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 12px;
+  border-radius: 999px;
+  color: #fff;
+  font-weight: 700;
+  font-size: .9rem;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, .25);
+  white-space: nowrap;
+}
+.type-badge--lg { font-size: 1.05rem; padding: 6px 16px; }
+.type-icon {
+  width: 1.15em;
+  height: 1.15em;
+  display: inline-block;
+  vertical-align: -0.18em;
+  /* SVG 字符本身為白色，與彩色 badge / 按鈕底色搭配 */
+}
+
+/* ── Quiz ────────────────────────────────────────────────────── */
+.quiz__meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: var(--c-muted);
+  font-size: .85rem;
+  margin-bottom: 10px;
+}
+.progress {
+  height: 6px;
+  background: var(--c-border);
+  border-radius: 999px;
+  overflow: hidden;
+  margin-bottom: 18px;
+}
+.progress__bar {
+  height: 100%;
+  background: var(--c-primary);
+  transition: width .3s ease;
+}
+.matchup {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  justify-content: center;
+  margin: 14px 0 6px;
+}
+.matchup__vs { color: var(--c-muted); font-weight: 700; }
+.matchup__defs { display: flex; gap: 6px; }
+.q-prompt { text-align: center; color: var(--c-muted); margin: 6px 0 18px; }
+
+.options { display: grid; gap: 10px; }
+.option {
+  min-height: var(--tap);
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+.option--correct {
+  background: var(--c-good);
+  color: #fff;
+  border-color: transparent;
+}
+.option--wrong {
+  background: var(--c-bad);
+  color: #fff;
+  border-color: transparent;
+}
+.feedback {
+  text-align: center;
+  font-weight: 700;
+  margin-top: 16px;
+  min-height: 1.4em;
+}
+.feedback--good { color: var(--c-good); }
+.feedback--bad { color: var(--c-bad); }
+
+/* ── Result ──────────────────────────────────────────────────── */
+.score-big {
+  text-align: center;
+  font-size: 3rem;
+  font-weight: 800;
+  margin: 8px 0;
+}
+.score-sub { text-align: center; color: var(--c-muted); margin-bottom: 18px; }
+.code-box {
+  display: flex;
+  gap: 8px;
+  margin: 10px 0 4px;
+}
+.code-box input {
+  flex: 1;
+  min-width: 0;
+  font: inherit;
+  font-size: .85rem;
+  padding: 12px;
+  border: 1px solid var(--c-border);
+  border-radius: var(--radius-sm);
+  background: var(--c-bg);
+  color: var(--c-text);
+}
+.code-box .btn { width: auto; flex: 0 0 auto; }
+.label { font-size: .85rem; color: var(--c-muted); margin: 14px 0 4px; }
+
+.banner {
+  background: linear-gradient(135deg, var(--c-accent), #5b86ff);
+  color: #fff;
+  border-radius: var(--radius);
+  padding: 18px 20px;
+  margin-bottom: var(--gap);
+}
+.banner h2 { color: #fff; }
+.banner p { margin: 0 0 4px; }
+
+/* ── Review list ─────────────────────────────────────────────── */
+.review { margin-top: 8px; }
+.review__item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding: 10px 0;
+  border-top: 1px solid var(--c-border);
+  font-size: .92rem;
+}
+.review__mark { font-weight: 800; }
+.review__mark--ok { color: var(--c-good); }
+.review__mark--no { color: var(--c-bad); }
+
+/* ── Chart lookup ────────────────────────────────────────────── */
+.chart-controls { display: grid; gap: 12px; }
+.type-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(72px, 1fr));
+  gap: 6px;
+}
+.type-pick {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  border: 2px solid transparent;
+  border-radius: var(--radius-sm);
+  padding: 8px 4px;
+  color: #fff;
+  font-weight: 700;
+  font-size: .85rem;
+  cursor: pointer;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, .25);
+}
+.type-pick .type-icon { width: 1.5em; height: 1.5em; vertical-align: middle; }
+.type-pick[aria-pressed="true"] {
+  outline: 3px solid var(--c-text);
+  outline-offset: 1px;
+}
+.chart-result {
+  text-align: center;
+  font-size: 2rem;
+  font-weight: 800;
+  margin: 16px 0 4px;
+}
+.chart-result small { display: block; font-size: .85rem; font-weight: 500; color: var(--c-muted); }
+
+.table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; margin-top: 8px; }
+table.chart { border-collapse: collapse; font-size: .7rem; }
+table.chart th, table.chart td {
+  width: 22px; height: 22px;
+  text-align: center;
+  border: 1px solid var(--c-border);
+}
+table.chart th { font-weight: 700; color: #fff; }
+table.chart td.m0 { background: #4a4a4a; color: #fff; }
+table.chart td.m05 { background: #f2c0c0; }
+table.chart td.m2 { background: #bfe3c0; }
+table.chart td.m1 { background: transparent; color: var(--c-muted); }
+
+@media (prefers-color-scheme: dark) {
+  table.chart td.m05 { background: #5a2f2f; }
+  table.chart td.m2 { background: #2f5a32; }
+}
+
+/* ── History (home) ──────────────────────────────────────────── */
+.history { display: grid; gap: 8px; margin-top: 10px; }
+.hist-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: var(--tap);
+  padding: 10px 12px;
+  border: 1px solid var(--c-border);
+  border-radius: var(--radius-sm);
+  background: var(--c-bg);
+  color: var(--c-text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: transform .05s ease, border-color .15s ease;
+}
+.hist-item:active { transform: scale(.99); }
+.hist-score {
+  flex: 0 0 auto;
+  min-width: 56px;
+  text-align: center;
+  padding: 6px 10px;
+  border-radius: 999px;
+  color: #fff;
+  font-weight: 800;
+  font-size: 1rem;
+}
+.hist-score--good { background: var(--c-good); }
+.hist-score--mid { background: #ef8c00; }
+.hist-score--bad { background: var(--c-bad); }
+.hist-meta { display: flex; flex-direction: column; line-height: 1.3; min-width: 0; }
+.hist-time { font-weight: 600; }
+.hist-code { color: var(--c-muted); font-size: .78rem; }
+.hist-chevron { margin-left: auto; color: var(--c-muted); font-size: 1.5rem; }
+
+/* ── Quiz category cards (home) ──────────────────────────────── */
+.quiz-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: var(--tap);
+  padding: 14px;
+  margin-bottom: 10px;
+  border: 1px solid var(--c-border);
+  border-radius: var(--radius-sm);
+  background: var(--c-bg);
+  color: var(--c-text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: transform .05s ease, border-color .15s ease;
+}
+.quiz-card:active { transform: scale(.99); }
+.quiz-card__emoji { font-size: 1.8rem; flex: 0 0 auto; }
+.quiz-card__text { display: flex; flex-direction: column; line-height: 1.3; }
+.quiz-card__title { font-weight: 800; font-size: 1.05rem; }
+.quiz-card__desc { color: var(--c-muted); font-size: .82rem; }
+
+/* ── Season toggle (setup) ───────────────────────────────────── */
+.season-pick { display: flex; gap: 8px; margin-bottom: 4px; }
+.season-btn {
+  flex: 1;
+  min-height: 44px;
+  border: 2px solid var(--c-border);
+  border-radius: var(--radius-sm);
+  background: var(--c-surface);
+  color: var(--c-text);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+.season-btn[aria-pressed="true"] {
+  border-color: var(--c-primary);
+  background: var(--c-primary);
+  color: var(--c-primary-ink);
+}
+
+/* ── Speed quiz (pokemon options) ────────────────────────────── */
+.speed-note {
+  text-align: center;
+  color: var(--c-muted);
+  font-size: .8rem;
+  margin: 2px 0 16px;
+}
+.options--poke { grid-template-columns: 1fr 1fr; }
+.option-poke {
+  flex-direction: column;
+  min-height: auto;
+  padding: 12px 8px;
+  gap: 6px;
+}
+.poke-img {
+  width: 100%;
+  max-width: 120px;
+  aspect-ratio: 1 / 1;
+  object-fit: contain;
+}
+.poke-name { font-size: .95rem; font-weight: 700; text-align: center; }
+.mega-tag {
+  font-size: .58rem;
+  background: #6f35fc;
+  color: #fff;
+  padding: 1px 5px;
+  border-radius: 4px;
+  vertical-align: middle;
+  letter-spacing: .04em;
+}
+.poke-speed {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 12px;
+  border-radius: 999px;
+  background: var(--c-border);
+  color: var(--c-text);
+  font-size: .82rem;
+  font-weight: 800;
+}
+.poke-speed .ui-icon { width: .9em; height: .9em; }
+.option-poke.option--correct .poke-speed,
+.option-poke.option--wrong .poke-speed {
+  background: rgba(255, 255, 255, .28);
+  color: #fff;
+}
+
+/* ── Review tails / speed review ─────────────────────────────── */
+.rv-tail { margin-left: auto; font-weight: 700; }
+.rv-poke { font-size: .85rem; }
+.rv-poke em { font-style: normal; font-weight: 700; color: var(--c-muted); }
+
+.muted { color: var(--c-muted); font-size: .82rem; }
+.linklike {
+  border: 0;
+  background: none;
+  padding: 0;
+  font: inherit;
+  color: var(--c-accent);
+  text-decoration: underline;
+  cursor: pointer;
+}
+.row { display: flex; gap: 10px; }
+.row > * { flex: 1; }
