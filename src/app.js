@@ -1,6 +1,6 @@
 // 瀏覽器端主程式：hash 路由 + 成績碼網址處理 + 各畫面渲染。
 import { TYPES, TYPE_META, multiplier, formatMultiplier } from './data/typechart.js';
-import { generateTypeQuiz, generateSpeedQuiz, generateWhoQuiz, whoAnswerCorrect, scoreQuiz, newSeed, DEFAULT_QUESTION_COUNT, SPEED_DIFFICULTIES, DEFAULT_SPEED_DIFFICULTY, WHO_DIFFICULTIES, DEFAULT_WHO_DIFFICULTY } from './quiz.js';
+import { generateTypeQuiz, generateSpeedQuiz, generateWhoQuiz, whoAnswerCorrect, normalizeName, speedLines, scoreQuiz, newSeed, DEFAULT_QUESTION_COUNT, SPEED_DIFFICULTIES, DEFAULT_SPEED_DIFFICULTY, WHO_DIFFICULTIES, DEFAULT_WHO_DIFFICULTY } from './quiz.js';
 import { encodeResult, decodeResult } from './share.js';
 import { getHistory, addHistory } from './history.js';
 import { t, typeName } from './i18n.js';
@@ -8,8 +8,9 @@ import { t, typeName } from './i18n.js';
 const app = document.getElementById('app');
 
 // ── 資料（離線產生的靜態檔，啟動時載入一次）──────────────────────
-let pokedex = {};
+let pokedex = {};            // Champions 賽季名單（速度測驗 / 我是誰冠軍賽季池）
 let seasonsData = { seasons: {} };
+let nationalDex = {};        // 全國圖鑑分世代（我是誰的世代/地區池，含未進化）
 
 // ── 小工具 ──────────────────────────────────────────────────────
 const el = (html) => {
@@ -33,6 +34,8 @@ const UI_ICONS = {
   shield: '<path fill="currentColor" d="M12 1 3 5v6c0 5.5 3.8 10.7 9 12 5.2-1.3 9-6.5 9-12V5l-9-4z"/>',
   swords: '<g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 17.5 4 6V3h3l11.5 10.5M13 19l3 3M16 16l4 4M19 21l2-2M18.5 3H21v3L9.5 17.5M11 13l-2 2M5 21l4-4"/></g>',
   who: '<path fill="currentColor" d="M12 2a6 6 0 0 1 6 6c0 2.6-1.7 4-3.1 5.1-1 .8-1.4 1.3-1.4 2.4v.5h-3v-.7c0-2.1.9-3.1 2.3-4.2C14 10.3 15 9.7 15 8a3 3 0 0 0-6 0H6a6 6 0 0 1 6-6Z"/><circle cx="12" cy="20.2" r="1.8" fill="currentColor"/>',
+  search: '<g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="21" y2="21"/></g>',
+  up: '<path fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" d="M5 15l7-7 7 7"/>',
 };
 function uiIcon(name) {
   return `<svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true">${UI_ICONS[name]}</svg>`;
@@ -88,39 +91,42 @@ const GENERATIONS = [
   { key: 'g9', cn: '九', min: 906, max: 1025, region: '帕底亞' },
 ];
 
-// Mega / 特殊高 dex（>10000）→ 取本體國家圖鑑編號來判世代。
-function baseDexOf(key, entry) {
-  if (entry.dex < 10000) return entry.dex;
-  const base = key.replace(/-mega.*$|-primal.*$|-gmax.*$/, '');
-  return pokedex[base]?.dex ?? null;
-}
+// 地區形態歸到「該形態登場的世代/地區」（非本體國家圖鑑世代）：
+// 阿羅拉九尾本體編號在關都，但形態是第七世代阿羅拉才有，故歸 g7。
+// 洗翠（傳說 阿爾宙斯）世代算第八世代但地區非伽勒爾，獨立成 'hisui' 桶。
+const REGION_GEN = { alola: 'g7', galar: 'g8', hisui: 'hisui', paldea: 'g9' };
 function genKeyOf(key, entry) {
-  const bd = baseDexOf(key, entry);
-  if (bd == null) return null;
-  return GENERATIONS.find((g) => bd >= g.min && bd <= g.max)?.key || null;
+  for (const tag in REGION_GEN) {
+    if (key.includes(`-${tag}`)) return REGION_GEN[tag];
+  }
+  // 一般／Mega：依國家圖鑑編號 ndex（Mega 仍算本體所屬世代）。
+  const nd = entry.ndex || entry.dex;
+  return GENERATIONS.find((g) => nd >= g.min && nd <= g.max)?.key || null;
 }
 
-// 我是誰的可選範圍：有非 Mega 成員的世代 + 冠軍最新賽季。
+// 我是誰的可選範圍：全國圖鑑各世代 + 洗翠地區 + 冠軍最新賽季。
 function whoPoolKeys() {
-  const gens = GENERATIONS
-    .map((g) => g.key)
-    .filter((gk) => Object.keys(pokedex).some((k) => !pokedex[k].mega && genKeyOf(k, pokedex[k]) === gk));
-  return [...gens, defaultSeason()];
+  const hasNonMega = (poolKey) => Object.keys(nationalDex).some((k) => !nationalDex[k].mega && genKeyOf(k, nationalDex[k]) === poolKey);
+  const gens = GENERATIONS.map((g) => g.key).filter(hasNonMega);
+  const hisui = hasNonMega('hisui') ? ['hisui'] : [];
+  return [...gens, ...hisui, defaultSeason()];
 }
 function defaultWhoPool() {
   return whoPoolKeys()[0] || defaultSeason();
 }
-// 由池鍵組出穩定排序的寶可夢池（賽季鍵走 seasonPool，世代鍵走全圖鑑篩選）。
+// 由池鍵組出穩定排序的寶可夢池：
+//   賽季鍵（冠軍最新賽季）→ Champions 名單 pokedex；世代/地區鍵 → 全國圖鑑 nationalDex。
 function whoPool(poolKey) {
   if (seasonsData.seasons[poolKey]) return seasonPool(poolKey);
-  return Object.keys(pokedex)
-    .filter((k) => genKeyOf(k, pokedex[k]) === poolKey)
-    .map((k) => ({ key: k, ...pokedex[k] }))
+  return Object.keys(nationalDex)
+    .filter((k) => genKeyOf(k, nationalDex[k]) === poolKey)
+    .map((k) => ({ key: k, ...nationalDex[k] }))
     .sort((a, b) => (a.key < b.key ? -1 : a.key > b.key ? 1 : 0));
 }
 function poolLabel(poolKey) {
   const g = GENERATIONS.find((x) => x.key === poolKey);
   if (g) return `第${g.cn}世代（${g.region}）`;
+  if (poolKey === 'hisui') return '洗翠地區（傳說 阿爾宙斯）';
   return `冠軍賽季（${poolKey.toUpperCase()}）`;
 }
 
@@ -306,7 +312,7 @@ function viewSetup() {
       <div class="season-pick"></div>` : ''}
       ${mode === 'who' ? `
       <p class="label">${esc(t('setup.pool'))}</p>
-      <div class="pool-pick"></div>` : ''}
+      <div class="pool-pick tab-scroll"></div>` : ''}
       ${mode === 'speed' || mode === 'who' ? `
       <p class="label">${esc(t('setup.difficulty'))}</p>
       <div class="difficulty-pick"></div>
@@ -314,6 +320,10 @@ function viewSetup() {
 
       ${mode === 'type' ? `
       <button class="btn btn--ghost" data-nav="chart" style="margin-top:14px">${esc(t('home.openChart'))}</button>` : ''}
+      ${mode === 'speed' ? `
+      <button class="btn btn--ghost" data-nav="speedline" style="margin-top:14px">${esc(t('speedline.openBtn'))}</button>` : ''}
+      ${mode === 'who' ? `
+      <button class="btn btn--ghost" data-nav="dex" style="margin-top:14px">${esc(t('dex.openBtn'))}</button>` : ''}
 
       <button class="btn btn--primary" data-act="start" style="margin-top:14px">${esc(t('setup.start'))}</button>
 
@@ -809,6 +819,212 @@ function buildChartTable() {
   return el(`<table class="chart">${head}${rows}</table>`);
 }
 
+// ── 速度線表（種族值 → Lv50 實數值，依賽季）─────────────────────
+function viewSpeedChart() {
+  // 入口只在「誰比較快」的 setup；直接帶網址進來時補一個預設賽季狀態。
+  if (!setupState || setupState.mode !== 'speed') {
+    setupState = { mode: 'speed', season: defaultSeason(), difficulty: DEFAULT_SPEED_DIFFICULTY, seed: newSeed() };
+  }
+  const season = setupState.season;
+
+  const node = el(`
+    <section>
+      <div class="card">
+        <h2>${esc(t('speedline.title'))}</h2>
+        <p class="muted">${esc(t('speedline.hint'))}</p>
+        <div class="season-pick" data-seasons></div>
+        <div class="code-box spd-search">
+          <input type="text" inputmode="text" autocomplete="off" spellcheck="false"
+                 placeholder="${esc(t('speedline.search'))}" aria-label="${esc(t('speedline.searchBtn'))}" data-spd-search />
+          <button class="btn btn--accent" data-act="spd-go" aria-label="${esc(t('speedline.searchBtn'))}">${uiIcon('search')}</button>
+        </div>
+        <p class="feedback feedback--bad spd-search__msg" data-spd-msg hidden></p>
+        <div class="table-wrap" data-table></div>
+        <p class="muted spd-legend">${esc(t('speedline.legend'))}</p>
+        <button class="btn btn--ghost" data-nav="setup">${esc(t('common.back'))}</button>
+      </div>
+      <button class="spd-top" data-act="spd-top" aria-label="${esc(t('speedline.toTop'))}">${uiIcon('up')}</button>
+    </section>`);
+
+  const seasonWrap = node.querySelector('[data-seasons]');
+  seasonKeys().forEach((key) => {
+    const b = el(`<button class="season-btn" aria-pressed="${season === key}">${esc(seasonLabel(key))}</button>`);
+    b.onclick = () => { setupState.season = key; viewSpeedChart(); };
+    seasonWrap.appendChild(b);
+  });
+
+  node.querySelector('[data-table]').appendChild(buildSpeedTable(season));
+
+  // 模糊搜尋：找到該寶可夢所在的速度列 → 捲過去並閃兩下。
+  const pool = seasonPool(season);
+  const input = node.querySelector('[data-spd-search]');
+  const msg = node.querySelector('[data-spd-msg]');
+  const doSearch = () => {
+    const q = normalizeName(input.value);
+    if (!q) return;
+    const hit = (test) => pool.find((p) => test(normalizeName(p.nameZh)) || test(normalizeName(p.nameEn)));
+    const match = hit((n) => n === q) || hit((n) => n.startsWith(q)) || hit((n) => n.includes(q));
+    if (!match) { msg.textContent = t('speedline.noMatch'); msg.hidden = false; return; }
+    msg.hidden = true;
+    const row = node.querySelector(`tr[data-spe="${match.speed}"]`);
+    if (!row) return;
+    row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    row.classList.remove('row-hl');
+    void row.offsetWidth; // 強制 reflow，讓動畫可重複觸發
+    row.classList.add('row-hl');
+    row.addEventListener('animationend', () => row.classList.remove('row-hl'), { once: true });
+  };
+  node.querySelector('[data-act="spd-go"]').onclick = doSearch;
+  input.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); doSearch(); } });
+  input.addEventListener('input', () => { msg.hidden = true; });
+  node.querySelector('[data-act="spd-top"]').onclick = () => window.scrollTo({ top: 0, behavior: 'smooth' });
+
+  setView(node);
+}
+
+// 同速排一列；每欄為該種族值在 Lv50 的實數值換算。
+function buildSpeedTable(season) {
+  const pool = seasonPool(season);
+  const bySpeed = new Map();
+  for (const p of pool) {
+    if (!bySpeed.has(p.speed)) bySpeed.set(p.speed, []);
+    bySpeed.get(p.speed).push(p);
+  }
+  const speeds = [...bySpeed.keys()].sort((a, b) => b - a);
+
+  const cols = [
+    ['max', '最速'], ['neu', '準速'], ['noInv', '無振'], ['neg', '減速'],
+    ['scarfMax', '圍巾·最速'], ['scarfNeu', '圍巾·準速'],
+    ['twMax', '順風·最速'], ['twNeu', '順風·準速'], ['twNoInv', '順風·無振'],
+  ];
+
+  // 種族值第一欄；立繪第二欄加寬（同速一整排不換行）；其後接各速度線。
+  let head = `<tr><th class="spd-base">種族</th><th class="spd-mons">寶可夢</th>`;
+  for (const [, label] of cols) head += `<th>${esc(label)}</th>`;
+  head += '</tr>';
+
+  let rows = '';
+  for (const spe of speeds) {
+    const ln = speedLines(spe);
+    const mons = bySpeed.get(spe)
+      .slice()
+      .sort((a, b) => (a.nameZh < b.nameZh ? -1 : a.nameZh > b.nameZh ? 1 : 0))
+      .map((p) => `<img class="spd-img" src="${esc(p.image)}" alt="${esc(p.nameZh)}" title="${esc(p.nameZh)}" loading="lazy" />`)
+      .join('');
+    rows += `<tr data-spe="${spe}"><th class="spd-base">${spe}</th><td class="spd-mons">${mons}</td>`;
+    for (const [k] of cols) rows += `<td>${ln[k]}</td>`;
+    rows += '</tr>';
+  }
+  const table = el(`<table class="chart spd">${head}${rows}</table>`);
+  table.querySelectorAll('.spd-img').forEach((im) => { im.onerror = () => { im.style.visibility = 'hidden'; }; });
+  return table;
+}
+
+// ── 圖鑑（題庫預覽：縮圖牆 + 類別/屬性過濾）─────────────────────
+let dexState = { group: 'gen', poolKey: 'g1', type: '' };
+function dexCategories() {
+  return dexState.group === 'gen' ? [...GENERATIONS.map((g) => g.key), 'hisui'] : seasonKeys();
+}
+function dexCatLabel(key) {
+  return dexState.group === 'gen' ? poolLabel(key) : seasonLabel(key);
+}
+
+function viewDex() {
+  if (!dexCategories().includes(dexState.poolKey)) dexState.poolKey = dexCategories()[0];
+  // 世代/地區 → nationalDex；賽制 → 賽季名單。兩者皆走 whoPool。依圖鑑編號排序。
+  const pool = whoPool(dexState.poolKey)
+    .slice()
+    .sort((a, b) => (a.ndex || a.dex || 0) - (b.ndex || b.dex || 0) || (a.key < b.key ? -1 : 1));
+
+  const node = el(`
+    <section>
+      <div class="card">
+        <h2>${esc(t('dex.title'))}</h2>
+        <div class="dex-groups">
+          <button class="seg" data-group="gen" aria-pressed="${dexState.group === 'gen'}">${esc(t('dex.group.gen'))}</button>
+          <button class="seg" data-group="season" aria-pressed="${dexState.group === 'season'}">${esc(t('dex.group.season'))}</button>
+        </div>
+        <div class="tab-scroll" data-cats></div>
+        <div class="dex-types" data-types></div>
+        <p class="muted" data-count></p>
+        <div class="dex-grid" data-grid></div>
+        <button class="btn btn--ghost" data-nav="setup">${esc(t('common.back'))}</button>
+      </div>
+      <button class="spd-top" data-act="dex-top" aria-label="${esc(t('speedline.toTop'))}">${uiIcon('up')}</button>
+    </section>`);
+
+  node.querySelectorAll('[data-group]').forEach((b) => {
+    b.onclick = () => {
+      if (dexState.group === b.dataset.group) return;
+      dexState.group = b.dataset.group;
+      dexState.poolKey = dexCategories()[0];
+      dexState.type = '';
+      viewDex();
+    };
+  });
+
+  const catWrap = node.querySelector('[data-cats]');
+  dexCategories().forEach((key) => {
+    const b = el(`<button class="season-btn" aria-pressed="${dexState.poolKey === key}">${esc(dexCatLabel(key))}</button>`);
+    b.onclick = () => { dexState.poolKey = key; dexState.type = ''; viewDex(); };
+    catWrap.appendChild(b);
+  });
+
+  // 屬性過濾（全部 + 18 屬性，單選）
+  const typeWrap = node.querySelector('[data-types]');
+  const allChip = el(`<button class="dex-type-chip dex-type-chip--all" data-type="">${esc(t('dex.type.all'))}</button>`);
+  typeWrap.appendChild(allChip);
+  TYPES.forEach((tk) => {
+    const m = TYPE_META[tk];
+    const c = el(`<button class="dex-type-chip" data-type="${tk}" style="background:${m.color}" title="${esc(typeName(tk))}" aria-label="${esc(typeName(tk))}">${typeIcon(tk)}</button>`);
+    typeWrap.appendChild(c);
+  });
+
+  // 縮圖牆
+  const grid = node.querySelector('[data-grid]');
+  const countEl = node.querySelector('[data-count]');
+  let toastTimer = null, activeName = null;
+  const showName = (nameEl) => {
+    if (activeName && activeName !== nameEl) activeName.classList.remove('show');
+    if (toastTimer) clearTimeout(toastTimer);
+    activeName = nameEl;
+    nameEl.classList.add('show');
+    toastTimer = setTimeout(() => { nameEl.classList.remove('show'); activeName = null; }, 5000);
+  };
+  pool.forEach((p) => {
+    const cell = el(`
+      <button class="dex-cell" data-types="${esc((p.types || []).join(' '))}">
+        <img class="dex-thumb" alt="${esc(p.nameZh)}" loading="lazy" />
+        <span class="dex-name">${esc(p.nameZh)}${p.mega ? ' <span class="mega-tag">MEGA</span>' : ''}</span>
+      </button>`);
+    const img = cell.querySelector('img');
+    img.src = p.image;
+    img.onerror = () => { img.style.visibility = 'hidden'; };
+    cell.onclick = () => showName(cell.querySelector('.dex-name'));
+    grid.appendChild(cell);
+  });
+
+  // 屬性過濾：切換 cell 顯示（不重繪、不重載圖）
+  const cells = [...grid.querySelectorAll('.dex-cell')];
+  const chips = [...typeWrap.querySelectorAll('.dex-type-chip')];
+  const applyType = (tk) => {
+    dexState.type = tk;
+    chips.forEach((ch) => ch.setAttribute('aria-pressed', String(ch.dataset.type === tk)));
+    let shown = 0;
+    cells.forEach((c) => {
+      const ok = tk === '' || c.dataset.types.split(' ').includes(tk);
+      c.hidden = !ok;
+      if (ok) shown++;
+    });
+    countEl.textContent = t('dex.count', { n: shown });
+  };
+  chips.forEach((ch) => { ch.onclick = () => applyType(ch.dataset.type); });
+  applyType(dexState.type);
+
+  node.querySelector('[data-act="dex-top"]').onclick = () => window.scrollTo({ top: 0, behavior: 'smooth' });
+  setView(node);
+}
+
 // ── 路由 ────────────────────────────────────────────────────────
 function render() {
   const params = new URLSearchParams(location.search);
@@ -828,6 +1044,8 @@ function render() {
     case '#/result': return viewResult();
     case '#/history': return viewHistoryDetail();
     case '#/chart': return viewChart();
+    case '#/speedline': return viewSpeedChart();
+    case '#/dex': return viewDex();
     default: return viewHome();
   }
 }
@@ -846,12 +1064,14 @@ window.addEventListener('hashchange', render);
 // ── 啟動：載入靜態資料後首次渲染 ───────────────────────────────
 async function init() {
   try {
-    const [dexRes, seasonsRes] = await Promise.all([
+    const [dexRes, seasonsRes, natRes] = await Promise.all([
       fetch('./src/data/pokedex.json'),
       fetch('./src/data/seasons.json'),
+      fetch('./src/data/dex-national.json'),
     ]);
     pokedex = await dexRes.json();
     seasonsData = await seasonsRes.json();
+    nationalDex = await natRes.json();
   } catch (e) {
     console.error('資料載入失敗', e);
   }

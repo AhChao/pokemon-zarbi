@@ -5,6 +5,7 @@
 import { readFile, writeFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
+import { formName } from './formname.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, '..');
@@ -15,15 +16,6 @@ async function getJson(url) {
   const res = await fetch(url);
   if (!res.ok) throw new Error(`${res.status} ${url}`);
   return res.json();
-}
-
-// 判斷 Mega 型態並取 X/Y/Z 標記（無標記則 tag=''）。
-function megaForm(name) {
-  if (!name.includes('-mega')) return null;
-  if (name.endsWith('-mega-x')) return { tag: 'X' };
-  if (name.endsWith('-mega-y')) return { tag: 'Y' };
-  if (name.endsWith('-mega-z')) return { tag: 'Z' };
-  return { tag: '' };
 }
 
 // PokéAPI 的 stat 名 → 我們的短鍵。
@@ -50,14 +42,12 @@ async function fetchEntry(name) {
   const enBase = species.names.find((n) => n.language.name === 'en')?.name
     || name.replace(/-/g, ' ');
 
-  const mf = megaForm(name);
-  const isMega = Boolean(mf);
-  const baseZh = zh || enBase;
-  // 官方中文 Mega 命名：「超級」+ 名稱（+ X/Y/Z，無空格）；英文維持「Mega ...」。
-  const nameZh = isMega ? `超級${baseZh}${mf.tag}` : baseZh;
-  const nameEn = isMega ? `Mega ${enBase}${mf.tag ? ' ' + mf.tag : ''}` : enBase;
+  const { zh: nameZh, en: nameEn, mega: isMega } = formName(name, zh || enBase, enBase);
+  const types = p.types.map((t) => t.type.name); // 屬性（英文鍵，供圖鑑過濾）
 
-  return { key: name, dex: p.id, speed, stats, bst, nameZh, nameEn: nameEn.trim(), image, mega: isMega };
+  // ndex = 種族的國家圖鑑編號（各形態共用）→ 供「我是誰」依世代分池用，
+  // 不受 Mega/地區形態的 form id（>10000）影響。
+  return { key: name, dex: p.id, ndex: species.id, speed, stats, bst, nameZh, nameEn: nameEn.trim(), types, image, mega: isMega };
 }
 
 async function pool(items, worker, limit) {
@@ -98,7 +88,7 @@ async function main() {
     }
   }, CONCURRENCY);
 
-  for (const r of results) if (r) dex[r.key] = { dex: r.dex, speed: r.speed, stats: r.stats, bst: r.bst, nameZh: r.nameZh, nameEn: r.nameEn, image: r.image, mega: r.mega };
+  for (const r of results) if (r) dex[r.key] = { dex: r.dex, ndex: r.ndex, speed: r.speed, stats: r.stats, bst: r.bst, nameZh: r.nameZh, nameEn: r.nameEn, types: r.types, image: r.image, mega: r.mega };
   for (const [k, v] of Object.entries(manual)) dex[k] = v;
 
   // 依 key 排序，產生穩定輸出（quiz 重現所需的決定性）。

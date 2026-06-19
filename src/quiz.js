@@ -138,6 +138,23 @@ export function whoAnswerCorrect(q, typed) {
   return t === normalizeName(q.nameZh);
 }
 
+// Lv50 速度線換算：由速度種族值算四條投資線與常見補正（VGC 固定 50 級）。
+// 用整數運算（×11/10 等）避免浮點誤差，與遊戲內 floor 行為一致。
+export function speedLines(base) {
+  const neu = base + 52;                 // 準速：252努力 + 31個體 + 無修正性格
+  const max = Math.floor(neu * 11 / 10); // 最速：再加 加速性格（×1.1）
+  const noInv = base + 20;               // 無振：0努力 + 31個體 + 無修正
+  const neg = Math.floor(noInv * 9 / 10); // 減速：0努力 + 31個體 + 減速性格（×0.9）
+  return {
+    base, max, neu, noInv, neg,
+    scarfMax: Math.floor(max * 3 / 2),   // 講究圍巾 ×1.5
+    scarfNeu: Math.floor(neu * 3 / 2),
+    twMax: max * 2,                       // 順風 ×2
+    twNeu: neu * 2,
+    twNoInv: noInv * 2,
+  };
+}
+
 // 計分：選擇題比對選項索引；我是誰比對輸入文字。
 export function scoreQuiz(quiz, answers) {
   let correct = 0;

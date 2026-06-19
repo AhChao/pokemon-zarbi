@@ -1,6 +1,7 @@
 {
   "abomasnow": {
     "dex": 460,
+    "ndex": 460,
     "speed": 60,
     "stats": {
       "hp": 90,
@@ -13,11 +14,16 @@
     "bst": 494,
     "nameZh": "暴雪王",
     "nameEn": "Abomasnow",
+    "types": [
+      "grass",
+      "ice"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/460.png",
     "mega": false
   },
   "abomasnow-mega": {
     "dex": 10060,
+    "ndex": 460,
     "speed": 30,
     "stats": {
       "hp": 90,
@@ -30,11 +36,16 @@
     "bst": 594,
     "nameZh": "超級暴雪王",
     "nameEn": "Mega Abomasnow",
+    "types": [
+      "grass",
+      "ice"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10060.png",
     "mega": true
   },
   "absol": {
     "dex": 359,
+    "ndex": 359,
     "speed": 75,
     "stats": {
       "hp": 65,
@@ -47,11 +58,15 @@
     "bst": 465,
     "nameZh": "阿勃梭魯",
     "nameEn": "Absol",
+    "types": [
+      "dark"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/359.png",
     "mega": false
   },
   "absol-mega": {
     "dex": 10057,
+    "ndex": 359,
     "speed": 115,
     "stats": {
       "hp": 65,
@@ -64,11 +79,15 @@
     "bst": 565,
     "nameZh": "超級阿勃梭魯",
     "nameEn": "Mega Absol",
+    "types": [
+      "dark"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10057.png",
     "mega": true
   },
   "absol-mega-z": {
     "dex": 10307,
+    "ndex": 359,
     "speed": 151,
     "stats": {
       "hp": 65,
@@ -81,11 +100,16 @@
     "bst": 565,
     "nameZh": "超級阿勃梭魯Z",
     "nameEn": "Mega Absol Z",
+    "types": [
+      "dark",
+      "ghost"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10307.png",
     "mega": true
   },
   "aegislash-shield": {
     "dex": 681,
+    "ndex": 681,
     "speed": 60,
     "stats": {
       "hp": 60,
@@ -98,11 +122,16 @@
     "bst": 500,
     "nameZh": "堅盾劍怪",
     "nameEn": "Aegislash",
+    "types": [
+      "steel",
+      "ghost"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/681.png",
     "mega": false
   },
   "aerodactyl": {
     "dex": 142,
+    "ndex": 142,
     "speed": 130,
     "stats": {
       "hp": 80,
@@ -115,11 +144,16 @@
     "bst": 515,
     "nameZh": "化石翼龍",
     "nameEn": "Aerodactyl",
+    "types": [
+      "rock",
+      "flying"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/142.png",
     "mega": false
   },
   "aerodactyl-mega": {
     "dex": 10042,
+    "ndex": 142,
     "speed": 150,
     "stats": {
       "hp": 80,
@@ -132,11 +166,16 @@
     "bst": 615,
     "nameZh": "超級化石翼龍",
     "nameEn": "Mega Aerodactyl",
+    "types": [
+      "rock",
+      "flying"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10042.png",
     "mega": true
   },
   "aggron": {
     "dex": 306,
+    "ndex": 306,
     "speed": 50,
     "stats": {
       "hp": 70,
@@ -149,11 +188,16 @@
     "bst": 530,
     "nameZh": "波士可多拉",
     "nameEn": "Aggron",
+    "types": [
+      "steel",
+      "rock"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/306.png",
     "mega": false
   },
   "aggron-mega": {
     "dex": 10053,
+    "ndex": 306,
     "speed": 50,
     "stats": {
       "hp": 70,
@@ -166,11 +210,15 @@
     "bst": 630,
     "nameZh": "超級波士可多拉",
     "nameEn": "Mega Aggron",
+    "types": [
+      "steel"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10053.png",
     "mega": true
   },
   "alakazam": {
     "dex": 65,
+    "ndex": 65,
     "speed": 120,
     "stats": {
       "hp": 55,
@@ -183,11 +231,15 @@
     "bst": 500,
     "nameZh": "胡地",
     "nameEn": "Alakazam",
+    "types": [
+      "psychic"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/65.png",
     "mega": false
   },
   "alakazam-mega": {
     "dex": 10037,
+    "ndex": 65,
     "speed": 150,
     "stats": {
       "hp": 55,
@@ -200,11 +252,15 @@
     "bst": 600,
     "nameZh": "超級胡地",
     "nameEn": "Mega Alakazam",
+    "types": [
+      "psychic"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10037.png",
     "mega": true
   },
   "alcremie": {
     "dex": 869,
+    "ndex": 869,
     "speed": 64,
     "stats": {
       "hp": 65,
@@ -217,11 +273,15 @@
     "bst": 495,
     "nameZh": "霜奶仙",
     "nameEn": "Alcremie",
+    "types": [
+      "fairy"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/869.png",
     "mega": false
   },
   "altaria": {
     "dex": 334,
+    "ndex": 334,
     "speed": 80,
     "stats": {
       "hp": 75,
@@ -234,11 +294,16 @@
     "bst": 490,
     "nameZh": "七夕青鳥",
     "nameEn": "Altaria",
+    "types": [
+      "dragon",
+      "flying"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/334.png",
     "mega": false
   },
   "altaria-mega": {
     "dex": 10067,
+    "ndex": 334,
     "speed": 80,
     "stats": {
       "hp": 75,
@@ -251,11 +316,16 @@
     "bst": 590,
     "nameZh": "超級七夕青鳥",
     "nameEn": "Mega Altaria",
+    "types": [
+      "dragon",
+      "fairy"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10067.png",
     "mega": true
   },
   "ampharos": {
     "dex": 181,
+    "ndex": 181,
     "speed": 55,
     "stats": {
       "hp": 90,
@@ -268,11 +338,15 @@
     "bst": 510,
     "nameZh": "電龍",
     "nameEn": "Ampharos",
+    "types": [
+      "electric"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/181.png",
     "mega": false
   },
   "ampharos-mega": {
     "dex": 10045,
+    "ndex": 181,
     "speed": 45,
     "stats": {
       "hp": 90,
@@ -285,11 +359,16 @@
     "bst": 610,
     "nameZh": "超級電龍",
     "nameEn": "Mega Ampharos",
+    "types": [
+      "electric",
+      "dragon"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10045.png",
     "mega": true
   },
   "annihilape": {
     "dex": 979,
+    "ndex": 979,
     "speed": 90,
     "stats": {
       "hp": 110,
@@ -302,11 +381,16 @@
     "bst": 535,
     "nameZh": "棄世猴",
     "nameEn": "Annihilape",
+    "types": [
+      "fighting",
+      "ghost"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/979.png",
     "mega": false
   },
   "appletun": {
     "dex": 842,
+    "ndex": 842,
     "speed": 30,
     "stats": {
       "hp": 110,
@@ -319,11 +403,16 @@
     "bst": 485,
     "nameZh": "豐蜜龍",
     "nameEn": "Appletun",
+    "types": [
+      "grass",
+      "dragon"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/842.png",
     "mega": false
   },
   "araquanid": {
     "dex": 752,
+    "ndex": 752,
     "speed": 42,
     "stats": {
       "hp": 68,
@@ -336,11 +425,16 @@
     "bst": 454,
     "nameZh": "滴蛛霸",
     "nameEn": "Araquanid",
+    "types": [
+      "water",
+      "bug"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/752.png",
     "mega": false
   },
   "arbok": {
     "dex": 24,
+    "ndex": 24,
     "speed": 80,
     "stats": {
       "hp": 60,
@@ -353,11 +447,15 @@
     "bst": 448,
     "nameZh": "阿柏怪",
     "nameEn": "Arbok",
+    "types": [
+      "poison"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/24.png",
     "mega": false
   },
   "arcanine": {
     "dex": 59,
+    "ndex": 59,
     "speed": 95,
     "stats": {
       "hp": 90,
@@ -370,11 +468,37 @@
     "bst": 555,
     "nameZh": "風速狗",
     "nameEn": "Arcanine",
+    "types": [
+      "fire"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/59.png",
+    "mega": false
+  },
+  "arcanine-hisui": {
+    "dex": 10230,
+    "ndex": 59,
+    "speed": 90,
+    "stats": {
+      "hp": 95,
+      "atk": 115,
+      "def": 80,
+      "spa": 95,
+      "spd": 80,
+      "spe": 90
+    },
+    "bst": 555,
+    "nameZh": "洗翠風速狗",
+    "nameEn": "Hisuian Arcanine",
+    "types": [
+      "fire",
+      "rock"
+    ],
+    "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10230.png",
     "mega": false
   },
   "archaludon": {
     "dex": 1018,
+    "ndex": 1018,
     "speed": 85,
     "stats": {
       "hp": 90,
@@ -387,11 +511,16 @@
     "bst": 600,
     "nameZh": "鋁鋼橋龍",
     "nameEn": "Archaludon",
+    "types": [
+      "steel",
+      "dragon"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/1018.png",
     "mega": false
   },
   "ariados": {
     "dex": 168,
+    "ndex": 168,
     "speed": 40,
     "stats": {
       "hp": 70,
@@ -404,11 +533,16 @@
     "bst": 400,
     "nameZh": "阿利多斯",
     "nameEn": "Ariados",
+    "types": [
+      "bug",
+      "poison"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/168.png",
     "mega": false
   },
   "armarouge": {
     "dex": 936,
+    "ndex": 936,
     "speed": 75,
     "stats": {
       "hp": 85,
@@ -421,11 +555,16 @@
     "bst": 525,
     "nameZh": "紅蓮鎧騎",
     "nameEn": "Armarouge",
+    "types": [
+      "fire",
+      "psychic"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/936.png",
     "mega": false
   },
   "aromatisse": {
     "dex": 683,
+    "ndex": 683,
     "speed": 29,
     "stats": {
       "hp": 101,
@@ -438,11 +577,15 @@
     "bst": 462,
     "nameZh": "芳香精",
     "nameEn": "Aromatisse",
+    "types": [
+      "fairy"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/683.png",
     "mega": false
   },
   "audino": {
     "dex": 531,
+    "ndex": 531,
     "speed": 50,
     "stats": {
       "hp": 103,
@@ -455,11 +598,15 @@
     "bst": 445,
     "nameZh": "差不多娃娃",
     "nameEn": "Audino",
+    "types": [
+      "normal"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/531.png",
     "mega": false
   },
   "audino-mega": {
     "dex": 10069,
+    "ndex": 531,
     "speed": 50,
     "stats": {
       "hp": 103,
@@ -472,11 +619,16 @@
     "bst": 545,
     "nameZh": "超級差不多娃娃",
     "nameEn": "Mega Audino",
+    "types": [
+      "normal",
+      "fairy"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10069.png",
     "mega": true
   },
   "aurorus": {
     "dex": 699,
+    "ndex": 699,
     "speed": 58,
     "stats": {
       "hp": 123,
@@ -489,11 +641,16 @@
     "bst": 521,
     "nameZh": "冰雪巨龍",
     "nameEn": "Aurorus",
+    "types": [
+      "rock",
+      "ice"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/699.png",
     "mega": false
   },
   "avalugg": {
     "dex": 713,
+    "ndex": 713,
     "speed": 28,
     "stats": {
       "hp": 95,
@@ -506,11 +663,37 @@
     "bst": 514,
     "nameZh": "冰岩怪",
     "nameEn": "Avalugg",
+    "types": [
+      "ice"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/713.png",
+    "mega": false
+  },
+  "avalugg-hisui": {
+    "dex": 10243,
+    "ndex": 713,
+    "speed": 38,
+    "stats": {
+      "hp": 95,
+      "atk": 127,
+      "def": 184,
+      "spa": 34,
+      "spd": 36,
+      "spe": 38
+    },
+    "bst": 514,
+    "nameZh": "洗翠冰岩怪",
+    "nameEn": "Hisuian Avalugg",
+    "types": [
+      "ice",
+      "rock"
+    ],
+    "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10243.png",
     "mega": false
   },
   "azumarill": {
     "dex": 184,
+    "ndex": 184,
     "speed": 50,
     "stats": {
       "hp": 100,
@@ -523,11 +706,16 @@
     "bst": 420,
     "nameZh": "瑪力露麗",
     "nameEn": "Azumarill",
+    "types": [
+      "water",
+      "fairy"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/184.png",
     "mega": false
   },
   "banette": {
     "dex": 354,
+    "ndex": 354,
     "speed": 65,
     "stats": {
       "hp": 64,
@@ -540,11 +728,15 @@
     "bst": 455,
     "nameZh": "詛咒娃娃",
     "nameEn": "Banette",
+    "types": [
+      "ghost"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/354.png",
     "mega": false
   },
   "banette-mega": {
     "dex": 10056,
+    "ndex": 354,
     "speed": 75,
     "stats": {
       "hp": 64,
@@ -557,11 +749,15 @@
     "bst": 555,
     "nameZh": "超級詛咒娃娃",
     "nameEn": "Mega Banette",
+    "types": [
+      "ghost"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10056.png",
     "mega": true
   },
   "barbaracle": {
     "dex": 689,
+    "ndex": 689,
     "speed": 68,
     "stats": {
       "hp": 72,
@@ -574,11 +770,16 @@
     "bst": 500,
     "nameZh": "龜足巨鎧",
     "nameEn": "Barbaracle",
+    "types": [
+      "rock",
+      "water"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/689.png",
     "mega": false
   },
   "barbaracle-mega": {
     "dex": 10298,
+    "ndex": 689,
     "speed": 88,
     "stats": {
       "hp": 72,
@@ -591,11 +792,16 @@
     "bst": 600,
     "nameZh": "超級龜足巨鎧",
     "nameEn": "Mega Barbaracle",
+    "types": [
+      "rock",
+      "fighting"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10298.png",
     "mega": true
   },
   "basculegion-male": {
     "dex": 902,
+    "ndex": 902,
     "speed": 78,
     "stats": {
       "hp": 120,
@@ -608,11 +814,16 @@
     "bst": 530,
     "nameZh": "幽尾玄魚",
     "nameEn": "Basculegion",
+    "types": [
+      "water",
+      "ghost"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/902.png",
     "mega": false
   },
   "bastiodon": {
     "dex": 411,
+    "ndex": 411,
     "speed": 30,
     "stats": {
       "hp": 60,
@@ -625,11 +836,16 @@
     "bst": 495,
     "nameZh": "護城龍",
     "nameEn": "Bastiodon",
+    "types": [
+      "rock",
+      "steel"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/411.png",
     "mega": false
   },
   "beartic": {
     "dex": 614,
+    "ndex": 614,
     "speed": 50,
     "stats": {
       "hp": 95,
@@ -642,11 +858,15 @@
     "bst": 505,
     "nameZh": "凍原熊",
     "nameEn": "Beartic",
+    "types": [
+      "ice"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/614.png",
     "mega": false
   },
   "beedrill": {
     "dex": 15,
+    "ndex": 15,
     "speed": 75,
     "stats": {
       "hp": 65,
@@ -659,11 +879,16 @@
     "bst": 395,
     "nameZh": "大針蜂",
     "nameEn": "Beedrill",
+    "types": [
+      "bug",
+      "poison"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/15.png",
     "mega": false
   },
   "beedrill-mega": {
     "dex": 10090,
+    "ndex": 15,
     "speed": 145,
     "stats": {
       "hp": 65,
@@ -676,11 +901,16 @@
     "bst": 495,
     "nameZh": "超級大針蜂",
     "nameEn": "Mega Beedrill",
+    "types": [
+      "bug",
+      "poison"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10090.png",
     "mega": true
   },
   "bellibolt": {
     "dex": 939,
+    "ndex": 939,
     "speed": 45,
     "stats": {
       "hp": 109,
@@ -693,11 +923,15 @@
     "bst": 495,
     "nameZh": "電肚蛙",
     "nameEn": "Bellibolt",
+    "types": [
+      "electric"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/939.png",
     "mega": false
   },
   "blastoise": {
     "dex": 9,
+    "ndex": 9,
     "speed": 78,
     "stats": {
       "hp": 79,
@@ -710,11 +944,15 @@
     "bst": 530,
     "nameZh": "水箭龜",
     "nameEn": "Blastoise",
+    "types": [
+      "water"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/9.png",
     "mega": false
   },
   "blastoise-mega": {
     "dex": 10036,
+    "ndex": 9,
     "speed": 78,
     "stats": {
       "hp": 79,
@@ -727,11 +965,15 @@
     "bst": 630,
     "nameZh": "超級水箭龜",
     "nameEn": "Mega Blastoise",
+    "types": [
+      "water"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10036.png",
     "mega": true
   },
   "blaziken": {
     "dex": 257,
+    "ndex": 257,
     "speed": 80,
     "stats": {
       "hp": 80,
@@ -744,11 +986,16 @@
     "bst": 530,
     "nameZh": "火焰雞",
     "nameEn": "Blaziken",
+    "types": [
+      "fire",
+      "fighting"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/257.png",
     "mega": false
   },
   "blaziken-mega": {
     "dex": 10050,
+    "ndex": 257,
     "speed": 100,
     "stats": {
       "hp": 80,
@@ -761,11 +1008,16 @@
     "bst": 630,
     "nameZh": "超級火焰雞",
     "nameEn": "Mega Blaziken",
+    "types": [
+      "fire",
+      "fighting"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10050.png",
     "mega": true
   },
   "camerupt": {
     "dex": 323,
+    "ndex": 323,
     "speed": 40,
     "stats": {
       "hp": 70,
@@ -778,11 +1030,16 @@
     "bst": 460,
     "nameZh": "噴火駝",
     "nameEn": "Camerupt",
+    "types": [
+      "fire",
+      "ground"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/323.png",
     "mega": false
   },
   "camerupt-mega": {
     "dex": 10087,
+    "ndex": 323,
     "speed": 20,
     "stats": {
       "hp": 70,
@@ -795,11 +1052,16 @@
     "bst": 560,
     "nameZh": "超級噴火駝",
     "nameEn": "Mega Camerupt",
+    "types": [
+      "fire",
+      "ground"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10087.png",
     "mega": true
   },
   "castform": {
     "dex": 351,
+    "ndex": 351,
     "speed": 70,
     "stats": {
       "hp": 70,
@@ -812,11 +1074,15 @@
     "bst": 420,
     "nameZh": "飄浮泡泡",
     "nameEn": "Castform",
+    "types": [
+      "normal"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/351.png",
     "mega": false
   },
   "ceruledge": {
     "dex": 937,
+    "ndex": 937,
     "speed": 85,
     "stats": {
       "hp": 75,
@@ -829,11 +1095,16 @@
     "bst": 525,
     "nameZh": "蒼炎刃鬼",
     "nameEn": "Ceruledge",
+    "types": [
+      "fire",
+      "ghost"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/937.png",
     "mega": false
   },
   "chandelure": {
     "dex": 609,
+    "ndex": 609,
     "speed": 80,
     "stats": {
       "hp": 60,
@@ -846,11 +1117,16 @@
     "bst": 520,
     "nameZh": "水晶燈火靈",
     "nameEn": "Chandelure",
+    "types": [
+      "ghost",
+      "fire"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/609.png",
     "mega": false
   },
   "chandelure-mega": {
     "dex": 10291,
+    "ndex": 609,
     "speed": 90,
     "stats": {
       "hp": 60,
@@ -863,11 +1139,16 @@
     "bst": 620,
     "nameZh": "超級水晶燈火靈",
     "nameEn": "Mega Chandelure",
+    "types": [
+      "ghost",
+      "fire"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10291.png",
     "mega": true
   },
   "charizard": {
     "dex": 6,
+    "ndex": 6,
     "speed": 100,
     "stats": {
       "hp": 78,
@@ -880,11 +1161,16 @@
     "bst": 534,
     "nameZh": "噴火龍",
     "nameEn": "Charizard",
+    "types": [
+      "fire",
+      "flying"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/6.png",
     "mega": false
   },
   "charizard-mega-x": {
     "dex": 10034,
+    "ndex": 6,
     "speed": 100,
     "stats": {
       "hp": 78,
@@ -897,11 +1183,16 @@
     "bst": 634,
     "nameZh": "超級噴火龍X",
     "nameEn": "Mega Charizard X",
+    "types": [
+      "fire",
+      "dragon"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10034.png",
     "mega": true
   },
   "charizard-mega-y": {
     "dex": 10035,
+    "ndex": 6,
     "speed": 100,
     "stats": {
       "hp": 78,
@@ -914,11 +1205,16 @@
     "bst": 634,
     "nameZh": "超級噴火龍Y",
     "nameEn": "Mega Charizard Y",
+    "types": [
+      "fire",
+      "flying"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10035.png",
     "mega": true
   },
   "chesnaught": {
     "dex": 652,
+    "ndex": 652,
     "speed": 64,
     "stats": {
       "hp": 88,
@@ -931,11 +1227,16 @@
     "bst": 530,
     "nameZh": "布里卡隆",
     "nameEn": "Chesnaught",
+    "types": [
+      "grass",
+      "fighting"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/652.png",
     "mega": false
   },
   "chesnaught-mega": {
     "dex": 10292,
+    "ndex": 652,
     "speed": 44,
     "stats": {
       "hp": 88,
@@ -948,11 +1249,16 @@
     "bst": 630,
     "nameZh": "超級布里卡隆",
     "nameEn": "Mega Chesnaught",
+    "types": [
+      "grass",
+      "fighting"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10292.png",
     "mega": true
   },
   "chimecho": {
     "dex": 358,
+    "ndex": 358,
     "speed": 65,
     "stats": {
       "hp": 75,
@@ -965,11 +1271,15 @@
     "bst": 455,
     "nameZh": "風鈴鈴",
     "nameEn": "Chimecho",
+    "types": [
+      "psychic"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/358.png",
     "mega": false
   },
   "chimecho-mega": {
     "dex": 10306,
+    "ndex": 358,
     "speed": 65,
     "stats": {
       "hp": 75,
@@ -982,11 +1292,16 @@
     "bst": 555,
     "nameZh": "超級風鈴鈴",
     "nameEn": "Mega Chimecho",
+    "types": [
+      "psychic",
+      "steel"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10306.png",
     "mega": true
   },
   "clawitzer": {
     "dex": 693,
+    "ndex": 693,
     "speed": 59,
     "stats": {
       "hp": 71,
@@ -999,11 +1314,15 @@
     "bst": 500,
     "nameZh": "鋼炮臂蝦",
     "nameEn": "Clawitzer",
+    "types": [
+      "water"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/693.png",
     "mega": false
   },
   "clefable": {
     "dex": 36,
+    "ndex": 36,
     "speed": 60,
     "stats": {
       "hp": 95,
@@ -1016,11 +1335,15 @@
     "bst": 483,
     "nameZh": "皮可西",
     "nameEn": "Clefable",
+    "types": [
+      "fairy"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/36.png",
     "mega": false
   },
   "clefable-mega": {
     "dex": 10278,
+    "ndex": 36,
     "speed": 70,
     "stats": {
       "hp": 95,
@@ -1033,11 +1356,16 @@
     "bst": 583,
     "nameZh": "超級皮可西",
     "nameEn": "Mega Clefable",
+    "types": [
+      "fairy",
+      "flying"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10278.png",
     "mega": true
   },
   "cofagrigus": {
     "dex": 563,
+    "ndex": 563,
     "speed": 30,
     "stats": {
       "hp": 58,
@@ -1050,11 +1378,15 @@
     "bst": 483,
     "nameZh": "死神棺",
     "nameEn": "Cofagrigus",
+    "types": [
+      "ghost"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/563.png",
     "mega": false
   },
   "conkeldurr": {
     "dex": 534,
+    "ndex": 534,
     "speed": 45,
     "stats": {
       "hp": 105,
@@ -1067,11 +1399,15 @@
     "bst": 505,
     "nameZh": "修建老匠",
     "nameEn": "Conkeldurr",
+    "types": [
+      "fighting"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/534.png",
     "mega": false
   },
   "corviknight": {
     "dex": 823,
+    "ndex": 823,
     "speed": 67,
     "stats": {
       "hp": 98,
@@ -1084,11 +1420,16 @@
     "bst": 495,
     "nameZh": "鋼鎧鴉",
     "nameEn": "Corviknight",
+    "types": [
+      "flying",
+      "steel"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/823.png",
     "mega": false
   },
   "crabominable": {
     "dex": 740,
+    "ndex": 740,
     "speed": 43,
     "stats": {
       "hp": 97,
@@ -1101,11 +1442,16 @@
     "bst": 478,
     "nameZh": "好勝毛蟹",
     "nameEn": "Crabominable",
+    "types": [
+      "fighting",
+      "ice"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/740.png",
     "mega": false
   },
   "crabominable-mega": {
     "dex": 10315,
+    "ndex": 740,
     "speed": 33,
     "stats": {
       "hp": 97,
@@ -1118,11 +1464,16 @@
     "bst": 578,
     "nameZh": "超級好勝毛蟹",
     "nameEn": "Mega Crabominable",
+    "types": [
+      "fighting",
+      "ice"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10315.png",
     "mega": true
   },
   "decidueye": {
     "dex": 724,
+    "ndex": 724,
     "speed": 70,
     "stats": {
       "hp": 78,
@@ -1135,11 +1486,38 @@
     "bst": 530,
     "nameZh": "狙射樹梟",
     "nameEn": "Decidueye",
+    "types": [
+      "grass",
+      "ghost"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/724.png",
+    "mega": false
+  },
+  "decidueye-hisui": {
+    "dex": 10244,
+    "ndex": 724,
+    "speed": 60,
+    "stats": {
+      "hp": 88,
+      "atk": 112,
+      "def": 80,
+      "spa": 95,
+      "spd": 95,
+      "spe": 60
+    },
+    "bst": 530,
+    "nameZh": "洗翠狙射樹梟",
+    "nameEn": "Hisuian Decidueye",
+    "types": [
+      "grass",
+      "fighting"
+    ],
+    "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10244.png",
     "mega": false
   },
   "dedenne": {
     "dex": 702,
+    "ndex": 702,
     "speed": 101,
     "stats": {
       "hp": 67,
@@ -1152,11 +1530,16 @@
     "bst": 431,
     "nameZh": "咚咚鼠",
     "nameEn": "Dedenne",
+    "types": [
+      "electric",
+      "fairy"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/702.png",
     "mega": false
   },
   "delphox": {
     "dex": 655,
+    "ndex": 655,
     "speed": 104,
     "stats": {
       "hp": 75,
@@ -1169,11 +1552,16 @@
     "bst": 534,
     "nameZh": "妖火紅狐",
     "nameEn": "Delphox",
+    "types": [
+      "fire",
+      "psychic"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/655.png",
     "mega": false
   },
   "delphox-mega": {
     "dex": 10293,
+    "ndex": 655,
     "speed": 134,
     "stats": {
       "hp": 75,
@@ -1186,11 +1574,16 @@
     "bst": 634,
     "nameZh": "超級妖火紅狐",
     "nameEn": "Mega Delphox",
+    "types": [
+      "fire",
+      "psychic"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10293.png",
     "mega": true
   },
   "diggersby": {
     "dex": 660,
+    "ndex": 660,
     "speed": 78,
     "stats": {
       "hp": 85,
@@ -1203,11 +1596,16 @@
     "bst": 423,
     "nameZh": "掘地兔",
     "nameEn": "Diggersby",
+    "types": [
+      "normal",
+      "ground"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/660.png",
     "mega": false
   },
   "ditto": {
     "dex": 132,
+    "ndex": 132,
     "speed": 48,
     "stats": {
       "hp": 48,
@@ -1220,11 +1618,15 @@
     "bst": 288,
     "nameZh": "百變怪",
     "nameEn": "Ditto",
+    "types": [
+      "normal"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/132.png",
     "mega": false
   },
   "dragalge": {
     "dex": 691,
+    "ndex": 691,
     "speed": 44,
     "stats": {
       "hp": 65,
@@ -1237,11 +1639,16 @@
     "bst": 494,
     "nameZh": "毒藻龍",
     "nameEn": "Dragalge",
+    "types": [
+      "poison",
+      "dragon"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/691.png",
     "mega": false
   },
   "dragalge-mega": {
     "dex": 10299,
+    "ndex": 691,
     "speed": 44,
     "stats": {
       "hp": 65,
@@ -1254,11 +1661,16 @@
     "bst": 594,
     "nameZh": "超級毒藻龍",
     "nameEn": "Mega Dragalge",
+    "types": [
+      "poison",
+      "dragon"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10299.png",
     "mega": true
   },
   "dragapult": {
     "dex": 887,
+    "ndex": 887,
     "speed": 142,
     "stats": {
       "hp": 88,
@@ -1271,11 +1683,16 @@
     "bst": 600,
     "nameZh": "多龍巴魯托",
     "nameEn": "Dragapult",
+    "types": [
+      "dragon",
+      "ghost"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/887.png",
     "mega": false
   },
   "dragonite": {
     "dex": 149,
+    "ndex": 149,
     "speed": 80,
     "stats": {
       "hp": 91,
@@ -1288,11 +1705,16 @@
     "bst": 600,
     "nameZh": "快龍",
     "nameEn": "Dragonite",
+    "types": [
+      "dragon",
+      "flying"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/149.png",
     "mega": false
   },
   "dragonite-mega": {
     "dex": 10281,
+    "ndex": 149,
     "speed": 100,
     "stats": {
       "hp": 91,
@@ -1305,11 +1727,16 @@
     "bst": 700,
     "nameZh": "超級快龍",
     "nameEn": "Mega Dragonite",
+    "types": [
+      "dragon",
+      "flying"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10281.png",
     "mega": true
   },
   "drampa": {
     "dex": 780,
+    "ndex": 780,
     "speed": 36,
     "stats": {
       "hp": 78,
@@ -1322,11 +1749,16 @@
     "bst": 485,
     "nameZh": "老翁龍",
     "nameEn": "Drampa",
+    "types": [
+      "normal",
+      "dragon"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/780.png",
     "mega": false
   },
   "drampa-mega": {
     "dex": 10302,
+    "ndex": 780,
     "speed": 36,
     "stats": {
       "hp": 78,
@@ -1339,11 +1771,16 @@
     "bst": 585,
     "nameZh": "超級老翁龍",
     "nameEn": "Mega Drampa",
+    "types": [
+      "normal",
+      "dragon"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10302.png",
     "mega": true
   },
   "eelektross": {
     "dex": 604,
+    "ndex": 604,
     "speed": 50,
     "stats": {
       "hp": 85,
@@ -1356,11 +1793,15 @@
     "bst": 515,
     "nameZh": "麻麻鰻魚王",
     "nameEn": "Eelektross",
+    "types": [
+      "electric"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/604.png",
     "mega": false
   },
   "eelektross-mega": {
     "dex": 10290,
+    "ndex": 604,
     "speed": 80,
     "stats": {
       "hp": 85,
@@ -1373,11 +1814,15 @@
     "bst": 615,
     "nameZh": "超級麻麻鰻魚王",
     "nameEn": "Mega Eelektross",
+    "types": [
+      "electric"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10290.png",
     "mega": true
   },
   "emboar": {
     "dex": 500,
+    "ndex": 500,
     "speed": 65,
     "stats": {
       "hp": 110,
@@ -1390,11 +1835,16 @@
     "bst": 528,
     "nameZh": "炎武王",
     "nameEn": "Emboar",
+    "types": [
+      "fire",
+      "fighting"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/500.png",
     "mega": false
   },
   "emboar-mega": {
     "dex": 10286,
+    "ndex": 500,
     "speed": 75,
     "stats": {
       "hp": 110,
@@ -1407,11 +1857,16 @@
     "bst": 628,
     "nameZh": "超級炎武王",
     "nameEn": "Mega Emboar",
+    "types": [
+      "fire",
+      "fighting"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10286.png",
     "mega": true
   },
   "emolga": {
     "dex": 587,
+    "ndex": 587,
     "speed": 103,
     "stats": {
       "hp": 55,
@@ -1424,11 +1879,16 @@
     "bst": 428,
     "nameZh": "電飛鼠",
     "nameEn": "Emolga",
+    "types": [
+      "electric",
+      "flying"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/587.png",
     "mega": false
   },
   "empoleon": {
     "dex": 395,
+    "ndex": 395,
     "speed": 60,
     "stats": {
       "hp": 84,
@@ -1441,11 +1901,16 @@
     "bst": 530,
     "nameZh": "帝王拿波",
     "nameEn": "Empoleon",
+    "types": [
+      "water",
+      "steel"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/395.png",
     "mega": false
   },
   "espathra": {
     "dex": 956,
+    "ndex": 956,
     "speed": 105,
     "stats": {
       "hp": 95,
@@ -1458,11 +1923,15 @@
     "bst": 481,
     "nameZh": "超能艷鴕",
     "nameEn": "Espathra",
+    "types": [
+      "psychic"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/956.png",
     "mega": false
   },
   "espeon": {
     "dex": 196,
+    "ndex": 196,
     "speed": 110,
     "stats": {
       "hp": 65,
@@ -1475,11 +1944,15 @@
     "bst": 525,
     "nameZh": "太陽伊布",
     "nameEn": "Espeon",
+    "types": [
+      "psychic"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/196.png",
     "mega": false
   },
   "excadrill": {
     "dex": 530,
+    "ndex": 530,
     "speed": 88,
     "stats": {
       "hp": 110,
@@ -1492,11 +1965,16 @@
     "bst": 508,
     "nameZh": "龍頭地鼠",
     "nameEn": "Excadrill",
+    "types": [
+      "ground",
+      "steel"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/530.png",
     "mega": false
   },
   "excadrill-mega": {
     "dex": 10287,
+    "ndex": 530,
     "speed": 103,
     "stats": {
       "hp": 110,
@@ -1509,11 +1987,16 @@
     "bst": 608,
     "nameZh": "超級龍頭地鼠",
     "nameEn": "Mega Excadrill",
+    "types": [
+      "ground",
+      "steel"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10287.png",
     "mega": true
   },
   "falinks": {
     "dex": 870,
+    "ndex": 870,
     "speed": 75,
     "stats": {
       "hp": 65,
@@ -1526,11 +2009,15 @@
     "bst": 470,
     "nameZh": "列陣兵",
     "nameEn": "Falinks",
+    "types": [
+      "fighting"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/870.png",
     "mega": false
   },
   "falinks-mega": {
     "dex": 10303,
+    "ndex": 870,
     "speed": 100,
     "stats": {
       "hp": 65,
@@ -1543,11 +2030,15 @@
     "bst": 570,
     "nameZh": "超級列陣兵",
     "nameEn": "Mega Falinks",
+    "types": [
+      "fighting"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10303.png",
     "mega": true
   },
   "farigiraf": {
     "dex": 981,
+    "ndex": 981,
     "speed": 60,
     "stats": {
       "hp": 120,
@@ -1560,11 +2051,16 @@
     "bst": 520,
     "nameZh": "奇麒麟",
     "nameEn": "Farigiraf",
+    "types": [
+      "normal",
+      "psychic"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/981.png",
     "mega": false
   },
   "feraligatr": {
     "dex": 160,
+    "ndex": 160,
     "speed": 78,
     "stats": {
       "hp": 85,
@@ -1577,11 +2073,15 @@
     "bst": 530,
     "nameZh": "大力鱷",
     "nameEn": "Feraligatr",
+    "types": [
+      "water"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/160.png",
     "mega": false
   },
   "feraligatr-mega": {
     "dex": 10283,
+    "ndex": 160,
     "speed": 78,
     "stats": {
       "hp": 85,
@@ -1594,11 +2094,16 @@
     "bst": 630,
     "nameZh": "超級大力鱷",
     "nameEn": "Mega Feraligatr",
+    "types": [
+      "water",
+      "dragon"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10283.png",
     "mega": true
   },
   "flapple": {
     "dex": 841,
+    "ndex": 841,
     "speed": 70,
     "stats": {
       "hp": 70,
@@ -1611,11 +2116,16 @@
     "bst": 485,
     "nameZh": "蘋裹龍",
     "nameEn": "Flapple",
+    "types": [
+      "grass",
+      "dragon"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/841.png",
     "mega": false
   },
   "flareon": {
     "dex": 136,
+    "ndex": 136,
     "speed": 65,
     "stats": {
       "hp": 65,
@@ -1628,11 +2138,15 @@
     "bst": 525,
     "nameZh": "火伊布",
     "nameEn": "Flareon",
+    "types": [
+      "fire"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/136.png",
     "mega": false
   },
   "floette": {
     "dex": 670,
+    "ndex": 670,
     "speed": 52,
     "stats": {
       "hp": 54,
@@ -1645,11 +2159,15 @@
     "bst": 371,
     "nameZh": "花葉蒂",
     "nameEn": "Floette",
+    "types": [
+      "fairy"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/670.png",
     "mega": false
   },
   "floette-mega": {
     "dex": 10296,
+    "ndex": 670,
     "speed": 102,
     "stats": {
       "hp": 74,
@@ -1662,11 +2180,15 @@
     "bst": 651,
     "nameZh": "超級花葉蒂",
     "nameEn": "Mega Floette",
+    "types": [
+      "fairy"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10296.png",
     "mega": true
   },
   "florges": {
     "dex": 671,
+    "ndex": 671,
     "speed": 75,
     "stats": {
       "hp": 78,
@@ -1679,11 +2201,15 @@
     "bst": 552,
     "nameZh": "花潔夫人",
     "nameEn": "Florges",
+    "types": [
+      "fairy"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/671.png",
     "mega": false
   },
   "forretress": {
     "dex": 205,
+    "ndex": 205,
     "speed": 40,
     "stats": {
       "hp": 75,
@@ -1696,11 +2222,16 @@
     "bst": 465,
     "nameZh": "佛烈托斯",
     "nameEn": "Forretress",
+    "types": [
+      "bug",
+      "steel"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/205.png",
     "mega": false
   },
   "froslass": {
     "dex": 478,
+    "ndex": 478,
     "speed": 110,
     "stats": {
       "hp": 70,
@@ -1713,11 +2244,16 @@
     "bst": 480,
     "nameZh": "雪妖女",
     "nameEn": "Froslass",
+    "types": [
+      "ice",
+      "ghost"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/478.png",
     "mega": false
   },
   "froslass-mega": {
     "dex": 10285,
+    "ndex": 478,
     "speed": 120,
     "stats": {
       "hp": 70,
@@ -1730,11 +2266,16 @@
     "bst": 580,
     "nameZh": "超級雪妖女",
     "nameEn": "Mega Froslass",
+    "types": [
+      "ice",
+      "ghost"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10285.png",
     "mega": true
   },
   "furfrou": {
     "dex": 676,
+    "ndex": 676,
     "speed": 102,
     "stats": {
       "hp": 75,
@@ -1747,11 +2288,15 @@
     "bst": 472,
     "nameZh": "多麗米亞",
     "nameEn": "Furfrou",
+    "types": [
+      "normal"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/676.png",
     "mega": false
   },
   "gallade": {
     "dex": 475,
+    "ndex": 475,
     "speed": 80,
     "stats": {
       "hp": 68,
@@ -1764,11 +2309,16 @@
     "bst": 518,
     "nameZh": "艾路雷朵",
     "nameEn": "Gallade",
+    "types": [
+      "psychic",
+      "fighting"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/475.png",
     "mega": false
   },
   "gallade-mega": {
     "dex": 10068,
+    "ndex": 475,
     "speed": 110,
     "stats": {
       "hp": 68,
@@ -1781,11 +2331,16 @@
     "bst": 618,
     "nameZh": "超級艾路雷朵",
     "nameEn": "Mega Gallade",
+    "types": [
+      "psychic",
+      "fighting"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10068.png",
     "mega": true
   },
   "garbodor": {
     "dex": 569,
+    "ndex": 569,
     "speed": 75,
     "stats": {
       "hp": 80,
@@ -1798,11 +2353,15 @@
     "bst": 474,
     "nameZh": "灰塵山",
     "nameEn": "Garbodor",
+    "types": [
+      "poison"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/569.png",
     "mega": false
   },
   "garchomp": {
     "dex": 445,
+    "ndex": 445,
     "speed": 102,
     "stats": {
       "hp": 108,
@@ -1815,11 +2374,16 @@
     "bst": 600,
     "nameZh": "烈咬陸鯊",
     "nameEn": "Garchomp",
+    "types": [
+      "dragon",
+      "ground"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/445.png",
     "mega": false
   },
   "garchomp-mega": {
     "dex": 10058,
+    "ndex": 445,
     "speed": 92,
     "stats": {
       "hp": 108,
@@ -1832,11 +2396,16 @@
     "bst": 700,
     "nameZh": "超級烈咬陸鯊",
     "nameEn": "Mega Garchomp",
+    "types": [
+      "dragon",
+      "ground"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10058.png",
     "mega": true
   },
   "garchomp-mega-z": {
     "dex": 10309,
+    "ndex": 445,
     "speed": 151,
     "stats": {
       "hp": 108,
@@ -1849,11 +2418,15 @@
     "bst": 700,
     "nameZh": "超級烈咬陸鯊Z",
     "nameEn": "Mega Garchomp Z",
+    "types": [
+      "dragon"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10309.png",
     "mega": true
   },
   "gardevoir": {
     "dex": 282,
+    "ndex": 282,
     "speed": 80,
     "stats": {
       "hp": 68,
@@ -1866,11 +2439,16 @@
     "bst": 518,
     "nameZh": "沙奈朵",
     "nameEn": "Gardevoir",
+    "types": [
+      "psychic",
+      "fairy"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/282.png",
     "mega": false
   },
   "gardevoir-mega": {
     "dex": 10051,
+    "ndex": 282,
     "speed": 100,
     "stats": {
       "hp": 68,
@@ -1883,11 +2461,16 @@
     "bst": 618,
     "nameZh": "超級沙奈朵",
     "nameEn": "Mega Gardevoir",
+    "types": [
+      "psychic",
+      "fairy"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10051.png",
     "mega": true
   },
   "garganacl": {
     "dex": 934,
+    "ndex": 934,
     "speed": 35,
     "stats": {
       "hp": 100,
@@ -1900,11 +2483,15 @@
     "bst": 500,
     "nameZh": "鹽石巨靈",
     "nameEn": "Garganacl",
+    "types": [
+      "rock"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/934.png",
     "mega": false
   },
   "gengar": {
     "dex": 94,
+    "ndex": 94,
     "speed": 110,
     "stats": {
       "hp": 60,
@@ -1917,11 +2504,16 @@
     "bst": 500,
     "nameZh": "耿鬼",
     "nameEn": "Gengar",
+    "types": [
+      "ghost",
+      "poison"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/94.png",
     "mega": false
   },
   "gengar-mega": {
     "dex": 10038,
+    "ndex": 94,
     "speed": 130,
     "stats": {
       "hp": 60,
@@ -1934,11 +2526,16 @@
     "bst": 600,
     "nameZh": "超級耿鬼",
     "nameEn": "Mega Gengar",
+    "types": [
+      "ghost",
+      "poison"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10038.png",
     "mega": true
   },
   "gholdengo": {
     "dex": 1000,
+    "ndex": 1000,
     "speed": 84,
     "stats": {
       "hp": 87,
@@ -1951,11 +2548,16 @@
     "bst": 550,
     "nameZh": "賽富豪",
     "nameEn": "Gholdengo",
+    "types": [
+      "steel",
+      "ghost"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/1000.png",
     "mega": false
   },
   "glaceon": {
     "dex": 471,
+    "ndex": 471,
     "speed": 65,
     "stats": {
       "hp": 65,
@@ -1968,11 +2570,15 @@
     "bst": 525,
     "nameZh": "冰伊布",
     "nameEn": "Glaceon",
+    "types": [
+      "ice"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/471.png",
     "mega": false
   },
   "glalie": {
     "dex": 362,
+    "ndex": 362,
     "speed": 80,
     "stats": {
       "hp": 80,
@@ -1985,11 +2591,15 @@
     "bst": 480,
     "nameZh": "冰鬼護",
     "nameEn": "Glalie",
+    "types": [
+      "ice"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/362.png",
     "mega": false
   },
   "glalie-mega": {
     "dex": 10074,
+    "ndex": 362,
     "speed": 100,
     "stats": {
       "hp": 80,
@@ -2002,11 +2612,15 @@
     "bst": 580,
     "nameZh": "超級冰鬼護",
     "nameEn": "Mega Glalie",
+    "types": [
+      "ice"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10074.png",
     "mega": true
   },
   "glimmora": {
     "dex": 970,
+    "ndex": 970,
     "speed": 86,
     "stats": {
       "hp": 83,
@@ -2019,11 +2633,16 @@
     "bst": 525,
     "nameZh": "晶光花",
     "nameEn": "Glimmora",
+    "types": [
+      "rock",
+      "poison"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/970.png",
     "mega": false
   },
   "glimmora-mega": {
     "dex": 10321,
+    "ndex": 970,
     "speed": 101,
     "stats": {
       "hp": 83,
@@ -2036,11 +2655,16 @@
     "bst": 625,
     "nameZh": "超級晶光花",
     "nameEn": "Mega Glimmora",
+    "types": [
+      "rock",
+      "poison"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10321.png",
     "mega": true
   },
   "gliscor": {
     "dex": 472,
+    "ndex": 472,
     "speed": 95,
     "stats": {
       "hp": 75,
@@ -2053,11 +2677,16 @@
     "bst": 510,
     "nameZh": "天蠍王",
     "nameEn": "Gliscor",
+    "types": [
+      "ground",
+      "flying"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/472.png",
     "mega": false
   },
   "golurk": {
     "dex": 623,
+    "ndex": 623,
     "speed": 55,
     "stats": {
       "hp": 89,
@@ -2070,11 +2699,16 @@
     "bst": 483,
     "nameZh": "泥偶巨人",
     "nameEn": "Golurk",
+    "types": [
+      "ground",
+      "ghost"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/623.png",
     "mega": false
   },
   "golurk-mega": {
     "dex": 10313,
+    "ndex": 623,
     "speed": 55,
     "stats": {
       "hp": 89,
@@ -2087,11 +2721,16 @@
     "bst": 583,
     "nameZh": "超級泥偶巨人",
     "nameEn": "Mega Golurk",
+    "types": [
+      "ground",
+      "ghost"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10313.png",
     "mega": true
   },
   "goodra": {
     "dex": 706,
+    "ndex": 706,
     "speed": 80,
     "stats": {
       "hp": 90,
@@ -2104,11 +2743,37 @@
     "bst": 600,
     "nameZh": "黏美龍",
     "nameEn": "Goodra",
+    "types": [
+      "dragon"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/706.png",
+    "mega": false
+  },
+  "goodra-hisui": {
+    "dex": 10242,
+    "ndex": 706,
+    "speed": 60,
+    "stats": {
+      "hp": 80,
+      "atk": 100,
+      "def": 100,
+      "spa": 110,
+      "spd": 150,
+      "spe": 60
+    },
+    "bst": 600,
+    "nameZh": "洗翠黏美龍",
+    "nameEn": "Hisuian Goodra",
+    "types": [
+      "steel",
+      "dragon"
+    ],
+    "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10242.png",
     "mega": false
   },
   "gourgeist-average": {
     "dex": 711,
+    "ndex": 711,
     "speed": 84,
     "stats": {
       "hp": 65,
@@ -2121,11 +2786,16 @@
     "bst": 494,
     "nameZh": "南瓜怪人",
     "nameEn": "Gourgeist",
+    "types": [
+      "ghost",
+      "grass"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/711.png",
     "mega": false
   },
   "greninja": {
     "dex": 658,
+    "ndex": 658,
     "speed": 122,
     "stats": {
       "hp": 72,
@@ -2138,11 +2808,16 @@
     "bst": 530,
     "nameZh": "甲賀忍蛙",
     "nameEn": "Greninja",
+    "types": [
+      "water",
+      "dark"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/658.png",
     "mega": false
   },
   "greninja-mega": {
     "dex": 10294,
+    "ndex": 658,
     "speed": 142,
     "stats": {
       "hp": 72,
@@ -2155,11 +2830,16 @@
     "bst": 630,
     "nameZh": "超級甲賀忍蛙",
     "nameEn": "Mega Greninja",
+    "types": [
+      "water",
+      "dark"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10294.png",
     "mega": true
   },
   "grimmsnarl": {
     "dex": 861,
+    "ndex": 861,
     "speed": 60,
     "stats": {
       "hp": 95,
@@ -2172,11 +2852,16 @@
     "bst": 510,
     "nameZh": "長毛巨魔",
     "nameEn": "Grimmsnarl",
+    "types": [
+      "dark",
+      "fairy"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/861.png",
     "mega": false
   },
   "gyarados": {
     "dex": 130,
+    "ndex": 130,
     "speed": 81,
     "stats": {
       "hp": 95,
@@ -2189,11 +2874,16 @@
     "bst": 540,
     "nameZh": "暴鯉龍",
     "nameEn": "Gyarados",
+    "types": [
+      "water",
+      "flying"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/130.png",
     "mega": false
   },
   "gyarados-mega": {
     "dex": 10041,
+    "ndex": 130,
     "speed": 81,
     "stats": {
       "hp": 95,
@@ -2206,11 +2896,16 @@
     "bst": 640,
     "nameZh": "超級暴鯉龍",
     "nameEn": "Mega Gyarados",
+    "types": [
+      "water",
+      "dark"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10041.png",
     "mega": true
   },
   "hatterene": {
     "dex": 858,
+    "ndex": 858,
     "speed": 29,
     "stats": {
       "hp": 57,
@@ -2223,11 +2918,16 @@
     "bst": 510,
     "nameZh": "布莉姆溫",
     "nameEn": "Hatterene",
+    "types": [
+      "psychic",
+      "fairy"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/858.png",
     "mega": false
   },
   "hawlucha": {
     "dex": 701,
+    "ndex": 701,
     "speed": 118,
     "stats": {
       "hp": 78,
@@ -2240,11 +2940,16 @@
     "bst": 500,
     "nameZh": "摔角鷹人",
     "nameEn": "Hawlucha",
+    "types": [
+      "fighting",
+      "flying"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/701.png",
     "mega": false
   },
   "hawlucha-mega": {
     "dex": 10300,
+    "ndex": 701,
     "speed": 118,
     "stats": {
       "hp": 78,
@@ -2257,11 +2962,16 @@
     "bst": 600,
     "nameZh": "超級摔角鷹人",
     "nameEn": "Mega Hawlucha",
+    "types": [
+      "fighting",
+      "flying"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10300.png",
     "mega": true
   },
   "heliolisk": {
     "dex": 695,
+    "ndex": 695,
     "speed": 109,
     "stats": {
       "hp": 62,
@@ -2274,11 +2984,16 @@
     "bst": 481,
     "nameZh": "光電傘蜥",
     "nameEn": "Heliolisk",
+    "types": [
+      "electric",
+      "normal"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/695.png",
     "mega": false
   },
   "heracross": {
     "dex": 214,
+    "ndex": 214,
     "speed": 85,
     "stats": {
       "hp": 80,
@@ -2291,11 +3006,16 @@
     "bst": 500,
     "nameZh": "赫拉克羅斯",
     "nameEn": "Heracross",
+    "types": [
+      "bug",
+      "fighting"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/214.png",
     "mega": false
   },
   "heracross-mega": {
     "dex": 10047,
+    "ndex": 214,
     "speed": 75,
     "stats": {
       "hp": 80,
@@ -2308,11 +3028,16 @@
     "bst": 600,
     "nameZh": "超級赫拉克羅斯",
     "nameEn": "Mega Heracross",
+    "types": [
+      "bug",
+      "fighting"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10047.png",
     "mega": true
   },
   "hippowdon": {
     "dex": 450,
+    "ndex": 450,
     "speed": 47,
     "stats": {
       "hp": 108,
@@ -2325,11 +3050,15 @@
     "bst": 525,
     "nameZh": "河馬獸",
     "nameEn": "Hippowdon",
+    "types": [
+      "ground"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/450.png",
     "mega": false
   },
   "houndoom": {
     "dex": 229,
+    "ndex": 229,
     "speed": 95,
     "stats": {
       "hp": 75,
@@ -2342,11 +3071,16 @@
     "bst": 500,
     "nameZh": "黑魯加",
     "nameEn": "Houndoom",
+    "types": [
+      "dark",
+      "fire"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/229.png",
     "mega": false
   },
   "houndoom-mega": {
     "dex": 10048,
+    "ndex": 229,
     "speed": 115,
     "stats": {
       "hp": 75,
@@ -2359,11 +3093,16 @@
     "bst": 600,
     "nameZh": "超級黑魯加",
     "nameEn": "Mega Houndoom",
+    "types": [
+      "dark",
+      "fire"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10048.png",
     "mega": true
   },
   "houndstone": {
     "dex": 972,
+    "ndex": 972,
     "speed": 68,
     "stats": {
       "hp": 72,
@@ -2376,11 +3115,15 @@
     "bst": 488,
     "nameZh": "墓揚犬",
     "nameEn": "Houndstone",
+    "types": [
+      "ghost"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/972.png",
     "mega": false
   },
   "hydrapple": {
     "dex": 1019,
+    "ndex": 1019,
     "speed": 44,
     "stats": {
       "hp": 106,
@@ -2393,11 +3136,16 @@
     "bst": 540,
     "nameZh": "蜜集大蛇",
     "nameEn": "Hydrapple",
+    "types": [
+      "grass",
+      "dragon"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/1019.png",
     "mega": false
   },
   "hydreigon": {
     "dex": 635,
+    "ndex": 635,
     "speed": 98,
     "stats": {
       "hp": 92,
@@ -2410,11 +3158,16 @@
     "bst": 600,
     "nameZh": "三首惡龍",
     "nameEn": "Hydreigon",
+    "types": [
+      "dark",
+      "dragon"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/635.png",
     "mega": false
   },
   "incineroar": {
     "dex": 727,
+    "ndex": 727,
     "speed": 60,
     "stats": {
       "hp": 95,
@@ -2427,11 +3180,16 @@
     "bst": 530,
     "nameZh": "熾焰咆哮虎",
     "nameEn": "Incineroar",
+    "types": [
+      "fire",
+      "dark"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/727.png",
     "mega": false
   },
   "infernape": {
     "dex": 392,
+    "ndex": 392,
     "speed": 108,
     "stats": {
       "hp": 76,
@@ -2444,11 +3202,16 @@
     "bst": 534,
     "nameZh": "烈焰猴",
     "nameEn": "Infernape",
+    "types": [
+      "fire",
+      "fighting"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/392.png",
     "mega": false
   },
   "jolteon": {
     "dex": 135,
+    "ndex": 135,
     "speed": 130,
     "stats": {
       "hp": 65,
@@ -2461,11 +3224,15 @@
     "bst": 525,
     "nameZh": "雷伊布",
     "nameEn": "Jolteon",
+    "types": [
+      "electric"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/135.png",
     "mega": false
   },
   "kangaskhan": {
     "dex": 115,
+    "ndex": 115,
     "speed": 90,
     "stats": {
       "hp": 105,
@@ -2478,11 +3245,15 @@
     "bst": 490,
     "nameZh": "袋獸",
     "nameEn": "Kangaskhan",
+    "types": [
+      "normal"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/115.png",
     "mega": false
   },
   "kangaskhan-mega": {
     "dex": 10039,
+    "ndex": 115,
     "speed": 100,
     "stats": {
       "hp": 105,
@@ -2495,11 +3266,15 @@
     "bst": 590,
     "nameZh": "超級袋獸",
     "nameEn": "Mega Kangaskhan",
+    "types": [
+      "normal"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10039.png",
     "mega": true
   },
   "kingambit": {
     "dex": 983,
+    "ndex": 983,
     "speed": 50,
     "stats": {
       "hp": 100,
@@ -2512,11 +3287,16 @@
     "bst": 550,
     "nameZh": "仆刀將軍",
     "nameEn": "Kingambit",
+    "types": [
+      "dark",
+      "steel"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/983.png",
     "mega": false
   },
   "kleavor": {
     "dex": 900,
+    "ndex": 900,
     "speed": 85,
     "stats": {
       "hp": 70,
@@ -2529,11 +3309,16 @@
     "bst": 500,
     "nameZh": "劈斧螳螂",
     "nameEn": "Kleavor",
+    "types": [
+      "bug",
+      "rock"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/900.png",
     "mega": false
   },
   "klefki": {
     "dex": 707,
+    "ndex": 707,
     "speed": 75,
     "stats": {
       "hp": 57,
@@ -2546,11 +3331,16 @@
     "bst": 470,
     "nameZh": "鑰圈兒",
     "nameEn": "Klefki",
+    "types": [
+      "steel",
+      "fairy"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/707.png",
     "mega": false
   },
   "kommo-o": {
     "dex": 784,
+    "ndex": 784,
     "speed": 85,
     "stats": {
       "hp": 75,
@@ -2563,11 +3353,16 @@
     "bst": 600,
     "nameZh": "杖尾鱗甲龍",
     "nameEn": "Kommo-o",
+    "types": [
+      "dragon",
+      "fighting"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/784.png",
     "mega": false
   },
   "krookodile": {
     "dex": 553,
+    "ndex": 553,
     "speed": 92,
     "stats": {
       "hp": 95,
@@ -2580,11 +3375,16 @@
     "bst": 519,
     "nameZh": "流氓鱷",
     "nameEn": "Krookodile",
+    "types": [
+      "ground",
+      "dark"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/553.png",
     "mega": false
   },
   "leafeon": {
     "dex": 470,
+    "ndex": 470,
     "speed": 95,
     "stats": {
       "hp": 65,
@@ -2597,11 +3397,15 @@
     "bst": 525,
     "nameZh": "葉伊布",
     "nameEn": "Leafeon",
+    "types": [
+      "grass"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/470.png",
     "mega": false
   },
   "liepard": {
     "dex": 510,
+    "ndex": 510,
     "speed": 106,
     "stats": {
       "hp": 64,
@@ -2614,11 +3418,15 @@
     "bst": 446,
     "nameZh": "酷豹",
     "nameEn": "Liepard",
+    "types": [
+      "dark"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/510.png",
     "mega": false
   },
   "lopunny": {
     "dex": 428,
+    "ndex": 428,
     "speed": 105,
     "stats": {
       "hp": 65,
@@ -2631,11 +3439,15 @@
     "bst": 480,
     "nameZh": "長耳兔",
     "nameEn": "Lopunny",
+    "types": [
+      "normal"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/428.png",
     "mega": false
   },
   "lopunny-mega": {
     "dex": 10088,
+    "ndex": 428,
     "speed": 135,
     "stats": {
       "hp": 65,
@@ -2648,11 +3460,16 @@
     "bst": 580,
     "nameZh": "超級長耳兔",
     "nameEn": "Mega Lopunny",
+    "types": [
+      "normal",
+      "fighting"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10088.png",
     "mega": true
   },
   "lucario": {
     "dex": 448,
+    "ndex": 448,
     "speed": 90,
     "stats": {
       "hp": 70,
@@ -2665,11 +3482,16 @@
     "bst": 525,
     "nameZh": "路卡利歐",
     "nameEn": "Lucario",
+    "types": [
+      "fighting",
+      "steel"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/448.png",
     "mega": false
   },
   "lucario-mega": {
     "dex": 10059,
+    "ndex": 448,
     "speed": 112,
     "stats": {
       "hp": 70,
@@ -2682,11 +3504,16 @@
     "bst": 625,
     "nameZh": "超級路卡利歐",
     "nameEn": "Mega Lucario",
+    "types": [
+      "fighting",
+      "steel"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10059.png",
     "mega": true
   },
   "lucario-mega-z": {
     "dex": 10310,
+    "ndex": 448,
     "speed": 151,
     "stats": {
       "hp": 70,
@@ -2699,11 +3526,16 @@
     "bst": 625,
     "nameZh": "超級路卡利歐Z",
     "nameEn": "Mega Lucario Z",
+    "types": [
+      "fighting",
+      "steel"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10310.png",
     "mega": true
   },
   "luxray": {
     "dex": 405,
+    "ndex": 405,
     "speed": 70,
     "stats": {
       "hp": 80,
@@ -2716,11 +3548,15 @@
     "bst": 523,
     "nameZh": "倫琴貓",
     "nameEn": "Luxray",
+    "types": [
+      "electric"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/405.png",
     "mega": false
   },
   "lycanroc-midday": {
     "dex": 745,
+    "ndex": 745,
     "speed": 112,
     "stats": {
       "hp": 75,
@@ -2733,11 +3569,15 @@
     "bst": 487,
     "nameZh": "鬃岩狼人",
     "nameEn": "Lycanroc",
+    "types": [
+      "rock"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/745.png",
     "mega": false
   },
   "machamp": {
     "dex": 68,
+    "ndex": 68,
     "speed": 55,
     "stats": {
       "hp": 90,
@@ -2750,11 +3590,15 @@
     "bst": 505,
     "nameZh": "怪力",
     "nameEn": "Machamp",
+    "types": [
+      "fighting"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/68.png",
     "mega": false
   },
   "malamar": {
     "dex": 687,
+    "ndex": 687,
     "speed": 73,
     "stats": {
       "hp": 86,
@@ -2767,11 +3611,16 @@
     "bst": 482,
     "nameZh": "烏賊王",
     "nameEn": "Malamar",
+    "types": [
+      "dark",
+      "psychic"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/687.png",
     "mega": false
   },
   "malamar-mega": {
     "dex": 10297,
+    "ndex": 687,
     "speed": 88,
     "stats": {
       "hp": 86,
@@ -2784,11 +3633,16 @@
     "bst": 582,
     "nameZh": "超級烏賊王",
     "nameEn": "Mega Malamar",
+    "types": [
+      "dark",
+      "psychic"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10297.png",
     "mega": true
   },
   "mamoswine": {
     "dex": 473,
+    "ndex": 473,
     "speed": 80,
     "stats": {
       "hp": 110,
@@ -2801,11 +3655,16 @@
     "bst": 530,
     "nameZh": "象牙豬",
     "nameEn": "Mamoswine",
+    "types": [
+      "ice",
+      "ground"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/473.png",
     "mega": false
   },
   "manectric": {
     "dex": 310,
+    "ndex": 310,
     "speed": 105,
     "stats": {
       "hp": 70,
@@ -2818,11 +3677,15 @@
     "bst": 475,
     "nameZh": "雷電獸",
     "nameEn": "Manectric",
+    "types": [
+      "electric"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/310.png",
     "mega": false
   },
   "manectric-mega": {
     "dex": 10055,
+    "ndex": 310,
     "speed": 135,
     "stats": {
       "hp": 70,
@@ -2835,11 +3698,15 @@
     "bst": 575,
     "nameZh": "超級雷電獸",
     "nameEn": "Mega Manectric",
+    "types": [
+      "electric"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10055.png",
     "mega": true
   },
   "maushold-family-of-four": {
     "dex": 925,
+    "ndex": 925,
     "speed": 111,
     "stats": {
       "hp": 74,
@@ -2852,11 +3719,15 @@
     "bst": 470,
     "nameZh": "一家鼠",
     "nameEn": "Maushold",
+    "types": [
+      "normal"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/925.png",
     "mega": false
   },
   "mawile": {
     "dex": 303,
+    "ndex": 303,
     "speed": 50,
     "stats": {
       "hp": 50,
@@ -2869,11 +3740,16 @@
     "bst": 380,
     "nameZh": "大嘴娃",
     "nameEn": "Mawile",
+    "types": [
+      "steel",
+      "fairy"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/303.png",
     "mega": false
   },
   "mawile-mega": {
     "dex": 10052,
+    "ndex": 303,
     "speed": 50,
     "stats": {
       "hp": 50,
@@ -2886,11 +3762,16 @@
     "bst": 480,
     "nameZh": "超級大嘴娃",
     "nameEn": "Mega Mawile",
+    "types": [
+      "steel",
+      "fairy"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10052.png",
     "mega": true
   },
   "medicham": {
     "dex": 308,
+    "ndex": 308,
     "speed": 80,
     "stats": {
       "hp": 60,
@@ -2903,11 +3784,16 @@
     "bst": 410,
     "nameZh": "恰雷姆",
     "nameEn": "Medicham",
+    "types": [
+      "fighting",
+      "psychic"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/308.png",
     "mega": false
   },
   "medicham-mega": {
     "dex": 10054,
+    "ndex": 308,
     "speed": 100,
     "stats": {
       "hp": 60,
@@ -2920,11 +3806,16 @@
     "bst": 510,
     "nameZh": "超級恰雷姆",
     "nameEn": "Mega Medicham",
+    "types": [
+      "fighting",
+      "psychic"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10054.png",
     "mega": true
   },
   "meganium": {
     "dex": 154,
+    "ndex": 154,
     "speed": 80,
     "stats": {
       "hp": 80,
@@ -2937,11 +3828,15 @@
     "bst": 525,
     "nameZh": "大竺葵",
     "nameEn": "Meganium",
+    "types": [
+      "grass"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/154.png",
     "mega": false
   },
   "meganium-mega": {
     "dex": 10282,
+    "ndex": 154,
     "speed": 80,
     "stats": {
       "hp": 80,
@@ -2954,11 +3849,16 @@
     "bst": 625,
     "nameZh": "超級大竺葵",
     "nameEn": "Mega Meganium",
+    "types": [
+      "grass",
+      "fairy"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10282.png",
     "mega": true
   },
   "meowscarada": {
     "dex": 908,
+    "ndex": 908,
     "speed": 123,
     "stats": {
       "hp": 76,
@@ -2971,11 +3871,16 @@
     "bst": 530,
     "nameZh": "魔幻假面喵",
     "nameEn": "Meowscarada",
+    "types": [
+      "grass",
+      "dark"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/908.png",
     "mega": false
   },
   "meowstic-male": {
     "dex": 678,
+    "ndex": 678,
     "speed": 104,
     "stats": {
       "hp": 74,
@@ -2988,11 +3893,15 @@
     "bst": 466,
     "nameZh": "超能妙喵",
     "nameEn": "Meowstic",
+    "types": [
+      "psychic"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/678.png",
     "mega": false
   },
   "meowstic-mega": {
     "dex": 10314,
+    "ndex": 678,
     "speed": 124,
     "stats": {
       "hp": 74,
@@ -3005,11 +3914,15 @@
     "bst": 566,
     "nameZh": "超級超能妙喵",
     "nameEn": "Mega Meowstic",
+    "types": [
+      "psychic"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10314.png",
     "mega": true
   },
   "metagross": {
     "dex": 376,
+    "ndex": 376,
     "speed": 70,
     "stats": {
       "hp": 80,
@@ -3022,11 +3935,16 @@
     "bst": 600,
     "nameZh": "巨金怪",
     "nameEn": "Metagross",
+    "types": [
+      "steel",
+      "psychic"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/376.png",
     "mega": false
   },
   "metagross-mega": {
     "dex": 10076,
+    "ndex": 376,
     "speed": 110,
     "stats": {
       "hp": 80,
@@ -3039,11 +3957,16 @@
     "bst": 700,
     "nameZh": "超級巨金怪",
     "nameEn": "Mega Metagross",
+    "types": [
+      "steel",
+      "psychic"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10076.png",
     "mega": true
   },
   "milotic": {
     "dex": 350,
+    "ndex": 350,
     "speed": 81,
     "stats": {
       "hp": 95,
@@ -3056,11 +3979,15 @@
     "bst": 540,
     "nameZh": "美納斯",
     "nameEn": "Milotic",
+    "types": [
+      "water"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/350.png",
     "mega": false
   },
   "mimikyu-disguised": {
     "dex": 778,
+    "ndex": 778,
     "speed": 96,
     "stats": {
       "hp": 55,
@@ -3073,11 +4000,16 @@
     "bst": 476,
     "nameZh": "謎擬Ｑ",
     "nameEn": "Mimikyu",
+    "types": [
+      "ghost",
+      "fairy"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/778.png",
     "mega": false
   },
   "morpeko-full-belly": {
     "dex": 877,
+    "ndex": 877,
     "speed": 97,
     "stats": {
       "hp": 58,
@@ -3090,11 +4022,16 @@
     "bst": 436,
     "nameZh": "莫魯貝可",
     "nameEn": "Morpeko",
+    "types": [
+      "electric",
+      "dark"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/877.png",
     "mega": false
   },
   "mudsdale": {
     "dex": 750,
+    "ndex": 750,
     "speed": 35,
     "stats": {
       "hp": 100,
@@ -3107,11 +4044,15 @@
     "bst": 500,
     "nameZh": "重泥挽馬",
     "nameEn": "Mudsdale",
+    "types": [
+      "ground"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/750.png",
     "mega": false
   },
   "musharna": {
     "dex": 518,
+    "ndex": 518,
     "speed": 29,
     "stats": {
       "hp": 116,
@@ -3124,11 +4065,15 @@
     "bst": 487,
     "nameZh": "夢夢蝕",
     "nameEn": "Musharna",
+    "types": [
+      "psychic"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/518.png",
     "mega": false
   },
   "ninetales": {
     "dex": 38,
+    "ndex": 38,
     "speed": 100,
     "stats": {
       "hp": 73,
@@ -3141,11 +4086,37 @@
     "bst": 505,
     "nameZh": "九尾",
     "nameEn": "Ninetales",
+    "types": [
+      "fire"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/38.png",
+    "mega": false
+  },
+  "ninetales-alola": {
+    "dex": 10104,
+    "ndex": 38,
+    "speed": 109,
+    "stats": {
+      "hp": 73,
+      "atk": 67,
+      "def": 75,
+      "spa": 81,
+      "spd": 100,
+      "spe": 109
+    },
+    "bst": 505,
+    "nameZh": "阿羅拉九尾",
+    "nameEn": "Alolan Ninetales",
+    "types": [
+      "ice",
+      "fairy"
+    ],
+    "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10104.png",
     "mega": false
   },
   "noivern": {
     "dex": 715,
+    "ndex": 715,
     "speed": 123,
     "stats": {
       "hp": 85,
@@ -3158,11 +4129,16 @@
     "bst": 535,
     "nameZh": "音波龍",
     "nameEn": "Noivern",
+    "types": [
+      "flying",
+      "dragon"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/715.png",
     "mega": false
   },
   "oranguru": {
     "dex": 765,
+    "ndex": 765,
     "speed": 60,
     "stats": {
       "hp": 90,
@@ -3175,11 +4151,16 @@
     "bst": 490,
     "nameZh": "智揮猩",
     "nameEn": "Oranguru",
+    "types": [
+      "normal",
+      "psychic"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/765.png",
     "mega": false
   },
   "orthworm": {
     "dex": 968,
+    "ndex": 968,
     "speed": 65,
     "stats": {
       "hp": 70,
@@ -3192,11 +4173,15 @@
     "bst": 480,
     "nameZh": "拖拖蚓",
     "nameEn": "Orthworm",
+    "types": [
+      "steel"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/968.png",
     "mega": false
   },
   "overqwil": {
     "dex": 904,
+    "ndex": 904,
     "speed": 85,
     "stats": {
       "hp": 85,
@@ -3209,11 +4194,16 @@
     "bst": 510,
     "nameZh": "萬針魚",
     "nameEn": "Overqwil",
+    "types": [
+      "dark",
+      "poison"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/904.png",
     "mega": false
   },
   "palafin-zero": {
     "dex": 964,
+    "ndex": 964,
     "speed": 100,
     "stats": {
       "hp": 100,
@@ -3226,11 +4216,15 @@
     "bst": 457,
     "nameZh": "海豚俠",
     "nameEn": "Palafin",
+    "types": [
+      "water"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/964.png",
     "mega": false
   },
   "pangoro": {
     "dex": 675,
+    "ndex": 675,
     "speed": 58,
     "stats": {
       "hp": 95,
@@ -3243,11 +4237,16 @@
     "bst": 495,
     "nameZh": "流氓熊貓",
     "nameEn": "Pangoro",
+    "types": [
+      "fighting",
+      "dark"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/675.png",
     "mega": false
   },
   "passimian": {
     "dex": 766,
+    "ndex": 766,
     "speed": 80,
     "stats": {
       "hp": 100,
@@ -3260,11 +4259,15 @@
     "bst": 490,
     "nameZh": "投擲猴",
     "nameEn": "Passimian",
+    "types": [
+      "fighting"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/766.png",
     "mega": false
   },
   "pelipper": {
     "dex": 279,
+    "ndex": 279,
     "speed": 65,
     "stats": {
       "hp": 60,
@@ -3277,11 +4280,16 @@
     "bst": 440,
     "nameZh": "大嘴鷗",
     "nameEn": "Pelipper",
+    "types": [
+      "water",
+      "flying"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/279.png",
     "mega": false
   },
   "pidgeot": {
     "dex": 18,
+    "ndex": 18,
     "speed": 101,
     "stats": {
       "hp": 83,
@@ -3294,11 +4302,16 @@
     "bst": 479,
     "nameZh": "大比鳥",
     "nameEn": "Pidgeot",
+    "types": [
+      "normal",
+      "flying"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/18.png",
     "mega": false
   },
   "pidgeot-mega": {
     "dex": 10073,
+    "ndex": 18,
     "speed": 121,
     "stats": {
       "hp": 83,
@@ -3311,11 +4324,16 @@
     "bst": 579,
     "nameZh": "超級大比鳥",
     "nameEn": "Mega Pidgeot",
+    "types": [
+      "normal",
+      "flying"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10073.png",
     "mega": true
   },
   "pikachu": {
     "dex": 25,
+    "ndex": 25,
     "speed": 90,
     "stats": {
       "hp": 35,
@@ -3328,11 +4346,15 @@
     "bst": 320,
     "nameZh": "皮卡丘",
     "nameEn": "Pikachu",
+    "types": [
+      "electric"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/25.png",
     "mega": false
   },
   "pinsir": {
     "dex": 127,
+    "ndex": 127,
     "speed": 85,
     "stats": {
       "hp": 65,
@@ -3345,11 +4367,15 @@
     "bst": 500,
     "nameZh": "凱羅斯",
     "nameEn": "Pinsir",
+    "types": [
+      "bug"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/127.png",
     "mega": false
   },
   "pinsir-mega": {
     "dex": 10040,
+    "ndex": 127,
     "speed": 105,
     "stats": {
       "hp": 65,
@@ -3362,11 +4388,16 @@
     "bst": 600,
     "nameZh": "超級凱羅斯",
     "nameEn": "Mega Pinsir",
+    "types": [
+      "bug",
+      "flying"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10040.png",
     "mega": true
   },
   "politoed": {
     "dex": 186,
+    "ndex": 186,
     "speed": 70,
     "stats": {
       "hp": 90,
@@ -3379,11 +4410,15 @@
     "bst": 500,
     "nameZh": "蚊香蛙皇",
     "nameEn": "Politoed",
+    "types": [
+      "water"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/186.png",
     "mega": false
   },
   "polteageist": {
     "dex": 855,
+    "ndex": 855,
     "speed": 70,
     "stats": {
       "hp": 60,
@@ -3396,11 +4431,15 @@
     "bst": 508,
     "nameZh": "怖思壺",
     "nameEn": "Polteageist",
+    "types": [
+      "ghost"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/855.png",
     "mega": false
   },
   "primarina": {
     "dex": 730,
+    "ndex": 730,
     "speed": 60,
     "stats": {
       "hp": 80,
@@ -3413,11 +4452,16 @@
     "bst": 530,
     "nameZh": "西獅海壬",
     "nameEn": "Primarina",
+    "types": [
+      "water",
+      "fairy"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/730.png",
     "mega": false
   },
   "pyroar-male": {
     "dex": 668,
+    "ndex": 668,
     "speed": 106,
     "stats": {
       "hp": 86,
@@ -3430,11 +4474,16 @@
     "bst": 507,
     "nameZh": "火炎獅",
     "nameEn": "Pyroar",
+    "types": [
+      "fire",
+      "normal"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/668.png",
     "mega": false
   },
   "pyroar-mega": {
     "dex": 10295,
+    "ndex": 668,
     "speed": 126,
     "stats": {
       "hp": 86,
@@ -3447,11 +4496,16 @@
     "bst": 607,
     "nameZh": "超級火炎獅",
     "nameEn": "Mega Pyroar",
+    "types": [
+      "fire",
+      "normal"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10295.png",
     "mega": true
   },
   "quaquaval": {
     "dex": 914,
+    "ndex": 914,
     "speed": 85,
     "stats": {
       "hp": 85,
@@ -3464,11 +4518,16 @@
     "bst": 530,
     "nameZh": "狂歡浪舞鴨",
     "nameEn": "Quaquaval",
+    "types": [
+      "water",
+      "fighting"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/914.png",
     "mega": false
   },
   "qwilfish": {
     "dex": 211,
+    "ndex": 211,
     "speed": 85,
     "stats": {
       "hp": 65,
@@ -3481,11 +4540,16 @@
     "bst": 440,
     "nameZh": "千針魚",
     "nameEn": "Qwilfish",
+    "types": [
+      "water",
+      "poison"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/211.png",
     "mega": false
   },
   "raichu": {
     "dex": 26,
+    "ndex": 26,
     "speed": 110,
     "stats": {
       "hp": 60,
@@ -3498,11 +4562,37 @@
     "bst": 485,
     "nameZh": "雷丘",
     "nameEn": "Raichu",
+    "types": [
+      "electric"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/26.png",
+    "mega": false
+  },
+  "raichu-alola": {
+    "dex": 10100,
+    "ndex": 26,
+    "speed": 110,
+    "stats": {
+      "hp": 60,
+      "atk": 85,
+      "def": 50,
+      "spa": 95,
+      "spd": 85,
+      "spe": 110
+    },
+    "bst": 485,
+    "nameZh": "阿羅拉雷丘",
+    "nameEn": "Alolan Raichu",
+    "types": [
+      "electric",
+      "psychic"
+    ],
+    "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10100.png",
     "mega": false
   },
   "raichu-mega-x": {
     "dex": 10304,
+    "ndex": 26,
     "speed": 110,
     "stats": {
       "hp": 60,
@@ -3515,11 +4605,15 @@
     "bst": 585,
     "nameZh": "超級雷丘X",
     "nameEn": "Mega Raichu X",
+    "types": [
+      "electric"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10304.png",
     "mega": true
   },
   "raichu-mega-y": {
     "dex": 10305,
+    "ndex": 26,
     "speed": 130,
     "stats": {
       "hp": 60,
@@ -3532,11 +4626,15 @@
     "bst": 585,
     "nameZh": "超級雷丘Y",
     "nameEn": "Mega Raichu Y",
+    "types": [
+      "electric"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10305.png",
     "mega": true
   },
   "rampardos": {
     "dex": 409,
+    "ndex": 409,
     "speed": 58,
     "stats": {
       "hp": 97,
@@ -3549,11 +4647,15 @@
     "bst": 495,
     "nameZh": "戰槌龍",
     "nameEn": "Rampardos",
+    "types": [
+      "rock"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/409.png",
     "mega": false
   },
   "reuniclus": {
     "dex": 579,
+    "ndex": 579,
     "speed": 30,
     "stats": {
       "hp": 110,
@@ -3566,11 +4668,15 @@
     "bst": 490,
     "nameZh": "人造細胞卵",
     "nameEn": "Reuniclus",
+    "types": [
+      "psychic"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/579.png",
     "mega": false
   },
   "rhyperior": {
     "dex": 464,
+    "ndex": 464,
     "speed": 40,
     "stats": {
       "hp": 115,
@@ -3583,11 +4689,16 @@
     "bst": 535,
     "nameZh": "超甲狂犀",
     "nameEn": "Rhyperior",
+    "types": [
+      "ground",
+      "rock"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/464.png",
     "mega": false
   },
   "roserade": {
     "dex": 407,
+    "ndex": 407,
     "speed": 90,
     "stats": {
       "hp": 60,
@@ -3600,11 +4711,16 @@
     "bst": 515,
     "nameZh": "羅絲雷朵",
     "nameEn": "Roserade",
+    "types": [
+      "grass",
+      "poison"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/407.png",
     "mega": false
   },
   "rotom": {
     "dex": 479,
+    "ndex": 479,
     "speed": 91,
     "stats": {
       "hp": 50,
@@ -3617,11 +4733,16 @@
     "bst": 440,
     "nameZh": "洛托姆",
     "nameEn": "Rotom",
+    "types": [
+      "electric",
+      "ghost"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/479.png",
     "mega": false
   },
   "runerigus": {
     "dex": 867,
+    "ndex": 867,
     "speed": 30,
     "stats": {
       "hp": 58,
@@ -3634,11 +4755,16 @@
     "bst": 483,
     "nameZh": "死神板",
     "nameEn": "Runerigus",
+    "types": [
+      "ground",
+      "ghost"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/867.png",
     "mega": false
   },
   "sableye": {
     "dex": 302,
+    "ndex": 302,
     "speed": 50,
     "stats": {
       "hp": 50,
@@ -3651,11 +4777,16 @@
     "bst": 380,
     "nameZh": "勾魂眼",
     "nameEn": "Sableye",
+    "types": [
+      "dark",
+      "ghost"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/302.png",
     "mega": false
   },
   "sableye-mega": {
     "dex": 10066,
+    "ndex": 302,
     "speed": 20,
     "stats": {
       "hp": 50,
@@ -3668,11 +4799,16 @@
     "bst": 480,
     "nameZh": "超級勾魂眼",
     "nameEn": "Mega Sableye",
+    "types": [
+      "dark",
+      "ghost"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10066.png",
     "mega": true
   },
   "salazzle": {
     "dex": 758,
+    "ndex": 758,
     "speed": 117,
     "stats": {
       "hp": 68,
@@ -3685,11 +4821,16 @@
     "bst": 480,
     "nameZh": "焰后蜥",
     "nameEn": "Salazzle",
+    "types": [
+      "poison",
+      "fire"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/758.png",
     "mega": false
   },
   "samurott": {
     "dex": 503,
+    "ndex": 503,
     "speed": 70,
     "stats": {
       "hp": 95,
@@ -3702,11 +4843,37 @@
     "bst": 528,
     "nameZh": "大劍鬼",
     "nameEn": "Samurott",
+    "types": [
+      "water"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/503.png",
+    "mega": false
+  },
+  "samurott-hisui": {
+    "dex": 10236,
+    "ndex": 503,
+    "speed": 85,
+    "stats": {
+      "hp": 90,
+      "atk": 108,
+      "def": 80,
+      "spa": 100,
+      "spd": 65,
+      "spe": 85
+    },
+    "bst": 528,
+    "nameZh": "洗翠大劍鬼",
+    "nameEn": "Hisuian Samurott",
+    "types": [
+      "water",
+      "dark"
+    ],
+    "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10236.png",
     "mega": false
   },
   "sandaconda": {
     "dex": 844,
+    "ndex": 844,
     "speed": 71,
     "stats": {
       "hp": 72,
@@ -3719,11 +4886,15 @@
     "bst": 510,
     "nameZh": "沙螺蟒",
     "nameEn": "Sandaconda",
+    "types": [
+      "ground"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/844.png",
     "mega": false
   },
   "sceptile": {
     "dex": 254,
+    "ndex": 254,
     "speed": 120,
     "stats": {
       "hp": 70,
@@ -3736,11 +4907,15 @@
     "bst": 530,
     "nameZh": "蜥蜴王",
     "nameEn": "Sceptile",
+    "types": [
+      "grass"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/254.png",
     "mega": false
   },
   "sceptile-mega": {
     "dex": 10065,
+    "ndex": 254,
     "speed": 145,
     "stats": {
       "hp": 70,
@@ -3753,11 +4928,16 @@
     "bst": 630,
     "nameZh": "超級蜥蜴王",
     "nameEn": "Mega Sceptile",
+    "types": [
+      "grass",
+      "dragon"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10065.png",
     "mega": true
   },
   "scizor": {
     "dex": 212,
+    "ndex": 212,
     "speed": 65,
     "stats": {
       "hp": 70,
@@ -3770,11 +4950,16 @@
     "bst": 500,
     "nameZh": "巨鉗螳螂",
     "nameEn": "Scizor",
+    "types": [
+      "bug",
+      "steel"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/212.png",
     "mega": false
   },
   "scizor-mega": {
     "dex": 10046,
+    "ndex": 212,
     "speed": 75,
     "stats": {
       "hp": 70,
@@ -3787,11 +4972,16 @@
     "bst": 600,
     "nameZh": "超級巨鉗螳螂",
     "nameEn": "Mega Scizor",
+    "types": [
+      "bug",
+      "steel"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10046.png",
     "mega": true
   },
   "scolipede": {
     "dex": 545,
+    "ndex": 545,
     "speed": 112,
     "stats": {
       "hp": 60,
@@ -3804,11 +4994,16 @@
     "bst": 485,
     "nameZh": "蜈蚣王",
     "nameEn": "Scolipede",
+    "types": [
+      "bug",
+      "poison"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/545.png",
     "mega": false
   },
   "scolipede-mega": {
     "dex": 10288,
+    "ndex": 545,
     "speed": 62,
     "stats": {
       "hp": 60,
@@ -3821,11 +5016,16 @@
     "bst": 585,
     "nameZh": "超級蜈蚣王",
     "nameEn": "Mega Scolipede",
+    "types": [
+      "bug",
+      "poison"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10288.png",
     "mega": true
   },
   "scovillain": {
     "dex": 952,
+    "ndex": 952,
     "speed": 75,
     "stats": {
       "hp": 65,
@@ -3838,11 +5038,16 @@
     "bst": 486,
     "nameZh": "狠辣椒",
     "nameEn": "Scovillain",
+    "types": [
+      "grass",
+      "fire"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/952.png",
     "mega": false
   },
   "scovillain-mega": {
     "dex": 10320,
+    "ndex": 952,
     "speed": 75,
     "stats": {
       "hp": 65,
@@ -3855,11 +5060,16 @@
     "bst": 586,
     "nameZh": "超級狠辣椒",
     "nameEn": "Mega Scovillain",
+    "types": [
+      "grass",
+      "fire"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10320.png",
     "mega": true
   },
   "scrafty": {
     "dex": 560,
+    "ndex": 560,
     "speed": 58,
     "stats": {
       "hp": 65,
@@ -3872,11 +5082,16 @@
     "bst": 488,
     "nameZh": "頭巾混混",
     "nameEn": "Scrafty",
+    "types": [
+      "dark",
+      "fighting"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/560.png",
     "mega": false
   },
   "scrafty-mega": {
     "dex": 10289,
+    "ndex": 560,
     "speed": 68,
     "stats": {
       "hp": 65,
@@ -3889,11 +5104,16 @@
     "bst": 588,
     "nameZh": "超級頭巾混混",
     "nameEn": "Mega Scrafty",
+    "types": [
+      "dark",
+      "fighting"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10289.png",
     "mega": true
   },
   "serperior": {
     "dex": 497,
+    "ndex": 497,
     "speed": 113,
     "stats": {
       "hp": 75,
@@ -3906,11 +5126,15 @@
     "bst": 528,
     "nameZh": "君主蛇",
     "nameEn": "Serperior",
+    "types": [
+      "grass"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/497.png",
     "mega": false
   },
   "sharpedo": {
     "dex": 319,
+    "ndex": 319,
     "speed": 95,
     "stats": {
       "hp": 70,
@@ -3923,11 +5147,16 @@
     "bst": 460,
     "nameZh": "巨牙鯊",
     "nameEn": "Sharpedo",
+    "types": [
+      "water",
+      "dark"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/319.png",
     "mega": false
   },
   "sharpedo-mega": {
     "dex": 10070,
+    "ndex": 319,
     "speed": 105,
     "stats": {
       "hp": 70,
@@ -3940,11 +5169,16 @@
     "bst": 560,
     "nameZh": "超級巨牙鯊",
     "nameEn": "Mega Sharpedo",
+    "types": [
+      "water",
+      "dark"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10070.png",
     "mega": true
   },
   "simipour": {
     "dex": 516,
+    "ndex": 516,
     "speed": 101,
     "stats": {
       "hp": 75,
@@ -3957,11 +5191,15 @@
     "bst": 498,
     "nameZh": "冷水猿",
     "nameEn": "Simipour",
+    "types": [
+      "water"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/516.png",
     "mega": false
   },
   "simisage": {
     "dex": 512,
+    "ndex": 512,
     "speed": 101,
     "stats": {
       "hp": 75,
@@ -3974,11 +5212,15 @@
     "bst": 498,
     "nameZh": "花椰猿",
     "nameEn": "Simisage",
+    "types": [
+      "grass"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/512.png",
     "mega": false
   },
   "simisear": {
     "dex": 514,
+    "ndex": 514,
     "speed": 101,
     "stats": {
       "hp": 75,
@@ -3991,11 +5233,15 @@
     "bst": 498,
     "nameZh": "爆香猿",
     "nameEn": "Simisear",
+    "types": [
+      "fire"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/514.png",
     "mega": false
   },
   "sinistcha": {
     "dex": 1013,
+    "ndex": 1013,
     "speed": 70,
     "stats": {
       "hp": 71,
@@ -4008,11 +5254,16 @@
     "bst": 508,
     "nameZh": "來悲粗茶",
     "nameEn": "Sinistcha",
+    "types": [
+      "grass",
+      "ghost"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/1013.png",
     "mega": false
   },
   "skarmory": {
     "dex": 227,
+    "ndex": 227,
     "speed": 70,
     "stats": {
       "hp": 65,
@@ -4025,11 +5276,16 @@
     "bst": 465,
     "nameZh": "盔甲鳥",
     "nameEn": "Skarmory",
+    "types": [
+      "steel",
+      "flying"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/227.png",
     "mega": false
   },
   "skarmory-mega": {
     "dex": 10284,
+    "ndex": 227,
     "speed": 110,
     "stats": {
       "hp": 65,
@@ -4042,11 +5298,16 @@
     "bst": 565,
     "nameZh": "超級盔甲鳥",
     "nameEn": "Mega Skarmory",
+    "types": [
+      "steel",
+      "flying"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10284.png",
     "mega": true
   },
   "skeledirge": {
     "dex": 911,
+    "ndex": 911,
     "speed": 66,
     "stats": {
       "hp": 104,
@@ -4059,11 +5320,16 @@
     "bst": 530,
     "nameZh": "骨紋巨聲鱷",
     "nameEn": "Skeledirge",
+    "types": [
+      "fire",
+      "ghost"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/911.png",
     "mega": false
   },
   "slowbro": {
     "dex": 80,
+    "ndex": 80,
     "speed": 30,
     "stats": {
       "hp": 95,
@@ -4076,11 +5342,38 @@
     "bst": 490,
     "nameZh": "呆殼獸",
     "nameEn": "Slowbro",
+    "types": [
+      "water",
+      "psychic"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/80.png",
+    "mega": false
+  },
+  "slowbro-galar": {
+    "dex": 10165,
+    "ndex": 80,
+    "speed": 30,
+    "stats": {
+      "hp": 95,
+      "atk": 100,
+      "def": 95,
+      "spa": 100,
+      "spd": 70,
+      "spe": 30
+    },
+    "bst": 490,
+    "nameZh": "伽勒爾呆殼獸",
+    "nameEn": "Galarian Slowbro",
+    "types": [
+      "poison",
+      "psychic"
+    ],
+    "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10165.png",
     "mega": false
   },
   "slowbro-mega": {
     "dex": 10071,
+    "ndex": 80,
     "speed": 30,
     "stats": {
       "hp": 95,
@@ -4093,11 +5386,16 @@
     "bst": 590,
     "nameZh": "超級呆殼獸",
     "nameEn": "Mega Slowbro",
+    "types": [
+      "water",
+      "psychic"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10071.png",
     "mega": true
   },
   "slowking": {
     "dex": 199,
+    "ndex": 199,
     "speed": 30,
     "stats": {
       "hp": 95,
@@ -4110,11 +5408,38 @@
     "bst": 490,
     "nameZh": "呆呆王",
     "nameEn": "Slowking",
+    "types": [
+      "water",
+      "psychic"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/199.png",
+    "mega": false
+  },
+  "slowking-galar": {
+    "dex": 10172,
+    "ndex": 199,
+    "speed": 30,
+    "stats": {
+      "hp": 95,
+      "atk": 65,
+      "def": 80,
+      "spa": 110,
+      "spd": 110,
+      "spe": 30
+    },
+    "bst": 490,
+    "nameZh": "伽勒爾呆呆王",
+    "nameEn": "Galarian Slowking",
+    "types": [
+      "poison",
+      "psychic"
+    ],
+    "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10172.png",
     "mega": false
   },
   "slurpuff": {
     "dex": 685,
+    "ndex": 685,
     "speed": 72,
     "stats": {
       "hp": 82,
@@ -4127,11 +5452,15 @@
     "bst": 480,
     "nameZh": "胖甜妮",
     "nameEn": "Slurpuff",
+    "types": [
+      "fairy"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/685.png",
     "mega": false
   },
   "sneasler": {
     "dex": 903,
+    "ndex": 903,
     "speed": 120,
     "stats": {
       "hp": 80,
@@ -4144,11 +5473,16 @@
     "bst": 510,
     "nameZh": "大狃拉",
     "nameEn": "Sneasler",
+    "types": [
+      "fighting",
+      "poison"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/903.png",
     "mega": false
   },
   "snorlax": {
     "dex": 143,
+    "ndex": 143,
     "speed": 30,
     "stats": {
       "hp": 160,
@@ -4161,11 +5495,15 @@
     "bst": 540,
     "nameZh": "卡比獸",
     "nameEn": "Snorlax",
+    "types": [
+      "normal"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/143.png",
     "mega": false
   },
   "spiritomb": {
     "dex": 442,
+    "ndex": 442,
     "speed": 35,
     "stats": {
       "hp": 50,
@@ -4178,11 +5516,16 @@
     "bst": 485,
     "nameZh": "花岩怪",
     "nameEn": "Spiritomb",
+    "types": [
+      "ghost",
+      "dark"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/442.png",
     "mega": false
   },
   "staraptor": {
     "dex": 398,
+    "ndex": 398,
     "speed": 100,
     "stats": {
       "hp": 85,
@@ -4195,11 +5538,16 @@
     "bst": 485,
     "nameZh": "姆克鷹",
     "nameEn": "Staraptor",
+    "types": [
+      "normal",
+      "flying"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/398.png",
     "mega": false
   },
   "staraptor-mega": {
     "dex": 10308,
+    "ndex": 398,
     "speed": 110,
     "stats": {
       "hp": 85,
@@ -4212,11 +5560,16 @@
     "bst": 585,
     "nameZh": "超級姆克鷹",
     "nameEn": "Mega Staraptor",
+    "types": [
+      "fighting",
+      "flying"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10308.png",
     "mega": true
   },
   "starmie": {
     "dex": 121,
+    "ndex": 121,
     "speed": 115,
     "stats": {
       "hp": 60,
@@ -4229,11 +5582,16 @@
     "bst": 520,
     "nameZh": "寶石海星",
     "nameEn": "Starmie",
+    "types": [
+      "water",
+      "psychic"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/121.png",
     "mega": false
   },
   "starmie-mega": {
     "dex": 10280,
+    "ndex": 121,
     "speed": 120,
     "stats": {
       "hp": 60,
@@ -4246,11 +5604,16 @@
     "bst": 620,
     "nameZh": "超級寶石海星",
     "nameEn": "Mega Starmie",
+    "types": [
+      "water",
+      "psychic"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10280.png",
     "mega": true
   },
   "steelix": {
     "dex": 208,
+    "ndex": 208,
     "speed": 30,
     "stats": {
       "hp": 75,
@@ -4263,11 +5626,16 @@
     "bst": 510,
     "nameZh": "大鋼蛇",
     "nameEn": "Steelix",
+    "types": [
+      "steel",
+      "ground"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/208.png",
     "mega": false
   },
   "steelix-mega": {
     "dex": 10072,
+    "ndex": 208,
     "speed": 30,
     "stats": {
       "hp": 75,
@@ -4280,11 +5648,16 @@
     "bst": 610,
     "nameZh": "超級大鋼蛇",
     "nameEn": "Mega Steelix",
+    "types": [
+      "steel",
+      "ground"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10072.png",
     "mega": true
   },
   "stunfisk": {
     "dex": 618,
+    "ndex": 618,
     "speed": 32,
     "stats": {
       "hp": 109,
@@ -4297,11 +5670,38 @@
     "bst": 471,
     "nameZh": "泥巴魚",
     "nameEn": "Stunfisk",
+    "types": [
+      "ground",
+      "electric"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/618.png",
+    "mega": false
+  },
+  "stunfisk-galar": {
+    "dex": 10180,
+    "ndex": 618,
+    "speed": 32,
+    "stats": {
+      "hp": 109,
+      "atk": 81,
+      "def": 99,
+      "spa": 66,
+      "spd": 84,
+      "spe": 32
+    },
+    "bst": 471,
+    "nameZh": "伽勒爾泥巴魚",
+    "nameEn": "Galarian Stunfisk",
+    "types": [
+      "ground",
+      "steel"
+    ],
+    "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10180.png",
     "mega": false
   },
   "swampert": {
     "dex": 260,
+    "ndex": 260,
     "speed": 60,
     "stats": {
       "hp": 100,
@@ -4314,11 +5714,16 @@
     "bst": 535,
     "nameZh": "巨沼怪",
     "nameEn": "Swampert",
+    "types": [
+      "water",
+      "ground"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/260.png",
     "mega": false
   },
   "swampert-mega": {
     "dex": 10064,
+    "ndex": 260,
     "speed": 70,
     "stats": {
       "hp": 100,
@@ -4331,11 +5736,16 @@
     "bst": 635,
     "nameZh": "超級巨沼怪",
     "nameEn": "Mega Swampert",
+    "types": [
+      "water",
+      "ground"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10064.png",
     "mega": true
   },
   "sylveon": {
     "dex": 700,
+    "ndex": 700,
     "speed": 60,
     "stats": {
       "hp": 95,
@@ -4348,11 +5758,15 @@
     "bst": 525,
     "nameZh": "仙子伊布",
     "nameEn": "Sylveon",
+    "types": [
+      "fairy"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/700.png",
     "mega": false
   },
   "talonflame": {
     "dex": 663,
+    "ndex": 663,
     "speed": 126,
     "stats": {
       "hp": 78,
@@ -4365,11 +5779,16 @@
     "bst": 499,
     "nameZh": "烈箭鷹",
     "nameEn": "Talonflame",
+    "types": [
+      "fire",
+      "flying"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/663.png",
     "mega": false
   },
   "tauros": {
     "dex": 128,
+    "ndex": 128,
     "speed": 110,
     "stats": {
       "hp": 75,
@@ -4382,11 +5801,80 @@
     "bst": 490,
     "nameZh": "肯泰羅",
     "nameEn": "Tauros",
+    "types": [
+      "normal"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/128.png",
+    "mega": false
+  },
+  "tauros-paldea-aqua-breed": {
+    "dex": 10252,
+    "ndex": 128,
+    "speed": 100,
+    "stats": {
+      "hp": 75,
+      "atk": 110,
+      "def": 105,
+      "spa": 30,
+      "spd": 70,
+      "spe": 100
+    },
+    "bst": 490,
+    "nameZh": "帕底亞肯泰羅（流水種）",
+    "nameEn": "Paldean Tauros (Aqua Breed)",
+    "types": [
+      "fighting",
+      "water"
+    ],
+    "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10252.png",
+    "mega": false
+  },
+  "tauros-paldea-blaze-breed": {
+    "dex": 10251,
+    "ndex": 128,
+    "speed": 100,
+    "stats": {
+      "hp": 75,
+      "atk": 110,
+      "def": 105,
+      "spa": 30,
+      "spd": 70,
+      "spe": 100
+    },
+    "bst": 490,
+    "nameZh": "帕底亞肯泰羅（火炎種）",
+    "nameEn": "Paldean Tauros (Blaze Breed)",
+    "types": [
+      "fighting",
+      "fire"
+    ],
+    "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10251.png",
+    "mega": false
+  },
+  "tauros-paldea-combat-breed": {
+    "dex": 10250,
+    "ndex": 128,
+    "speed": 100,
+    "stats": {
+      "hp": 75,
+      "atk": 110,
+      "def": 105,
+      "spa": 30,
+      "spd": 70,
+      "spe": 100
+    },
+    "bst": 490,
+    "nameZh": "帕底亞肯泰羅（鬥戰種）",
+    "nameEn": "Paldean Tauros (Combat Breed)",
+    "types": [
+      "fighting"
+    ],
+    "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10250.png",
     "mega": false
   },
   "tinkaton": {
     "dex": 959,
+    "ndex": 959,
     "speed": 94,
     "stats": {
       "hp": 85,
@@ -4399,11 +5887,16 @@
     "bst": 506,
     "nameZh": "巨鍛匠",
     "nameEn": "Tinkaton",
+    "types": [
+      "fairy",
+      "steel"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/959.png",
     "mega": false
   },
   "torkoal": {
     "dex": 324,
+    "ndex": 324,
     "speed": 20,
     "stats": {
       "hp": 70,
@@ -4416,11 +5909,15 @@
     "bst": 470,
     "nameZh": "煤炭龜",
     "nameEn": "Torkoal",
+    "types": [
+      "fire"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/324.png",
     "mega": false
   },
   "torterra": {
     "dex": 389,
+    "ndex": 389,
     "speed": 56,
     "stats": {
       "hp": 95,
@@ -4433,11 +5930,16 @@
     "bst": 525,
     "nameZh": "土台龜",
     "nameEn": "Torterra",
+    "types": [
+      "grass",
+      "ground"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/389.png",
     "mega": false
   },
   "toucannon": {
     "dex": 733,
+    "ndex": 733,
     "speed": 60,
     "stats": {
       "hp": 80,
@@ -4450,11 +5952,16 @@
     "bst": 485,
     "nameZh": "銃嘴大鳥",
     "nameEn": "Toucannon",
+    "types": [
+      "normal",
+      "flying"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/733.png",
     "mega": false
   },
   "toxapex": {
     "dex": 748,
+    "ndex": 748,
     "speed": 35,
     "stats": {
       "hp": 50,
@@ -4467,11 +5974,16 @@
     "bst": 495,
     "nameZh": "超壞星",
     "nameEn": "Toxapex",
+    "types": [
+      "poison",
+      "water"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/748.png",
     "mega": false
   },
   "toxicroak": {
     "dex": 454,
+    "ndex": 454,
     "speed": 85,
     "stats": {
       "hp": 83,
@@ -4484,11 +5996,16 @@
     "bst": 490,
     "nameZh": "毒骷蛙",
     "nameEn": "Toxicroak",
+    "types": [
+      "poison",
+      "fighting"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/454.png",
     "mega": false
   },
   "trevenant": {
     "dex": 709,
+    "ndex": 709,
     "speed": 56,
     "stats": {
       "hp": 85,
@@ -4501,11 +6018,16 @@
     "bst": 474,
     "nameZh": "朽木妖",
     "nameEn": "Trevenant",
+    "types": [
+      "ghost",
+      "grass"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/709.png",
     "mega": false
   },
   "tsareena": {
     "dex": 763,
+    "ndex": 763,
     "speed": 72,
     "stats": {
       "hp": 72,
@@ -4518,11 +6040,15 @@
     "bst": 510,
     "nameZh": "甜冷美后",
     "nameEn": "Tsareena",
+    "types": [
+      "grass"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/763.png",
     "mega": false
   },
   "typhlosion": {
     "dex": 157,
+    "ndex": 157,
     "speed": 100,
     "stats": {
       "hp": 78,
@@ -4535,11 +6061,37 @@
     "bst": 534,
     "nameZh": "火爆獸",
     "nameEn": "Typhlosion",
+    "types": [
+      "fire"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/157.png",
+    "mega": false
+  },
+  "typhlosion-hisui": {
+    "dex": 10233,
+    "ndex": 157,
+    "speed": 95,
+    "stats": {
+      "hp": 73,
+      "atk": 84,
+      "def": 78,
+      "spa": 119,
+      "spd": 85,
+      "spe": 95
+    },
+    "bst": 534,
+    "nameZh": "洗翠火爆獸",
+    "nameEn": "Hisuian Typhlosion",
+    "types": [
+      "fire",
+      "ghost"
+    ],
+    "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10233.png",
     "mega": false
   },
   "tyranitar": {
     "dex": 248,
+    "ndex": 248,
     "speed": 61,
     "stats": {
       "hp": 100,
@@ -4552,11 +6104,16 @@
     "bst": 600,
     "nameZh": "班基拉斯",
     "nameEn": "Tyranitar",
+    "types": [
+      "rock",
+      "dark"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/248.png",
     "mega": false
   },
   "tyranitar-mega": {
     "dex": 10049,
+    "ndex": 248,
     "speed": 71,
     "stats": {
       "hp": 100,
@@ -4569,11 +6126,16 @@
     "bst": 700,
     "nameZh": "超級班基拉斯",
     "nameEn": "Mega Tyranitar",
+    "types": [
+      "rock",
+      "dark"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10049.png",
     "mega": true
   },
   "tyrantrum": {
     "dex": 697,
+    "ndex": 697,
     "speed": 71,
     "stats": {
       "hp": 82,
@@ -4586,11 +6148,16 @@
     "bst": 521,
     "nameZh": "怪顎龍",
     "nameEn": "Tyrantrum",
+    "types": [
+      "rock",
+      "dragon"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/697.png",
     "mega": false
   },
   "umbreon": {
     "dex": 197,
+    "ndex": 197,
     "speed": 65,
     "stats": {
       "hp": 95,
@@ -4603,11 +6170,15 @@
     "bst": 525,
     "nameZh": "月亮伊布",
     "nameEn": "Umbreon",
+    "types": [
+      "dark"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/197.png",
     "mega": false
   },
   "vanilluxe": {
     "dex": 584,
+    "ndex": 584,
     "speed": 79,
     "stats": {
       "hp": 71,
@@ -4620,11 +6191,15 @@
     "bst": 535,
     "nameZh": "雙倍多多冰",
     "nameEn": "Vanilluxe",
+    "types": [
+      "ice"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/584.png",
     "mega": false
   },
   "vaporeon": {
     "dex": 134,
+    "ndex": 134,
     "speed": 65,
     "stats": {
       "hp": 130,
@@ -4637,11 +6212,15 @@
     "bst": 525,
     "nameZh": "水伊布",
     "nameEn": "Vaporeon",
+    "types": [
+      "water"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/134.png",
     "mega": false
   },
   "venusaur": {
     "dex": 3,
+    "ndex": 3,
     "speed": 80,
     "stats": {
       "hp": 80,
@@ -4654,11 +6233,16 @@
     "bst": 525,
     "nameZh": "妙蛙花",
     "nameEn": "Venusaur",
+    "types": [
+      "grass",
+      "poison"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/3.png",
     "mega": false
   },
   "venusaur-mega": {
     "dex": 10033,
+    "ndex": 3,
     "speed": 80,
     "stats": {
       "hp": 80,
@@ -4671,11 +6255,16 @@
     "bst": 625,
     "nameZh": "超級妙蛙花",
     "nameEn": "Mega Venusaur",
+    "types": [
+      "grass",
+      "poison"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10033.png",
     "mega": true
   },
   "victreebel": {
     "dex": 71,
+    "ndex": 71,
     "speed": 70,
     "stats": {
       "hp": 80,
@@ -4688,11 +6277,16 @@
     "bst": 490,
     "nameZh": "大食花",
     "nameEn": "Victreebel",
+    "types": [
+      "grass",
+      "poison"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/71.png",
     "mega": false
   },
   "victreebel-mega": {
     "dex": 10279,
+    "ndex": 71,
     "speed": 70,
     "stats": {
       "hp": 80,
@@ -4705,11 +6299,16 @@
     "bst": 590,
     "nameZh": "超級大食花",
     "nameEn": "Mega Victreebel",
+    "types": [
+      "grass",
+      "poison"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10279.png",
     "mega": true
   },
   "vileplume": {
     "dex": 45,
+    "ndex": 45,
     "speed": 50,
     "stats": {
       "hp": 75,
@@ -4722,11 +6321,16 @@
     "bst": 490,
     "nameZh": "霸王花",
     "nameEn": "Vileplume",
+    "types": [
+      "grass",
+      "poison"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/45.png",
     "mega": false
   },
   "vivillon": {
     "dex": 666,
+    "ndex": 666,
     "speed": 89,
     "stats": {
       "hp": 80,
@@ -4739,11 +6343,16 @@
     "bst": 411,
     "nameZh": "彩粉蝶",
     "nameEn": "Vivillon",
+    "types": [
+      "bug",
+      "flying"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/666.png",
     "mega": false
   },
   "volcarona": {
     "dex": 637,
+    "ndex": 637,
     "speed": 100,
     "stats": {
       "hp": 85,
@@ -4756,11 +6365,16 @@
     "bst": 550,
     "nameZh": "火神蛾",
     "nameEn": "Volcarona",
+    "types": [
+      "bug",
+      "fire"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/637.png",
     "mega": false
   },
   "watchog": {
     "dex": 505,
+    "ndex": 505,
     "speed": 77,
     "stats": {
       "hp": 60,
@@ -4773,11 +6387,15 @@
     "bst": 420,
     "nameZh": "步哨鼠",
     "nameEn": "Watchog",
+    "types": [
+      "normal"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/505.png",
     "mega": false
   },
   "weavile": {
     "dex": 461,
+    "ndex": 461,
     "speed": 125,
     "stats": {
       "hp": 70,
@@ -4790,11 +6408,16 @@
     "bst": 510,
     "nameZh": "瑪狃拉",
     "nameEn": "Weavile",
+    "types": [
+      "dark",
+      "ice"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/461.png",
     "mega": false
   },
   "whimsicott": {
     "dex": 547,
+    "ndex": 547,
     "speed": 116,
     "stats": {
       "hp": 60,
@@ -4807,11 +6430,16 @@
     "bst": 480,
     "nameZh": "風妖精",
     "nameEn": "Whimsicott",
+    "types": [
+      "grass",
+      "fairy"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/547.png",
     "mega": false
   },
   "wyrdeer": {
     "dex": 899,
+    "ndex": 899,
     "speed": 65,
     "stats": {
       "hp": 103,
@@ -4824,11 +6452,16 @@
     "bst": 525,
     "nameZh": "詭角鹿",
     "nameEn": "Wyrdeer",
+    "types": [
+      "normal",
+      "psychic"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/899.png",
     "mega": false
   },
   "zoroark": {
     "dex": 571,
+    "ndex": 571,
     "speed": 105,
     "stats": {
       "hp": 60,
@@ -4841,7 +6474,32 @@
     "bst": 510,
     "nameZh": "索羅亞克",
     "nameEn": "Zoroark",
+    "types": [
+      "dark"
+    ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/571.png",
+    "mega": false
+  },
+  "zoroark-hisui": {
+    "dex": 10239,
+    "ndex": 571,
+    "speed": 110,
+    "stats": {
+      "hp": 55,
+      "atk": 100,
+      "def": 60,
+      "spa": 125,
+      "spd": 60,
+      "spe": 110
+    },
+    "bst": 510,
+    "nameZh": "洗翠索羅亞克",
+    "nameEn": "Hisuian Zoroark",
+    "types": [
+      "normal",
+      "ghost"
+    ],
+    "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10239.png",
     "mega": false
   }
 }

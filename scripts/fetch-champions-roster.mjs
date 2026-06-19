@@ -76,9 +76,15 @@ async function main() {
   const all = [...new Set(perSpecies.flat())].sort();
   const ma = all.filter((n) => !MB_ADDED.has(n));
 
+  // 地區形態（-alola/-galar/-hisui/-paldea）是 Serebii species 頁的 form toggle，PokéAPI varieties
+  // 的 is_default 不含、也非 mega，故上面展開抓不到 → 由 seasons.json 既有名單「人工維護」並在此保留，
+  // 避免重跑時被覆蓋掉。
+  const REGIONAL = /-(alola|galar|hisui|paldea)/;
   const seasons = JSON.parse(await readFile(join(ROOT, 'src/data/seasons.json'), 'utf8'));
-  seasons.seasons['m-a'].members = ma;
-  seasons.seasons['m-b'].members = all;
+  const keepRegional = (computed, existing) =>
+    [...new Set([...computed, ...existing.filter((m) => REGIONAL.test(m))])].sort();
+  seasons.seasons['m-a'].members = keepRegional(ma, seasons.seasons['m-a'].members);
+  seasons.seasons['m-b'].members = keepRegional(all, seasons.seasons['m-b'].members);
   await writeFile(join(ROOT, 'src/data/seasons.json'), JSON.stringify(seasons, null, 2) + '\n');
 
   console.log(`M-A members: ${ma.length}`);

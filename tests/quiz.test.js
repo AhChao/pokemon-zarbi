@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { generateTypeQuiz, generateSpeedQuiz, generateWhoQuiz, whoAnswerCorrect, normalizeName, scoreQuiz, DEFAULT_QUESTION_COUNT } from '../src/quiz.js';
+import { generateTypeQuiz, generateSpeedQuiz, generateWhoQuiz, whoAnswerCorrect, normalizeName, speedLines, scoreQuiz, DEFAULT_QUESTION_COUNT } from '../src/quiz.js';
 import { multiplier } from '../src/data/typechart.js';
 import { hashSeed, makeRng } from '../src/rng.js';
 
@@ -154,6 +154,23 @@ test('計分通用於我是誰模式', () => {
   assert.equal(scoreQuiz(quiz, allRight), quiz.count);
   const allWrong = quiz.questions.map(() => 'xxxxx');
   assert.equal(scoreQuiz(quiz, allWrong), 0);
+});
+
+test('速度線：Lv50 換算對齊早見表（base 100 / 150）', () => {
+  assert.deepEqual(speedLines(100),
+    { base: 100, max: 167, neu: 152, noInv: 120, neg: 108, scarfMax: 250, scarfNeu: 228, twMax: 334, twNeu: 304, twNoInv: 240 });
+  assert.deepEqual(speedLines(150),
+    { base: 150, max: 222, neu: 202, noInv: 170, neg: 153, scarfMax: 333, scarfNeu: 303, twMax: 444, twNeu: 404, twNoInv: 340 });
+});
+
+test('速度線：最速 = floor(準速×1.1)、減速 = floor(無振×0.9)（無浮點誤差）', () => {
+  for (let b = 5; b <= 200; b++) {
+    const ln = speedLines(b);
+    assert.equal(ln.neu, b + 52);
+    assert.equal(ln.max, Math.floor((b + 52) * 11 / 10));
+    assert.equal(ln.neg, Math.floor((b + 20) * 9 / 10));
+    assert.equal(ln.twMax, ln.max * 2);
+  }
 });
 
 test('rng 決定論：同種子同序列', () => {
