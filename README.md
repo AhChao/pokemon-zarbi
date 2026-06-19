@@ -60,6 +60,10 @@ https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/o
 
 靜態站，免 build。Framework preset 選 **None**、build command 留空、output 目錄設專案根目錄。hash 路由 + query 參數皆走 `index.html`，不需 redirect 設定。
 
+### 快取策略（`_headers`）
+
+依 `static-asset-cache-policy`：本站無 content-hash，故會變動的檔（HTML / JS / CSS / 資料 JSON）用 `Cache-Control: no-cache`——瀏覽器存下 body 但每次用 ETag 重新驗證，未變回 304（零 body、不重新下載），改版即拿到新樣式/程式碼；**不用 `no-store`**（那才會每次整包重載）。穩定的本地 SVG 圖示（`/assets/*`）給 30 天快取省掉重複驗證。寶可夢立繪走外部 PokéAPI/GitHub CDN，由上游長快取。Cloudflare Pages 會自動產生 ETag 並處理 304；前緣需尊重來源 header（Pages 預設如此），這是部署時的驗收點。
+
 ## 資料 / 圖片來源（備忘，非商用、頁面不另標 license）
 
 僅作自己參考：屬性符號 `assets/types/*.svg` 來自 [duiker101/pokemon-type-svg-icons](https://github.com/duiker101/pokemon-type-svg-icons)；寶可夢種族值與立繪來自 [PokéAPI](https://pokeapi.co/)；賽制名單參考 GameWith / Serebii。屬性色與寶可夢相關內容版權屬 Nintendo / Game Freak / The Pokémon Company。
