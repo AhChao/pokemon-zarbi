@@ -1,3 +1,10 @@
 node_modules/
 .DS_Store
 *.log
+
+# 個人本地開發筆記（不推上 GitHub）
+*.local.md
+
+# AI 指令／設定只留本機，不發佈到公開 repo
+CLAUDE.md
+.claude/

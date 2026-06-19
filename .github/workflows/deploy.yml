@@ -1,0 +1,41 @@
+name: Deploy to GitHub Pages
+
+# 純前端、零 build 的靜態站：把整個 repo 根目錄發佈到 GitHub Pages。
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+# GitHub Pages 部署所需的最小權限
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# 同時間只跑一個部署，新 push 取消進行中的舊部署
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload site artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          # 整個 repo 根目錄即為站台（index.html 在根、資源走相對路徑）
+          path: .
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
