@@ -21,6 +21,14 @@ test('速度成績碼帶難度 round-trip', () => {
   }
 });
 
+test('我是誰成績碼 round-trip（池鍵 + 難度一律附第 7 欄）', () => {
+  for (const [season, difficulty] of [['g1', 'easy'], ['g9', 'normal'], ['m-b', 'hard']]) {
+    const code = encodeResult({ mode: 'who', season, seed: 'wseed', total: 10, score: 6, difficulty });
+    assert.deepEqual(decodeResult(code),
+      { mode: 'who', season, seed: 'wseed', total: 10, score: 6, difficulty });
+  }
+});
+
 test('難度欄不污染屬性碼長度（type 不附第 7 欄，仍 6 欄）', () => {
   const typeCode = encodeResult({ mode: 'type', seed: 's', total: 10, score: 5, difficulty: 'hard' });
   const decoded = decodeResult(typeCode);

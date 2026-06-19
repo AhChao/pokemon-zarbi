@@ -2,18 +2,18 @@
 // 對方打開連結後，用同樣的類型/賽季/seed 還原同一份測驗來挑戰或一起測。
 //
 // v2 格式：2 ~ mode ~ season ~ seed ~ total ~ score [ ~ difficulty ]
-//   mode:       t = 屬性相剋, s = 種族值速度
-//   season:     速度測驗的賽季鍵（如 m-a / m-b）；屬性測驗用 '-'
-//   difficulty: 僅速度測驗附加的第 7 欄（a/e/m/h）；屬性碼維持 6 欄不變。
+//   mode:       t = 屬性相剋, s = 種族值速度, w = 我是誰
+//   season:     速度測驗的賽季鍵（如 m-a / m-b）；我是誰的池鍵（世代 g1..g9 或賽季鍵）；屬性測驗用 '-'
+//   difficulty: 速度測驗非 'all' 時、以及我是誰一律附加的第 7 欄（a/e/n/m/h）；屬性碼維持 6 欄不變。
 //               缺欄（舊速度碼）→ 'all'，與舊版題目重現一致。
 // v1 格式（1 ~ seed ~ total ~ score）仍可解，視為屬性相剋。
 
 const VERSION = '2';
 const SEP = '~';
-const MODE_TO_CODE = { type: 't', speed: 's' };
-const CODE_TO_MODE = { t: 'type', s: 'speed' };
-const DIFF_TO_CODE = { all: 'a', easy: 'e', medium: 'm', hard: 'h' };
-const CODE_TO_DIFF = { a: 'all', e: 'easy', m: 'medium', h: 'hard' };
+const MODE_TO_CODE = { type: 't', speed: 's', who: 'w' };
+const CODE_TO_MODE = { t: 'type', s: 'speed', w: 'who' };
+const DIFF_TO_CODE = { all: 'a', easy: 'e', normal: 'n', medium: 'm', hard: 'h' };
+const CODE_TO_DIFF = { a: 'all', e: 'easy', n: 'normal', m: 'medium', h: 'hard' };
 
 function b64urlEncode(str) {
   const b64 = typeof btoa === 'function'
@@ -36,8 +36,10 @@ export function encodeResult({ mode = 'type', season = '', seed, total, score, d
   const modeCode = MODE_TO_CODE[mode] || 't';
   const seasonField = season || '-';
   const parts = [VERSION, modeCode, seasonField, seed, String(total), String(score)];
-  // 難度只對速度測驗有意義；非 'all' 才附加第 7 欄，讓既有屬性/速度碼維持原樣。
+  // 速度測驗非 'all' 時附加第 7 欄；我是誰一律附加（難度決定 Mega 是否進池，影響題目重現）。
+  // 屬性碼維持 6 欄不變。
   if (mode === 'speed' && difficulty && difficulty !== 'all') parts.push(DIFF_TO_CODE[difficulty] || 'a');
+  else if (mode === 'who') parts.push(DIFF_TO_CODE[difficulty] || 'e');
   return b64urlEncode(parts.join(SEP));
 }
 

@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { generateTypeQuiz, generateSpeedQuiz, scoreQuiz, DEFAULT_QUESTION_COUNT } from '../src/quiz.js';
+import { generateTypeQuiz, generateSpeedQuiz, generateWhoQuiz, whoAnswerCorrect, normalizeName, scoreQuiz, DEFAULT_QUESTION_COUNT } from '../src/quiz.js';
 import { multiplier } from '../src/data/typechart.js';
 import { hashSeed, makeRng } from '../src/rng.js';
 
@@ -88,6 +88,71 @@ test('計分通用於兩種模式', () => {
   const allRight = quiz.questions.map((q) => q.correctIndex);
   assert.equal(scoreQuiz(quiz, allRight), quiz.count);
   const allWrong = quiz.questions.map((q) => (q.correctIndex + 1) % 2);
+  assert.equal(scoreQuiz(quiz, allWrong), 0);
+});
+
+// 我是誰測驗
+const WHO_POOL = [
+  { key: 'pikachu', nameZh: '皮卡丘', nameEn: 'Pikachu', image: 'p.png', mega: false, dex: 25 },
+  { key: 'charizard', nameZh: '噴火龍', nameEn: 'Charizard', image: 'c.png', mega: false, dex: 6 },
+  { key: 'charizard-mega-x', nameZh: '噴火龍 Mega X', nameEn: 'Mega Charizard X', image: 'cx.png', mega: true, dex: 10034 },
+  { key: 'gengar', nameZh: '耿鬼', nameEn: 'Gengar', image: 'g.png', mega: false, dex: 94 },
+  { key: 'snorlax', nameZh: '卡比獸', nameEn: 'Snorlax', image: 's.png', mega: false, dex: 143 },
+];
+
+test('我是誰：同 seed + 同 pool 永遠相同', () => {
+  assert.deepEqual(generateWhoQuiz('w1', WHO_POOL, 4), generateWhoQuiz('w1', WHO_POOL, 4));
+});
+
+test('我是誰：easy/normal 不含 Mega、hard 含 Mega', () => {
+  for (const difficulty of ['easy', 'normal']) {
+    const quiz = generateWhoQuiz('seed', WHO_POOL, 10, difficulty);
+    assert.ok(quiz.questions.every((q) => !q.mega), `${difficulty} 不應含 Mega`);
+  }
+  const hard = generateWhoQuiz('seed', WHO_POOL, 10, 'hard');
+  assert.ok(hard.questions.some((q) => q.mega), 'hard 應可能含 Mega');
+});
+
+test('我是誰：題目不重複、上限為可用池大小', () => {
+  const quiz = generateWhoQuiz('w2', WHO_POOL, 10, 'normal'); // normal 排除 1 隻 Mega → 4 隻
+  assert.equal(quiz.count, 4);
+  assert.equal(new Set(quiz.questions.map((q) => q.key)).size, quiz.count);
+});
+
+test('我是誰：空池會丟錯', () => {
+  assert.throws(() => generateWhoQuiz('x', [{ key: 'm', nameZh: 'x', nameEn: 'x', mega: true }], 5, 'easy'));
+});
+
+test('名字正規化：全形/大小寫/空白皆容錯', () => {
+  assert.equal(normalizeName('Ｐｉｋａｃｈｕ'), 'pikachu'); // 全形英文
+  assert.equal(normalizeName('  Mega  Charizard  X '), 'megacharizardx'); // 大小寫 + 空白
+  assert.equal(normalizeName('皮卡丘'), '皮卡丘');
+});
+
+test('我是誰計分：只比中文名，名字內含英數容許全形/大小寫/空白', () => {
+  const q = { mode: 'who', nameZh: '噴火龍 Mega Y', nameEn: 'Mega Charizard Y' };
+  assert.ok(whoAnswerCorrect(q, '噴火龍 Mega Y'));
+  assert.ok(whoAnswerCorrect(q, '噴火龍 mega y')); // 內含英文小寫
+  assert.ok(whoAnswerCorrect(q, '噴火龍megay')); // 去空白
+  assert.ok(whoAnswerCorrect(q, '噴火龍 ＭＥＧＡ Ｙ')); // 全形英文
+  assert.ok(!whoAnswerCorrect(q, 'Mega Charizard Y')); // 不收英文名
+  assert.ok(!whoAnswerCorrect(q, '噴火龍'));
+  assert.ok(!whoAnswerCorrect(q, ''));
+});
+
+test('我是誰計分：名字內含英數可大小寫互通（3D龍）', () => {
+  const q = { mode: 'who', nameZh: '3D龍', nameEn: 'Porygon' };
+  assert.ok(whoAnswerCorrect(q, '3d龍'));
+  assert.ok(whoAnswerCorrect(q, '3D龍'));
+  assert.ok(whoAnswerCorrect(q, '３Ｄ龍')); // 全形英數
+  assert.ok(!whoAnswerCorrect(q, 'porygon')); // 不收英文名
+});
+
+test('計分通用於我是誰模式', () => {
+  const quiz = generateWhoQuiz('grade-who', WHO_POOL, 4, 'normal');
+  const allRight = quiz.questions.map((q) => q.nameZh);
+  assert.equal(scoreQuiz(quiz, allRight), quiz.count);
+  const allWrong = quiz.questions.map(() => 'xxxxx');
   assert.equal(scoreQuiz(quiz, allWrong), 0);
 });
 

@@ -1,6 +1,6 @@
 // 瀏覽器端主程式：hash 路由 + 成績碼網址處理 + 各畫面渲染。
 import { TYPES, TYPE_META, multiplier, formatMultiplier } from './data/typechart.js';
-import { generateTypeQuiz, generateSpeedQuiz, scoreQuiz, newSeed, DEFAULT_QUESTION_COUNT, SPEED_DIFFICULTIES, DEFAULT_SPEED_DIFFICULTY } from './quiz.js';
+import { generateTypeQuiz, generateSpeedQuiz, generateWhoQuiz, whoAnswerCorrect, scoreQuiz, newSeed, DEFAULT_QUESTION_COUNT, SPEED_DIFFICULTIES, DEFAULT_SPEED_DIFFICULTY, WHO_DIFFICULTIES, DEFAULT_WHO_DIFFICULTY } from './quiz.js';
 import { encodeResult, decodeResult } from './share.js';
 import { getHistory, addHistory } from './history.js';
 import { t, typeName } from './i18n.js';
@@ -32,6 +32,7 @@ const UI_ICONS = {
   bolt: '<path fill="currentColor" d="M7 2v11h3v9l7-12h-4l4-8z"/>',
   shield: '<path fill="currentColor" d="M12 1 3 5v6c0 5.5 3.8 10.7 9 12 5.2-1.3 9-6.5 9-12V5l-9-4z"/>',
   swords: '<g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 17.5 4 6V3h3l11.5 10.5M13 19l3 3M16 16l4 4M19 21l2-2M18.5 3H21v3L9.5 17.5M11 13l-2 2M5 21l4-4"/></g>',
+  who: '<path fill="currentColor" d="M12 2a6 6 0 0 1 6 6c0 2.6-1.7 4-3.1 5.1-1 .8-1.4 1.3-1.4 2.4v.5h-3v-.7c0-2.1.9-3.1 2.3-4.2C14 10.3 15 9.7 15 8a3 3 0 0 0-6 0H6a6 6 0 0 1 6-6Z"/><circle cx="12" cy="20.2" r="1.8" fill="currentColor"/>',
 };
 function uiIcon(name) {
   return `<svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true">${UI_ICONS[name]}</svg>`;
@@ -73,8 +74,59 @@ function seasonPool(key) {
     .sort((a, b) => (a.key < b.key ? -1 : a.key > b.key ? 1 : 0));
 }
 
+// ── 我是誰：世代/地區池 ─────────────────────────────────────────
+// 池鍵：世代 g1..g9，或賽季鍵（如 m-b，作為「冠軍最新賽季」選項）。
+const GENERATIONS = [
+  { key: 'g1', cn: '一', min: 1, max: 151, region: '關都' },
+  { key: 'g2', cn: '二', min: 152, max: 251, region: '城都' },
+  { key: 'g3', cn: '三', min: 252, max: 386, region: '豐緣' },
+  { key: 'g4', cn: '四', min: 387, max: 493, region: '神奧' },
+  { key: 'g5', cn: '五', min: 494, max: 649, region: '合眾' },
+  { key: 'g6', cn: '六', min: 650, max: 721, region: '卡洛斯' },
+  { key: 'g7', cn: '七', min: 722, max: 809, region: '阿羅拉' },
+  { key: 'g8', cn: '八', min: 810, max: 905, region: '伽勒爾' },
+  { key: 'g9', cn: '九', min: 906, max: 1025, region: '帕底亞' },
+];
+
+// Mega / 特殊高 dex（>10000）→ 取本體國家圖鑑編號來判世代。
+function baseDexOf(key, entry) {
+  if (entry.dex < 10000) return entry.dex;
+  const base = key.replace(/-mega.*$|-primal.*$|-gmax.*$/, '');
+  return pokedex[base]?.dex ?? null;
+}
+function genKeyOf(key, entry) {
+  const bd = baseDexOf(key, entry);
+  if (bd == null) return null;
+  return GENERATIONS.find((g) => bd >= g.min && bd <= g.max)?.key || null;
+}
+
+// 我是誰的可選範圍：有非 Mega 成員的世代 + 冠軍最新賽季。
+function whoPoolKeys() {
+  const gens = GENERATIONS
+    .map((g) => g.key)
+    .filter((gk) => Object.keys(pokedex).some((k) => !pokedex[k].mega && genKeyOf(k, pokedex[k]) === gk));
+  return [...gens, defaultSeason()];
+}
+function defaultWhoPool() {
+  return whoPoolKeys()[0] || defaultSeason();
+}
+// 由池鍵組出穩定排序的寶可夢池（賽季鍵走 seasonPool，世代鍵走全圖鑑篩選）。
+function whoPool(poolKey) {
+  if (seasonsData.seasons[poolKey]) return seasonPool(poolKey);
+  return Object.keys(pokedex)
+    .filter((k) => genKeyOf(k, pokedex[k]) === poolKey)
+    .map((k) => ({ key: k, ...pokedex[k] }))
+    .sort((a, b) => (a.key < b.key ? -1 : a.key > b.key ? 1 : 0));
+}
+function poolLabel(poolKey) {
+  const g = GENERATIONS.find((x) => x.key === poolKey);
+  if (g) return `第${g.cn}世代（${g.region}）`;
+  return `冠軍賽季（${poolKey.toUpperCase()}）`;
+}
+
 function buildQuiz({ mode, season, seed, total, difficulty }) {
   if (mode === 'speed') return generateSpeedQuiz(seed, seasonPool(season), total, difficulty || DEFAULT_SPEED_DIFFICULTY);
+  if (mode === 'who') return generateWhoQuiz(seed, whoPool(season), total, difficulty || DEFAULT_WHO_DIFFICULTY);
   return generateTypeQuiz(seed, total);
 }
 
@@ -87,6 +139,10 @@ function quizLabel(mode, season, difficulty = 'all') {
   if (mode === 'speed') {
     const diff = difficulty && difficulty !== 'all' ? ` · ${difficultyLabel(difficulty)}` : '';
     return `${t('quiz.speed.title')}（${seasonLabel(season)}${diff}）`;
+  }
+  if (mode === 'who') {
+    const diff = difficulty ? ` · ${difficultyLabel(difficulty)}` : '';
+    return `${t('quiz.who.title')}（${poolLabel(season)}${diff}）`;
   }
   return t('quiz.type.title');
 }
@@ -134,7 +190,14 @@ function viewHome() {
           </span>
           <span class="hist-chevron" aria-hidden="true">›</span>
         </button>
-        <button class="btn btn--ghost" data-nav="chart" style="margin-top:10px">${esc(t('home.openChart'))}</button>
+        <button class="quiz-card" data-pick="who">
+          <span class="quiz-card__emoji" aria-hidden="true">${uiIcon('who')}</span>
+          <span class="quiz-card__text">
+            <span class="quiz-card__title">${esc(t('quiz.who.title'))}</span>
+            <span class="quiz-card__desc">${esc(t('quiz.who.desc'))}</span>
+          </span>
+          <span class="hist-chevron" aria-hidden="true">›</span>
+        </button>
       </div>
 
       <div class="card">
@@ -160,7 +223,10 @@ function viewHome() {
   node.querySelectorAll('[data-pick]').forEach((b) => {
     b.onclick = () => {
       const mode = b.dataset.pick;
-      setupState = { mode, season: mode === 'speed' ? defaultSeason() : '', difficulty: DEFAULT_SPEED_DIFFICULTY, seed: newSeed() };
+      let season = '', difficulty = 'all';
+      if (mode === 'speed') { season = defaultSeason(); difficulty = DEFAULT_SPEED_DIFFICULTY; }
+      else if (mode === 'who') { season = defaultWhoPool(); difficulty = DEFAULT_WHO_DIFFICULTY; }
+      setupState = { mode, season, difficulty, seed: newSeed() };
       go('#/setup');
     };
   });
@@ -213,16 +279,22 @@ function viewHome() {
 function viewSetup() {
   if (!setupState) return viewHome();
   const { mode } = setupState;
-  if (mode === 'speed' && !setupState.season) setupState.season = defaultSeason();
-  if (mode === 'speed' && !setupState.difficulty) setupState.difficulty = DEFAULT_SPEED_DIFFICULTY;
-  const season = mode === 'speed' ? setupState.season : '';
-  const difficulty = mode === 'speed' ? setupState.difficulty : 'all';
+  if (mode === 'speed') {
+    if (!setupState.season) setupState.season = defaultSeason();
+    if (!setupState.difficulty) setupState.difficulty = DEFAULT_SPEED_DIFFICULTY;
+  } else if (mode === 'who') {
+    if (!setupState.season) setupState.season = defaultWhoPool();
+    if (!setupState.difficulty) setupState.difficulty = DEFAULT_WHO_DIFFICULTY;
+  }
+  const season = mode === 'type' ? '' : setupState.season;
+  const difficulty = mode === 'type' ? 'all' : setupState.difficulty;
   const seed = setupState.seed;
 
   const code = encodeResult({ mode, season, seed, total: DEFAULT_QUESTION_COUNT, score: 0, difficulty });
   const url = shareUrlFor(code);
-  const title = mode === 'speed' ? t('quiz.speed.title') : t('quiz.type.title');
-  const desc = mode === 'speed' ? t('quiz.speed.desc') : t('quiz.type.desc');
+  const title = t(`quiz.${mode}.title`);
+  const desc = t(`quiz.${mode}.desc`);
+  const noteKey = mode === 'who' ? `who.difficulty.${difficulty}.note` : `difficulty.${difficulty}.note`;
 
   const node = el(`
     <section class="card">
@@ -231,10 +303,17 @@ function viewSetup() {
 
       ${mode === 'speed' ? `
       <p class="label">${esc(t('setup.season'))}</p>
-      <div class="season-pick"></div>
+      <div class="season-pick"></div>` : ''}
+      ${mode === 'who' ? `
+      <p class="label">${esc(t('setup.pool'))}</p>
+      <div class="pool-pick"></div>` : ''}
+      ${mode === 'speed' || mode === 'who' ? `
       <p class="label">${esc(t('setup.difficulty'))}</p>
       <div class="difficulty-pick"></div>
-      <p class="muted">${esc(t(`difficulty.${difficulty}.note`))}</p>` : ''}
+      <p class="muted">${esc(t(noteKey))}</p>` : ''}
+
+      ${mode === 'type' ? `
+      <button class="btn btn--ghost" data-nav="chart" style="margin-top:14px">${esc(t('home.openChart'))}</button>` : ''}
 
       <button class="btn btn--primary" data-act="start" style="margin-top:14px">${esc(t('setup.start'))}</button>
 
@@ -259,6 +338,22 @@ function viewSetup() {
     const diffWrap = node.querySelector('.difficulty-pick');
     // UI 只給三檔（'all' 為相容舊碼的內部值，不對外呈現）。
     SPEED_DIFFICULTIES.filter((d) => d !== 'all').forEach((d) => {
+      const b = el(`<button class="season-btn" aria-pressed="${difficulty === d}">${esc(difficultyLabel(d))}</button>`);
+      b.onclick = () => { setupState.difficulty = d; viewSetup(); };
+      diffWrap.appendChild(b);
+    });
+  }
+
+  if (mode === 'who') {
+    const poolWrap = node.querySelector('.pool-pick');
+    whoPoolKeys().forEach((pk) => {
+      const b = el(`<button class="season-btn" aria-pressed="${season === pk}">${esc(poolLabel(pk))}</button>`);
+      b.onclick = () => { setupState.season = pk; viewSetup(); };
+      poolWrap.appendChild(b);
+    });
+
+    const diffWrap = node.querySelector('.difficulty-pick');
+    WHO_DIFFICULTIES.forEach((d) => {
       const b = el(`<button class="season-btn" aria-pressed="${difficulty === d}">${esc(difficultyLabel(d))}</button>`);
       b.onclick = () => { setupState.difficulty = d; viewSetup(); };
       diffWrap.appendChild(b);
@@ -335,7 +430,25 @@ function viewQuiz() {
   const body = node.querySelector('[data-qbody]');
   const optWrap = node.querySelector('.options');
 
-  if (q.mode === 'speed') {
+  if (q.mode === 'who') {
+    const hint = whoHint(q, session.meta.difficulty);
+    body.innerHTML = `
+      <div class="who-stage"><img class="who-img" alt="" /></div>
+      <p class="q-prompt">${esc(t('who.prompt'))}</p>
+      ${hint ? `<p class="who-hint">${hint}</p>` : ''}
+      <div class="code-box who-input">
+        <input type="text" inputmode="text" autocomplete="off" autocapitalize="off" spellcheck="false"
+               placeholder="${esc(t('who.placeholder'))}" aria-label="${esc(t('who.prompt'))}" data-who-input />
+        <button class="btn btn--accent" data-act="who-submit">${esc(t('who.submit'))}</button>
+      </div>`;
+    const img = body.querySelector('.who-img');
+    img.src = q.image;
+    img.onerror = () => { img.style.visibility = 'hidden'; };
+    const input = body.querySelector('[data-who-input]');
+    const submit = () => answerWho(input.value, node);
+    body.querySelector('[data-act="who-submit"]').onclick = submit;
+    input.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); submit(); } });
+  } else if (q.mode === 'speed') {
     body.innerHTML = `
       <p class="q-prompt">${esc(t('speed.prompt'))}</p>
       <p class="speed-note">${esc(t('speed.note'))}</p>`;
@@ -361,6 +474,50 @@ function viewQuiz() {
   }
 
   setView(node);
+  if (q.mode === 'who') node.querySelector('[data-who-input]')?.focus();
+}
+
+// 我是誰提示（以圈圈呈現字數）：easy 露第一個字、其餘 ○；normal 全 ○；hard 無提示。
+function whoHint(q, difficulty) {
+  const chars = Array.from(q.nameZh);
+  if (difficulty === 'easy') {
+    return chars.map((c, i) => (i === 0 ? `<strong>${esc(c)}</strong>` : '○')).join(' ');
+  }
+  if (difficulty === 'normal') {
+    return chars.map(() => '○').join(' ');
+  }
+  return '';
+}
+
+// 我是誰作答：比對輸入、揭曉黑影與正解名、鎖定輸入。
+function answerWho(typed, node) {
+  if (session.locked) return;
+  session.locked = true;
+  const q = session.quiz.questions[session.index];
+  session.answers[session.index] = typed;
+  const right = whoAnswerCorrect(q, typed);
+
+  node.querySelector('.who-stage')?.classList.add('revealed');
+  node.querySelectorAll('.who-input input, .who-input button').forEach((e) => { e.disabled = true; });
+
+  const nameLine = el(`<p class="who-answer">${q.mega ? `${esc(q.nameZh)} <span class="mega-tag">MEGA</span>` : esc(q.nameZh)}</p>`);
+  node.querySelector('[data-qbody]').appendChild(nameLine);
+
+  const fb = node.querySelector('.feedback');
+  fb.textContent = right ? t('who.correct', { name: q.nameZh }) : t('who.wrong', { name: q.nameZh });
+  fb.classList.add(right ? 'feedback--good' : 'feedback--bad');
+
+  const last = session.index === session.quiz.count - 1;
+  const next = node.querySelector('[data-act="next"]');
+  next.textContent = last ? t('quiz.finish') : t('quiz.next');
+  next.hidden = false;
+  next.onclick = () => {
+    if (last) { go('#/result'); return; }
+    session.index++;
+    session.locked = false;
+    render();
+  };
+  next.focus();
 }
 
 function answer(choice, node) {
@@ -400,9 +557,15 @@ function answer(choice, node) {
 }
 
 // ── 結果區塊（測驗完成頁與歷史詳情頁共用）──────────────────────
-function reviewItem(q, ok) {
+function reviewItem(q, ok, userAnswer) {
   let detail;
-  if (q.mode === 'speed') {
+  if (q.mode === 'who') {
+    const typed = String(userAnswer == null ? '' : userAnswer).trim();
+    detail = `
+      <img class="rv-img" alt="" src="${esc(q.image)}" />
+      <span class="rv-poke">${esc(q.nameZh)}${q.mega ? ' <span class="mega-tag">MEGA</span>' : ''}</span>
+      <span class="rv-tail">${typed ? esc(typed) : '—'}</span>`;
+  } else if (q.mode === 'speed') {
     const [a, b] = q.pair;
     const faster = q.options[q.correctIndex];
     detail = `
@@ -415,11 +578,16 @@ function reviewItem(q, ok) {
       ${badge(q.atk)} <span class="matchup__vs">→</span> ${q.def.map((d) => badge(d)).join(' ')}
       <span class="rv-tail">${esc(formatMultiplier(q.correct))}</span>`;
   }
-  return el(`
+  const item = el(`
     <div class="review__item">
       <span class="review__mark ${ok ? 'review__mark--ok' : 'review__mark--no'}">${ok ? '✓' : '✗'}</span>
       ${detail}
     </div>`);
+  if (q.mode === 'who') {
+    const im = item.querySelector('.rv-img');
+    if (im) im.onerror = () => { im.style.visibility = 'hidden'; };
+  }
+  return item;
 }
 
 function buildResultSection(quiz, answers, opts = {}) {
@@ -469,7 +637,10 @@ function buildResultSection(quiz, answers, opts = {}) {
     </section>`);
 
   const reviewWrap = node.querySelector('.review');
-  quiz.questions.forEach((q, i) => reviewWrap.appendChild(reviewItem(q, answers[i] === q.correctIndex)));
+  quiz.questions.forEach((q, i) => {
+    const ok = q.mode === 'who' ? whoAnswerCorrect(q, answers[i]) : answers[i] === q.correctIndex;
+    reviewWrap.appendChild(reviewItem(q, ok, answers[i]));
+  });
 
   const copyBtn = node.querySelector('[data-act="copy"]');
   copyBtn.onclick = async () => {

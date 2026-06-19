@@ -460,6 +460,29 @@ table.chart td.m1 { background: transparent; color: var(--c-muted); }
   color: #fff;
 }
 
+/* ── 我是誰（黑影猜名）─────────────────────────────────────── */
+.who-stage { display: flex; justify-content: center; margin: 4px 0 14px; }
+.who-img {
+  width: 62%;
+  max-width: 210px;
+  aspect-ratio: 1 / 1;
+  object-fit: contain;
+  filter: brightness(0);
+  transition: filter .3s ease;
+}
+.who-stage.revealed .who-img { filter: none; }
+.who-hint {
+  text-align: center;
+  color: var(--c-muted);
+  font-size: .95rem;
+  letter-spacing: .14em;
+  margin: 0 0 12px;
+}
+.who-hint strong { color: var(--c-text); font-weight: 800; }
+.who-input { margin-top: 0; }
+.who-answer { text-align: center; font-weight: 800; font-size: 1.05rem; margin: 12px 0 0; }
+.rv-img { width: 34px; height: 34px; object-fit: contain; flex: 0 0 auto; }
+
 /* ── Review tails / speed review ─────────────────────────────── */
 .rv-tail { margin-left: auto; font-weight: 700; }
 .rv-poke { font-size: .85rem; }

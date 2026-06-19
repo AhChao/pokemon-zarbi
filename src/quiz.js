@@ -13,6 +13,13 @@ export const DEFAULT_QUESTION_COUNT = 10;
 //   hard   = 接近（1..5），約 9%
 export const SPEED_DIFFICULTIES = ['all', 'easy', 'medium', 'hard'];
 export const DEFAULT_SPEED_DIFFICULTY = 'easy';
+
+// 「我是誰」難度：只決定 Mega 是否進池（提示由 UI 端依難度呈現）。
+//   easy   = 不含 Mega，提示第一個字
+//   normal = 不含 Mega，無提示
+//   hard   = 含 Mega，無提示
+export const WHO_DIFFICULTIES = ['easy', 'normal', 'hard'];
+export const DEFAULT_WHO_DIFFICULTY = 'easy';
 const DIFFICULTY_BANDS = {
   all: { min: 1, max: Infinity },
   easy: { min: 20, max: Infinity },
@@ -96,11 +103,47 @@ export function generateSpeedQuiz(seed, pool, count = DEFAULT_QUESTION_COUNT, di
   return { mode: 'speed', seed: String(seed), difficulty, count: questions.length, questions };
 }
 
-// 計分：answers 為使用者每題選到的「選項索引」陣列。
+// 我是誰：看黑影猜名字。pool 由呼叫端依「世代/賽季」組好（每筆需 key/nameZh/nameEn/image/mega）。
+// 難度只決定 Mega 是否進池：easy/normal 不含、hard 含。提示由 UI 端依難度呈現。
+export function generateWhoQuiz(seed, pool, count = DEFAULT_QUESTION_COUNT, difficulty = DEFAULT_WHO_DIFFICULTY) {
+  const allowMega = difficulty === 'hard';
+  const usable = (Array.isArray(pool) ? pool : []).filter((p) => allowMega || !p.mega);
+  if (usable.length < 1) throw new Error('who quiz needs at least 1 pokemon in pool');
+  const rng = makeRng(hashSeed(String(seed)));
+  const rand = makeRandom(rng);
+  // 洗牌後取前 count 隻（不重複）；pool 已由呼叫端穩定排序 → 同 seed 完全可重現。
+  const picked = rand.shuffle(usable).slice(0, Math.min(count, usable.length));
+  const questions = picked.map((p, i) => ({
+    id: i, mode: 'who', key: p.key,
+    nameZh: p.nameZh, nameEn: p.nameEn, image: p.image, mega: !!p.mega, dex: p.dex,
+  }));
+  return { mode: 'who', seed: String(seed), difficulty, count: questions.length, questions };
+}
+
+// 名字正規化：中文名裡內含的英數（如 3D龍、噴火龍 Mega Y）容許全形/半形、
+// 大小寫、空白差異；其餘字元需一字不漏。
+export function normalizeName(s) {
+  return String(s == null ? '' : s)
+    // 全形 ASCII（U+FF01–FF5E）轉半形
+    .replace(/[！-～]/g, (c) => String.fromCharCode(c.charCodeAt(0) - 0xFEE0))
+    .replace(/　/g, ' ') // 全形空白
+    .toLowerCase()
+    .replace(/\s+/g, ''); // 空白不計入比對
+}
+
+// 我是誰計分：只比中文名（正規化後）。不收 Pokémon 英文名。
+export function whoAnswerCorrect(q, typed) {
+  const t = normalizeName(typed);
+  if (!t) return false;
+  return t === normalizeName(q.nameZh);
+}
+
+// 計分：選擇題比對選項索引；我是誰比對輸入文字。
 export function scoreQuiz(quiz, answers) {
   let correct = 0;
   quiz.questions.forEach((q, i) => {
-    if (answers[i] === q.correctIndex) correct++;
+    if (q.mode === 'who') { if (whoAnswerCorrect(q, answers[i])) correct++; }
+    else if (answers[i] === q.correctIndex) correct++;
   });
   return correct;
 }

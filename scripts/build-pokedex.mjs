@@ -17,13 +17,13 @@ async function getJson(url) {
   return res.json();
 }
 
-// 把 form 名整理成顯示用後綴（Mega / Mega X / Mega Y）。
-function megaSuffix(name) {
+// 判斷 Mega 型態並取 X/Y/Z 標記（無標記則 tag=''）。
+function megaForm(name) {
   if (!name.includes('-mega')) return null;
-  if (name.endsWith('-mega-x')) return { zh: ' Mega X', en: ' Mega X' };
-  if (name.endsWith('-mega-y')) return { zh: ' Mega Y', en: ' Mega Y' };
-  if (name.endsWith('-mega-z')) return { zh: ' Mega Z', en: ' Mega Z' };
-  return { zh: ' Mega', en: ' Mega' };
+  if (name.endsWith('-mega-x')) return { tag: 'X' };
+  if (name.endsWith('-mega-y')) return { tag: 'Y' };
+  if (name.endsWith('-mega-z')) return { tag: 'Z' };
+  return { tag: '' };
 }
 
 // PokéAPI 的 stat 名 → 我們的短鍵。
@@ -50,10 +50,12 @@ async function fetchEntry(name) {
   const enBase = species.names.find((n) => n.language.name === 'en')?.name
     || name.replace(/-/g, ' ');
 
-  const suf = megaSuffix(name);
-  const isMega = Boolean(suf);
-  const nameZh = (zh || enBase) + (suf ? suf.zh : '');
-  const nameEn = (suf ? 'Mega ' : '') + enBase + (suf && suf.en !== ' Mega' ? suf.en.replace(' Mega', '') : '');
+  const mf = megaForm(name);
+  const isMega = Boolean(mf);
+  const baseZh = zh || enBase;
+  // 官方中文 Mega 命名：「超級」+ 名稱（+ X/Y/Z，無空格）；英文維持「Mega ...」。
+  const nameZh = isMega ? `超級${baseZh}${mf.tag}` : baseZh;
+  const nameEn = isMega ? `Mega ${enBase}${mf.tag ? ' ' + mf.tag : ''}` : enBase;
 
   return { key: name, dex: p.id, speed, stats, bst, nameZh, nameEn: nameEn.trim(), image, mega: isMega };
 }
