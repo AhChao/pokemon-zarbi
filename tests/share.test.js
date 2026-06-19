@@ -22,11 +22,45 @@ test('速度成績碼帶難度 round-trip', () => {
 });
 
 test('我是誰成績碼 round-trip（池鍵 + 難度一律附第 7 欄）', () => {
-  for (const [season, difficulty] of [['g1', 'easy'], ['g9', 'normal'], ['m-b', 'hard']]) {
+  for (const [season, difficulty] of [['g1', 'veryeasy'], ['g1', 'easy'], ['g9', 'normal'], ['m-b', 'hard']]) {
     const code = encodeResult({ mode: 'who', season, seed: 'wseed', total: 10, score: 6, difficulty });
     assert.deepEqual(decodeResult(code),
       { mode: 'who', season, seed: 'wseed', total: 10, score: 6, difficulty });
   }
+});
+
+test('我是誰按字計分成績碼 round-trip（百分制、保留兩位小數、第 8 欄旗標）', () => {
+  for (const score of [87.5, 66.67, 100, 0, 12.34]) {
+    const code = encodeResult({ mode: 'who', season: 'g1', seed: 'cs', total: 15, score, difficulty: 'easy', charScore: true });
+    assert.deepEqual(decodeResult(code),
+      { mode: 'who', season: 'g1', seed: 'cs', total: 15, score, difficulty: 'easy', charScore: true });
+  }
+});
+
+test('計分方式三態 round-trip（不計分／正常 N／按字 C）', () => {
+  // 不計分：無旗標，score=答對題數
+  const a = decodeResult(encodeResult({ mode: 'who', season: 'g1', seed: 'a', total: 12, score: 8, difficulty: 'easy' }));
+  assert.deepEqual(a, { mode: 'who', season: 'g1', seed: 'a', total: 12, score: 8, difficulty: 'easy' });
+  // 正常計分：旗標 N，score 仍為答對題數
+  const n = decodeResult(encodeResult({ mode: 'type', seed: 'b', total: 10, score: 7, score100: true }));
+  assert.deepEqual(n, { mode: 'type', season: '', seed: 'b', total: 10, score: 7, difficulty: 'all', score100: true });
+  // 按字計分：旗標 C，score 為百分制
+  const c = decodeResult(encodeResult({ mode: 'who', season: 'g1', seed: 'c', total: 10, score: 87.5, difficulty: 'easy', charScore: true }));
+  assert.deepEqual(c, { mode: 'who', season: 'g1', seed: 'c', total: 10, score: 87.5, difficulty: 'easy', charScore: true });
+});
+
+test('題數 10～20 成績碼 round-trip', () => {
+  for (const total of [10, 15, 20]) {
+    const code = encodeResult({ mode: 'who', season: 'all', seed: 'q', total, score: 6, difficulty: 'normal' });
+    assert.equal(decodeResult(code).total, total);
+  }
+});
+
+test('一般我是誰碼不帶第 8 欄、score 為答對題數', () => {
+  const code = encodeResult({ mode: 'who', season: 'g1', seed: 'n', total: 10, score: 7, difficulty: 'easy' });
+  const d = decodeResult(code);
+  assert.equal(d.score, 7);
+  assert.equal(d.charScore, undefined); // 非按字計分不附旗標
 });
 
 test('難度欄不污染屬性碼長度（type 不附第 7 欄，仍 6 欄）', () => {

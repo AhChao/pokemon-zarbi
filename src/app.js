@@ -1,6 +1,6 @@
 // 瀏覽器端主程式：hash 路由 + 成績碼網址處理 + 各畫面渲染。
 import { TYPES, TYPE_META, multiplier, formatMultiplier } from './data/typechart.js';
-import { generateTypeQuiz, generateSpeedQuiz, generateWhoQuiz, whoAnswerCorrect, normalizeName, speedLines, scoreQuiz, newSeed, DEFAULT_QUESTION_COUNT, SPEED_DIFFICULTIES, DEFAULT_SPEED_DIFFICULTY, WHO_DIFFICULTIES, DEFAULT_WHO_DIFFICULTY } from './quiz.js';
+import { generateTypeQuiz, generateSpeedQuiz, generateWhoQuiz, whoAnswerCorrect, whoCharScore, scoreQuizChar, normalizeName, speedLines, scoreQuiz, newSeed, DEFAULT_QUESTION_COUNT, MIN_QUESTION_COUNT, MAX_QUESTION_COUNT, SPEED_DIFFICULTIES, DEFAULT_SPEED_DIFFICULTY, WHO_DIFFICULTIES, DEFAULT_WHO_DIFFICULTY } from './quiz.js';
 import { encodeResult, decodeResult } from './share.js';
 import { getHistory, addHistory } from './history.js';
 import { t, typeName } from './i18n.js';
@@ -22,6 +22,24 @@ const esc = (s) => String(s).replace(/[&<>"]/g, (c) =>
   ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
 const shareUrlFor = (code) => `${location.origin}${location.pathname}?c=${code}`;
+const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+
+// 計分方式（單選）：不計分（只顯示對幾題）／正常計分（對/錯換算 100 分）；
+// 我是誰多一個按字計分（逐字部分分、換算 100）。
+function scoreModesFor(mode) {
+  return mode === 'who' ? ['count', 'normal', 'char'] : ['count', 'normal'];
+}
+// 按字計分專用百分制（0..100）。
+function charPct(quiz, answers) {
+  return (scoreQuizChar(quiz, answers) / (quiz.count * 10)) * 100;
+}
+// 由（已解碼/歷史）結果取百分制，供比較與配色：按字計分 score 已是百分制；正常＝答對/題數×100。
+function pctOf({ charScore, score, total }) {
+  if (charScore) return score;
+  return total ? (score / total) * 100 : 0;
+}
+// 顯示：最多兩位小數、去尾零（70 / 75.5 / 66.67）。
+const fmtPct = (v) => String(Math.round(v * 100) / 100);
 
 // 屬性 icon（本地 vendor 的白色字符 SVG）。
 function typeIcon(typeKey) {
@@ -104,26 +122,29 @@ function genKeyOf(key, entry) {
   return GENERATIONS.find((g) => nd >= g.min && nd <= g.max)?.key || null;
 }
 
-// 我是誰的可選範圍：全國圖鑑各世代 + 洗翠地區 + 冠軍最新賽季。
+// 我是誰的可選範圍：全部混合 + 全國圖鑑各世代 + 洗翠地區 + 冠軍最新賽季。
 function whoPoolKeys() {
   const hasNonMega = (poolKey) => Object.keys(nationalDex).some((k) => !nationalDex[k].mega && genKeyOf(k, nationalDex[k]) === poolKey);
   const gens = GENERATIONS.map((g) => g.key).filter(hasNonMega);
   const hisui = hasNonMega('hisui') ? ['hisui'] : [];
-  return [...gens, ...hisui, defaultSeason()];
+  return ['all', ...gens, ...hisui, defaultSeason()];
 }
 function defaultWhoPool() {
   return whoPoolKeys()[0] || defaultSeason();
 }
 // 由池鍵組出穩定排序的寶可夢池：
-//   賽季鍵（冠軍最新賽季）→ Champions 名單 pokedex；世代/地區鍵 → 全國圖鑑 nationalDex。
+//   賽季鍵（冠軍最新賽季）→ Champions 名單 pokedex；'all' / 世代 / 地區鍵 → 全國圖鑑 nationalDex。
 function whoPool(poolKey) {
   if (seasonsData.seasons[poolKey]) return seasonPool(poolKey);
-  return Object.keys(nationalDex)
-    .filter((k) => genKeyOf(k, nationalDex[k]) === poolKey)
+  const keys = poolKey === 'all'
+    ? Object.keys(nationalDex)
+    : Object.keys(nationalDex).filter((k) => genKeyOf(k, nationalDex[k]) === poolKey);
+  return keys
     .map((k) => ({ key: k, ...nationalDex[k] }))
     .sort((a, b) => (a.key < b.key ? -1 : a.key > b.key ? 1 : 0));
 }
 function poolLabel(poolKey) {
+  if (poolKey === 'all') return '全部世代（混合）';
   const g = GENERATIONS.find((x) => x.key === poolKey);
   if (g) return `第${g.cn}世代（${g.region}）`;
   if (poolKey === 'hisui') return '洗翠地區（傳說 阿爾宙斯）';
@@ -261,12 +282,15 @@ function viewHome() {
   const histWrap = node.querySelector('.history');
   if (histWrap) {
     history.forEach((rec) => {
-      const pct = Math.round((rec.score / rec.total) * 100);
+      const rsm = rec.scoreMode || 'count';
+      const usePct = rsm === 'char' || rsm === 'normal';
+      const pct = pctOf({ charScore: rsm === 'char', score: rec.score, total: rec.total });
       const tone = pct >= 80 ? 'good' : pct >= 50 ? 'mid' : 'bad';
-      const label = quizLabel(rec.mode || 'type', rec.season || '', rec.difficulty || 'all');
+      const label = quizLabel(rec.mode || 'type', rec.season || '', rec.difficulty || 'all') + (rsm !== 'count' ? ' · ' + t('score.' + rsm) : '');
+      const scoreText = usePct ? fmtPct(pct) : `${rec.score}/${rec.total}`;
       const item = el(`
         <button class="hist-item" type="button">
-          <span class="hist-score hist-score--${tone}">${rec.score}/${rec.total}</span>
+          <span class="hist-score hist-score--${tone}">${esc(scoreText)}</span>
           <span class="hist-meta">
             <span class="hist-time">${esc(label)} · ${esc(relTime(rec.ts))}</span>
             <span class="hist-code">分享碼 ${esc(rec.code.slice(0, 10))}…</span>
@@ -292,11 +316,19 @@ function viewSetup() {
     if (!setupState.season) setupState.season = defaultWhoPool();
     if (!setupState.difficulty) setupState.difficulty = DEFAULT_WHO_DIFFICULTY;
   }
+  if (setupState.count == null) setupState.count = DEFAULT_QUESTION_COUNT;
+  if (setupState.scoreMode == null) setupState.scoreMode = 'count';
+  if (mode !== 'who' && setupState.scoreMode === 'char') setupState.scoreMode = 'count';
   const season = mode === 'type' ? '' : setupState.season;
   const difficulty = mode === 'type' ? 'all' : setupState.difficulty;
   const seed = setupState.seed;
+  // 題數（10–20）與計分方式套用所有模式；按字計分（char）僅我是誰可選。
+  const count = setupState.count;
+  const scoreMode = setupState.scoreMode;
+  const charScore = mode === 'who' && scoreMode === 'char';
+  const score100 = scoreMode === 'normal';
 
-  const code = encodeResult({ mode, season, seed, total: DEFAULT_QUESTION_COUNT, score: 0, difficulty });
+  const code = encodeResult({ mode, season, seed, total: count, score: 0, difficulty, charScore, score100 });
   const url = shareUrlFor(code);
   const title = t(`quiz.${mode}.title`);
   const desc = t(`quiz.${mode}.desc`);
@@ -315,8 +347,19 @@ function viewSetup() {
       <div class="pool-pick tab-scroll"></div>` : ''}
       ${mode === 'speed' || mode === 'who' ? `
       <p class="label">${esc(t('setup.difficulty'))}</p>
-      <div class="difficulty-pick"></div>
+      <div class="difficulty-pick tab-scroll"></div>
       <p class="muted">${esc(t(noteKey))}</p>` : ''}
+
+      <p class="label">${esc(t('setup.scoreMode'))}</p>
+      <div class="difficulty-pick tab-scroll" data-scoremodes></div>
+      <p class="muted">${esc(t(`score.${scoreMode}.note`))}</p>
+
+      <p class="label">${esc(t('setup.count'))}</p>
+      <div class="count-pick">
+        <button class="count-step" data-count-step="-1" aria-label="減少題數" ${count <= MIN_QUESTION_COUNT ? 'disabled' : ''}>−</button>
+        <span class="count-val" data-count-val>${count}</span>
+        <button class="count-step" data-count-step="1" aria-label="增加題數" ${count >= MAX_QUESTION_COUNT ? 'disabled' : ''}>＋</button>
+      </div>
 
       ${mode === 'type' ? `
       <button class="btn btn--ghost" data-nav="chart" style="margin-top:14px">${esc(t('home.openChart'))}</button>` : ''}
@@ -370,7 +413,21 @@ function viewSetup() {
     });
   }
 
-  node.querySelector('[data-act="start"]').onclick = () => startQuiz({ mode, season, seed, difficulty });
+  const smWrap = node.querySelector('[data-scoremodes]');
+  if (smWrap) scoreModesFor(mode).forEach((sm) => {
+    const b = el(`<button class="season-btn" aria-pressed="${scoreMode === sm}">${esc(t(`score.${sm}`))}</button>`);
+    b.onclick = () => { setupState.scoreMode = sm; viewSetup(); };
+    smWrap.appendChild(b);
+  });
+
+  node.querySelectorAll('[data-count-step]').forEach((b) => {
+    b.onclick = () => {
+      const next = clamp(setupState.count + Number(b.dataset.countStep), MIN_QUESTION_COUNT, MAX_QUESTION_COUNT);
+      if (next !== setupState.count) { setupState.count = next; viewSetup(); }
+    };
+  });
+
+  node.querySelector('[data-act="start"]').onclick = () => startQuiz({ mode, season, seed, difficulty, count, scoreMode });
 
   const shareBtn = node.querySelector('[data-act="copy-share"]');
   shareBtn.onclick = async () => {
@@ -391,8 +448,10 @@ function viewSetup() {
 }
 
 // ── 開始測驗 ────────────────────────────────────────────────────
-function startQuiz({ mode = 'type', season = '', seed, difficulty = 'all', challenge = null }) {
-  const total = challenge ? challenge.total : DEFAULT_QUESTION_COUNT;
+function startQuiz({ mode = 'type', season = '', seed, difficulty = 'all', count = DEFAULT_QUESTION_COUNT, scoreMode = 'count', challenge = null }) {
+  const total = clamp(challenge ? challenge.total : count, MIN_QUESTION_COUNT, MAX_QUESTION_COUNT);
+  let sm = challenge ? (challenge.charScore ? 'char' : challenge.score100 ? 'normal' : 'count') : scoreMode;
+  if (mode !== 'who' && sm === 'char') sm = 'count';
   let quiz;
   try {
     quiz = buildQuiz({ mode, season, seed, total, difficulty });
@@ -400,7 +459,7 @@ function startQuiz({ mode = 'type', season = '', seed, difficulty = 'all', chall
     console.error(e);
     return viewHome();
   }
-  session = { quiz, answers: [], index: 0, locked: false, challenge, saved: false, meta: { mode, season, difficulty } };
+  session = { quiz, answers: [], index: 0, locked: false, challenge, saved: false, meta: { mode, season, difficulty, count: total, scoreMode: sm } };
   go('#/quiz');
 }
 
@@ -443,7 +502,7 @@ function viewQuiz() {
   if (q.mode === 'who') {
     const hint = whoHint(q, session.meta.difficulty);
     body.innerHTML = `
-      <div class="who-stage"><img class="who-img" alt="" /></div>
+      <div class="who-stage${session.meta.difficulty === 'veryeasy' ? ' revealed' : ''}"><img class="who-img" alt="" /></div>
       <p class="q-prompt">${esc(t('who.prompt'))}</p>
       ${hint ? `<p class="who-hint">${hint}</p>` : ''}
       <div class="code-box who-input">
@@ -487,14 +546,27 @@ function viewQuiz() {
   if (q.mode === 'who') node.querySelector('[data-who-input]')?.focus();
 }
 
-// 我是誰提示（以圈圈呈現字數）：easy 露第一個字、其餘 ○；normal 全 ○；hard 無提示。
+// 地區形態的中文前綴：提示時整段直接顯示（露「阿」這種前綴第一個字沒意義）。
+const REGION_ZH = { alola: '阿羅拉', galar: '伽勒爾', hisui: '洗翠', paldea: '帕底亞' };
+function regionPrefixOf(q) {
+  for (const tag in REGION_ZH) {
+    if (q.key && q.key.includes(`-${tag}`) && q.nameZh.startsWith(REGION_ZH[tag])) return REGION_ZH[tag];
+  }
+  return '';
+}
+
+// 我是誰提示：veryeasy/easy 露第一個字、其餘 ○；normal 全 ○；hard 無提示。
+// 地區形態：前綴（阿羅拉/洗翠…）整段直接顯示，提示套用在前綴後的本體名。
 function whoHint(q, difficulty) {
-  const chars = Array.from(q.nameZh);
-  if (difficulty === 'easy') {
-    return chars.map((c, i) => (i === 0 ? `<strong>${esc(c)}</strong>` : '○')).join(' ');
+  if (difficulty === 'hard') return '';
+  const prefix = regionPrefixOf(q);
+  const lead = prefix ? `<strong>${esc(prefix)}</strong> ` : '';
+  const chars = Array.from(prefix ? q.nameZh.slice(prefix.length) : q.nameZh);
+  if (difficulty === 'veryeasy' || difficulty === 'easy') {
+    return lead + chars.map((c, i) => (i === 0 ? `<strong>${esc(c)}</strong>` : '○')).join(' ');
   }
   if (difficulty === 'normal') {
-    return chars.map(() => '○').join(' ');
+    return lead + chars.map(() => '○').join(' ');
   }
   return '';
 }
@@ -567,7 +639,7 @@ function answer(choice, node) {
 }
 
 // ── 結果區塊（測驗完成頁與歷史詳情頁共用）──────────────────────
-function reviewItem(q, ok, userAnswer) {
+function reviewItem(q, ok, userAnswer, mark) {
   let detail;
   if (q.mode === 'who') {
     const typed = String(userAnswer == null ? '' : userAnswer).trim();
@@ -588,9 +660,11 @@ function reviewItem(q, ok, userAnswer) {
       ${badge(q.atk)} <span class="matchup__vs">→</span> ${q.def.map((d) => badge(d)).join(' ')}
       <span class="rv-tail">${esc(formatMultiplier(q.correct))}</span>`;
   }
+  const markClass = mark ? `review__mark--${mark.tone}` : (ok ? 'review__mark--ok' : 'review__mark--no');
+  const markText = mark ? esc(mark.text) : (ok ? '✓' : '✗');
   const item = el(`
     <div class="review__item">
-      <span class="review__mark ${ok ? 'review__mark--ok' : 'review__mark--no'}">${ok ? '✓' : '✗'}</span>
+      <span class="review__mark ${markClass}">${markText}</span>
       ${detail}
     </div>`);
   if (q.mode === 'who') {
@@ -603,31 +677,47 @@ function reviewItem(q, ok, userAnswer) {
 function buildResultSection(quiz, answers, opts = {}) {
   const meta = opts.meta || { mode: quiz.mode || 'type', season: '', difficulty: quiz.difficulty || 'all' };
   const difficulty = meta.difficulty || 'all';
-  const score = scoreQuiz(quiz, answers);
+  const sm = (meta.mode === 'who' ? meta.scoreMode : (meta.scoreMode === 'char' ? 'count' : meta.scoreMode)) || 'count';
+  const charScore = sm === 'char';
+  const score100 = sm === 'normal';
+  const usePct = charScore || score100; // 顯示 /100（不計分顯示題數）
   const total = quiz.count;
-  const code = encodeResult({ mode: meta.mode, season: meta.season, seed: quiz.seed, total, score, difficulty });
+
+  const correct = scoreQuiz(quiz, answers);
+  // 不計分/正常計分：算對幾題（正常計分換算 /100）。按字計分：各題 whoCharScore 加總換算 /100。
+  const pct = charScore ? charPct(quiz, answers) : (correct / total) * 100;
+
+  const code = encodeResult({ mode: meta.mode, season: meta.season, seed: quiz.seed, total, score: charScore ? pct : correct, difficulty, charScore, score100 });
   const shareUrl = shareUrlFor(code);
 
   let challengeHtml = '';
   if (opts.challenge) {
-    const you = score, them = opts.challenge.score;
+    const th = opts.challenge;
+    const themPct = pctOf({ charScore: th.charScore, score: th.score, total: th.total });
+    const themUsePct = th.charScore || th.score100;
+    const you = usePct ? fmtPct(pct) : String(correct);
+    const them = themUsePct ? fmtPct(themPct) : String(th.score);
+    const eps = 1e-9;
     let msg;
-    if (you > them) msg = t('challenge.beat', { you, them });
-    else if (you === them) msg = t('challenge.tie', { you });
+    if (pct > themPct + eps) msg = t('challenge.beat', { you, them });
+    else if (Math.abs(pct - themPct) <= eps) msg = t('challenge.tie', { you });
     else msg = t('challenge.lose', { you, them });
     challengeHtml = `<div class="banner"><p style="font-weight:800;font-size:1.2rem">${esc(msg)}</p></div>`;
   }
 
   const title = opts.history ? '這次紀錄' : t('result.title');
+  // 不計分：寫「答對 X / Y 題」；正常/按字計分：顯示 /100。
+  const bigScore = usePct ? `${esc(fmtPct(pct))} / 100` : `${correct} / ${total}`;
+  const scoreSub = charScore ? t('result.scoreChar', { total }) : t('result.score', { score: correct, total });
 
   const node = el(`
     <section>
       ${challengeHtml}
       <div class="card">
         <h2>${esc(title)}</h2>
-        <p class="score-sub" style="margin-bottom:4px">${esc(quizLabel(meta.mode, meta.season, difficulty))}</p>
-        <div class="score-big">${score} / ${total}</div>
-        <p class="score-sub">${esc(t('result.score', { score, total }))}</p>
+        <p class="score-sub" style="margin-bottom:4px">${esc(quizLabel(meta.mode, meta.season, difficulty))}${sm !== 'count' ? ' · ' + esc(t('score.' + sm)) : ''}</p>
+        <div class="score-big">${bigScore}</div>
+        <p class="score-sub">${esc(scoreSub)}</p>
 
         <p class="label">${esc(t('result.yourCode'))}</p>
         <div class="code-box">
@@ -648,8 +738,13 @@ function buildResultSection(quiz, answers, opts = {}) {
 
   const reviewWrap = node.querySelector('.review');
   quiz.questions.forEach((q, i) => {
-    const ok = q.mode === 'who' ? whoAnswerCorrect(q, answers[i]) : answers[i] === q.correctIndex;
-    reviewWrap.appendChild(reviewItem(q, ok, answers[i]));
+    if (charScore && q.mode === 'who') {
+      const s = whoCharScore(q, answers[i]);
+      reviewWrap.appendChild(reviewItem(q, s >= 10, answers[i], { text: fmtPct(s), tone: s >= 10 ? 'ok' : s > 0 ? 'mid' : 'no' }));
+    } else {
+      const ok = q.mode === 'who' ? whoAnswerCorrect(q, answers[i]) : answers[i] === q.correctIndex;
+      reviewWrap.appendChild(reviewItem(q, ok, answers[i]));
+    }
   });
 
   const copyBtn = node.querySelector('[data-act="copy"]');
@@ -665,21 +760,21 @@ function buildResultSection(quiz, answers, opts = {}) {
     setTimeout(() => (copyBtn.textContent = t('result.copy')), 1500);
   };
   node.querySelector('[data-act="retry"]').onclick = () =>
-    startQuiz({ mode: meta.mode, season: meta.season, seed: newSeed(), difficulty });
+    startQuiz({ mode: meta.mode, season: meta.season, seed: newSeed(), difficulty, count: total, scoreMode: sm });
 
-  return { node, score, total, code };
+  return { node, pct, correct, total, scoreMode: sm, charScore, code };
 }
 
 // ── 結果畫面（剛完成的測驗）────────────────────────────────────
 function viewResult() {
   if (!session || session.answers.length < session.quiz.count) return viewHome();
   const { quiz, answers, challenge, meta } = session;
-  const { node, score, total, code } = buildResultSection(quiz, answers, { challenge, meta });
+  const { node, pct, correct, total, scoreMode, charScore, code } = buildResultSection(quiz, answers, { challenge, meta });
 
   if (!session.saved) {
     addHistory({
       mode: meta.mode, season: meta.season, difficulty: meta.difficulty || 'all', seed: quiz.seed,
-      total, score, answers: answers.slice(), code, ts: Date.now(),
+      total, scoreMode, score: charScore ? pct : correct, answers: answers.slice(), code, ts: Date.now(),
     });
     session.saved = true;
   }
@@ -691,7 +786,7 @@ function viewResult() {
 function viewHistoryDetail() {
   const rec = viewingHistory;
   if (!rec) return viewHome();
-  const meta = { mode: rec.mode || 'type', season: rec.season || '', difficulty: rec.difficulty || 'all' };
+  const meta = { mode: rec.mode || 'type', season: rec.season || '', difficulty: rec.difficulty || 'all', scoreMode: rec.scoreMode || 'count' };
   let quiz;
   try {
     quiz = buildQuiz({ mode: meta.mode, season: meta.season, seed: rec.seed, total: rec.total, difficulty: meta.difficulty });
@@ -708,7 +803,9 @@ function viewChallenge(decoded) {
   const title = coplay ? t('challenge.coplayTitle') : t('challenge.title');
   const body = coplay
     ? t('challenge.coplayBody', { total: decoded.total })
-    : t('challenge.body', { score: decoded.score, total: decoded.total });
+    : ((decoded.charScore || decoded.score100)
+        ? t('challenge.bodyPct', { score: fmtPct(pctOf(decoded)) })
+        : t('challenge.body', { score: decoded.score, total: decoded.total }));
   const startLabel = coplay ? t('challenge.coplayStart') : t('challenge.start');
 
   const node = el(`
@@ -725,7 +822,9 @@ function viewChallenge(decoded) {
       season: decoded.season,
       difficulty: decoded.difficulty,
       seed: decoded.seed,
-      challenge: coplay ? null : { total: decoded.total, score: decoded.score },
+      count: decoded.total,
+      scoreMode: decoded.charScore ? 'char' : decoded.score100 ? 'normal' : 'count',
+      challenge: coplay ? null : { total: decoded.total, score: decoded.score, charScore: !!decoded.charScore, score100: !!decoded.score100 },
     });
   setView(node);
 }

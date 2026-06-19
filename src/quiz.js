@@ -5,6 +5,8 @@ import { TYPES, multiplier } from './data/typechart.js';
 import { hashSeed, makeRng, makeRandom } from './rng.js';
 
 export const DEFAULT_QUESTION_COUNT = 10;
+export const MIN_QUESTION_COUNT = 10;
+export const MAX_QUESTION_COUNT = 20;
 
 // 速度測驗難度：以兩隻寶可夢的速度差分桶。連續不重疊、無孤兒配對。
 //   all    = 不限（diff>=1）→ 與舊版行為完全相同，舊成績碼可原樣重現。
@@ -14,11 +16,12 @@ export const DEFAULT_QUESTION_COUNT = 10;
 export const SPEED_DIFFICULTIES = ['all', 'easy', 'medium', 'hard'];
 export const DEFAULT_SPEED_DIFFICULTY = 'easy';
 
-// 「我是誰」難度：只決定 Mega 是否進池（提示由 UI 端依難度呈現）。
-//   easy   = 不含 Mega，提示第一個字
-//   normal = 不含 Mega，無提示
-//   hard   = 含 Mega，無提示
-export const WHO_DIFFICULTIES = ['easy', 'normal', 'hard'];
+// 「我是誰」難度：只決定 Mega 是否進池（立繪是否黑影、提示由 UI 端依難度呈現）。
+//   veryeasy = 不含 Mega，立繪直接亮著，提示第一個字（同 easy 提示）
+//   easy     = 不含 Mega，黑影，提示第一個字
+//   normal   = 不含 Mega，黑影，只提示字數（圈圈）
+//   hard     = 含 Mega，黑影，無提示
+export const WHO_DIFFICULTIES = ['veryeasy', 'easy', 'normal', 'hard'];
 export const DEFAULT_WHO_DIFFICULTY = 'easy';
 const DIFFICULTY_BANDS = {
   all: { min: 1, max: Infinity },
@@ -153,6 +156,27 @@ export function speedLines(base) {
     twNeu: neu * 2,
     twNoInv: noInv * 2,
   };
+}
+
+// 按字計分（我是誰）：每隻滿分 10，每字 10/名字長度。輸入字元依序對到正解名字
+// （子序列：對的字之間可跳過沒打的字），算對幾字得幾分；該題下限 0 分。回傳 0..10。
+// 名字先正規化（全形→半形、小寫、去空白）再逐字比，故 3D龍/3d龍 同分。
+export function whoCharScore(q, typed) {
+  const target = Array.from(normalizeName(q.nameZh));
+  if (target.length === 0) return 0;
+  const per = 10 / target.length;
+  let pt = 0, matched = 0;
+  for (const ch of Array.from(normalizeName(typed))) {
+    let found = -1;
+    for (let j = pt; j < target.length; j++) { if (target[j] === ch) { found = j; break; } }
+    if (found >= 0) { matched++; pt = found + 1; }
+  }
+  return Math.max(0, Math.min(10, matched * per));
+}
+
+// 整份按字計分（我是誰）：各題 whoCharScore 加總，範圍 0..題數×10。
+export function scoreQuizChar(quiz, answers) {
+  return quiz.questions.reduce((s, q, i) => s + whoCharScore(q, answers[i]), 0);
 }
 
 // 計分：選擇題比對選項索引；我是誰比對輸入文字。
