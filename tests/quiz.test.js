@@ -51,6 +51,38 @@ test('速度測驗：pool 不足兩隻會丟錯', () => {
   assert.throws(() => generateSpeedQuiz('x', [{ key: 'a', speed: 1 }]));
 });
 
+test('速度測驗：預設難度為 all、所有題目速度差>=1', () => {
+  const quiz = generateSpeedQuiz('s1', POOL);
+  assert.equal(quiz.difficulty, 'all');
+  for (const q of quiz.questions) assert.ok(q.diff >= 1);
+});
+
+// 速度分布夠分散，足以填滿各難度桶。
+const BANDED = [
+  { key: 'a', speed: 100 }, { key: 'b', speed: 102 }, { key: 'c', speed: 104 },
+  { key: 'd', speed: 105 }, { key: 'e', speed: 110 }, { key: 'f', speed: 113 },
+  { key: 'g', speed: 118 }, { key: 'h', speed: 130 }, { key: 'i', speed: 160 },
+];
+
+test('速度測驗：難度桶把每題速度差限制在範圍內', () => {
+  const cases = { easy: [20, Infinity], medium: [6, 19], hard: [1, 5] };
+  for (const [difficulty, [min, max]] of Object.entries(cases)) {
+    const quiz = generateSpeedQuiz('band-seed', BANDED, 10, difficulty);
+    assert.equal(quiz.difficulty, difficulty);
+    assert.ok(quiz.questions.length > 0, `${difficulty} 應能產生題目`);
+    for (const q of quiz.questions) {
+      assert.ok(q.diff >= min && q.diff <= max, `${difficulty}: diff ${q.diff} 超出 ${min}..${max}`);
+    }
+  }
+});
+
+test('速度測驗：同 seed + 同難度可重現', () => {
+  assert.deepEqual(
+    generateSpeedQuiz('rep', BANDED, 10, 'hard'),
+    generateSpeedQuiz('rep', BANDED, 10, 'hard'),
+  );
+});
+
 test('計分通用於兩種模式', () => {
   const quiz = generateSpeedQuiz('grade', POOL);
   const allRight = quiz.questions.map((q) => q.correctIndex);

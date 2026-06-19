@@ -14,11 +14,12 @@ export function getHistory() {
   }
 }
 
-// rec: { seed, total, score, answers, code, ts }
+// rec: { mode, season, difficulty, seed, total, score, answers, code, ts }
 export function addHistory(rec) {
   try {
-    // 同一份測驗（seed+total）重玩時，以最新一筆取代舊的。
-    const list = getHistory().filter((r) => !(r.seed === rec.seed && r.total === rec.total));
+    // 同一份測驗（seed+total+難度）重玩時，以最新一筆取代舊的。
+    const list = getHistory().filter((r) =>
+      !(r.seed === rec.seed && r.total === rec.total && (r.difficulty || 'all') === (rec.difficulty || 'all')));
     list.unshift(rec);
     const trimmed = list.slice(0, MAX);
     localStorage.setItem(KEY, JSON.stringify(trimmed));

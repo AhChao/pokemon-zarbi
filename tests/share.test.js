@@ -5,12 +5,34 @@ import { generateTypeQuiz } from '../src/quiz.js';
 
 test('屬性成績碼 round-trip', () => {
   const code = encodeResult({ mode: 'type', seed: 'abc123', total: 10, score: 7 });
-  assert.deepEqual(decodeResult(code), { mode: 'type', season: '', seed: 'abc123', total: 10, score: 7 });
+  assert.deepEqual(decodeResult(code), { mode: 'type', season: '', seed: 'abc123', total: 10, score: 7, difficulty: 'all' });
 });
 
 test('速度成績碼帶賽季 round-trip', () => {
   const code = encodeResult({ mode: 'speed', season: 'm-b', seed: 'xyz', total: 10, score: 9 });
-  assert.deepEqual(decodeResult(code), { mode: 'speed', season: 'm-b', seed: 'xyz', total: 10, score: 9 });
+  assert.deepEqual(decodeResult(code), { mode: 'speed', season: 'm-b', seed: 'xyz', total: 10, score: 9, difficulty: 'all' });
+});
+
+test('速度成績碼帶難度 round-trip', () => {
+  for (const difficulty of ['easy', 'medium', 'hard']) {
+    const code = encodeResult({ mode: 'speed', season: 'm-a', seed: 'd1', total: 10, score: 4, difficulty });
+    assert.deepEqual(decodeResult(code),
+      { mode: 'speed', season: 'm-a', seed: 'd1', total: 10, score: 4, difficulty });
+  }
+});
+
+test('難度欄不污染屬性碼長度（type 不附第 7 欄，仍 6 欄）', () => {
+  const typeCode = encodeResult({ mode: 'type', seed: 's', total: 10, score: 5, difficulty: 'hard' });
+  const decoded = decodeResult(typeCode);
+  assert.equal(decoded.difficulty, 'all'); // type 模式忽略難度
+});
+
+test('舊版速度碼（無難度欄）解為 all', () => {
+  // 仿 v2 6 欄速度碼：2~s~m-b~seed~10~8
+  const legacy = Buffer.from('2~s~m-b~legseed~10~8', 'utf8').toString('base64')
+    .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  assert.deepEqual(decodeResult(legacy),
+    { mode: 'speed', season: 'm-b', seed: 'legseed', total: 10, score: 8, difficulty: 'all' });
 });
 
 test('成績碼是 URL 安全字元', () => {
@@ -27,7 +49,7 @@ test('舊版 v1 代碼仍可解、視為屬性模式', () => {
   // 1~seed~total~score 的 base64url
   const legacy = Buffer.from('1~oldseed~10~5', 'utf8').toString('base64')
     .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-  assert.deepEqual(decodeResult(legacy), { mode: 'type', season: '', seed: 'oldseed', total: 10, score: 5 });
+  assert.deepEqual(decodeResult(legacy), { mode: 'type', season: '', seed: 'oldseed', total: 10, score: 5, difficulty: 'all' });
 });
 
 test('壞掉的碼回傳 null', () => {
@@ -43,5 +65,5 @@ test('分數超出範圍視為無效', () => {
 
 test('共玩碼 score=0 合法', () => {
   const code = encodeResult({ mode: 'speed', season: 'm-b', seed: 's', total: 10, score: 0 });
-  assert.deepEqual(decodeResult(code), { mode: 'speed', season: 'm-b', seed: 's', total: 10, score: 0 });
+  assert.deepEqual(decodeResult(code), { mode: 'speed', season: 'm-b', seed: 's', total: 10, score: 0, difficulty: 'all' });
 });

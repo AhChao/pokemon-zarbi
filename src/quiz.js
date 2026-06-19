@@ -6,6 +6,20 @@ import { hashSeed, makeRng, makeRandom } from './rng.js';
 
 export const DEFAULT_QUESTION_COUNT = 10;
 
+// 速度測驗難度：以兩隻寶可夢的速度差分桶。連續不重疊、無孤兒配對。
+//   all    = 不限（diff>=1）→ 與舊版行為完全相同，舊成績碼可原樣重現。
+//   easy   = 差距大（>=20），約佔可用配對 68%
+//   medium = 中間帶（6..19），約 22%
+//   hard   = 接近（1..5），約 9%
+export const SPEED_DIFFICULTIES = ['all', 'easy', 'medium', 'hard'];
+export const DEFAULT_SPEED_DIFFICULTY = 'easy';
+const DIFFICULTY_BANDS = {
+  all: { min: 1, max: Infinity },
+  easy: { min: 20, max: Infinity },
+  medium: { min: 6, max: 19 },
+  hard: { min: 1, max: 5 },
+};
+
 // 單屬性防禦時可能出現的倍率（乾淨的四選一）。
 const SINGLE_OPTIONS = [0, 0.5, 1, 2];
 // 雙屬性防禦時可能出現的倍率（含 ¼× 與 4×）。
@@ -58,25 +72,28 @@ export function generateTypeQuiz(seed, count = DEFAULT_QUESTION_COUNT) {
 
 // 種族值速度測驗：「誰比較快」。pool 為已排序的寶可夢陣列
 // （每筆需有 key 與 speed），由呼叫端依賽季組好傳入，保持純函式與決定性。
-export function generateSpeedQuiz(seed, pool, count = DEFAULT_QUESTION_COUNT) {
+export function generateSpeedQuiz(seed, pool, count = DEFAULT_QUESTION_COUNT, difficulty = 'all') {
   if (!Array.isArray(pool) || pool.length < 2) {
     throw new Error('speed quiz needs a pool of at least 2 pokemon');
   }
+  const band = DIFFICULTY_BANDS[difficulty] || DIFFICULTY_BANDS.all;
   const rng = makeRng(hashSeed(String(seed)));
   const rand = makeRandom(rng);
   const questions = [];
   let guard = 0;
-  const maxGuard = count * 100 + 100;
+  const maxGuard = count * 200 + 100;
   while (questions.length < count && guard < maxGuard) {
     guard++;
     const a = rand.pick(pool);
     const b = rand.pick(pool);
-    // 必須是不同隻、且速度不同（避免「一樣快」的無解題）。
-    if (a.key === b.key || a.speed === b.speed) continue;
+    if (a.key === b.key) continue;
+    // 速度差須落在難度桶內（band.min>=1 已排除「一樣快」的無解題）。
+    const diff = Math.abs(a.speed - b.speed);
+    if (diff < band.min || diff > band.max) continue;
     const correctIndex = a.speed > b.speed ? 0 : 1;
-    questions.push({ id: questions.length, mode: 'speed', pair: [a, b], options: [a, b], correctIndex });
+    questions.push({ id: questions.length, mode: 'speed', diff, pair: [a, b], options: [a, b], correctIndex });
   }
-  return { mode: 'speed', seed: String(seed), count: questions.length, questions };
+  return { mode: 'speed', seed: String(seed), difficulty, count: questions.length, questions };
 }
 
 // 計分：answers 為使用者每題選到的「選項索引」陣列。

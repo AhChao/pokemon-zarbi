@@ -393,7 +393,8 @@ table.chart td.m1 { background: transparent; color: var(--c-muted); }
 .quiz-card__desc { color: var(--c-muted); font-size: .82rem; }
 
 /* ── Season toggle (setup) ───────────────────────────────────── */
-.season-pick { display: flex; gap: 8px; margin-bottom: 4px; }
+.season-pick,
+.difficulty-pick { display: flex; gap: 8px; margin-bottom: 4px; }
 .season-btn {
   flex: 1;
   min-height: 44px;

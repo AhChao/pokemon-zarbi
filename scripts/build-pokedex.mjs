@@ -26,9 +26,22 @@ function megaSuffix(name) {
   return { zh: ' Mega', en: ' Mega' };
 }
 
+// PokéAPI 的 stat 名 → 我們的短鍵。
+const STAT_KEYS = {
+  hp: 'hp', attack: 'atk', defense: 'def',
+  'special-attack': 'spa', 'special-defense': 'spd', speed: 'spe',
+};
+
 async function fetchEntry(name) {
   const p = await getJson(`${API}/pokemon/${name}`);
-  const speed = p.stats.find((s) => s.stat.name === 'speed').base_stat;
+  // 完整種族值：種族值幾乎不會調整，存成本地靜態資料（可離線分析、解鎖 BST 模式）。
+  const stats = { hp: 0, atk: 0, def: 0, spa: 0, spd: 0, spe: 0 };
+  for (const s of p.stats) {
+    const k = STAT_KEYS[s.stat.name];
+    if (k) stats[k] = s.base_stat;
+  }
+  const bst = stats.hp + stats.atk + stats.def + stats.spa + stats.spd + stats.spe;
+  const speed = stats.spe;
   const image = p.sprites?.other?.['official-artwork']?.front_default
     || `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${p.id}.png`;
 
@@ -42,7 +55,7 @@ async function fetchEntry(name) {
   const nameZh = (zh || enBase) + (suf ? suf.zh : '');
   const nameEn = (suf ? 'Mega ' : '') + enBase + (suf && suf.en !== ' Mega' ? suf.en.replace(' Mega', '') : '');
 
-  return { key: name, dex: p.id, speed, nameZh, nameEn: nameEn.trim(), image, mega: isMega };
+  return { key: name, dex: p.id, speed, stats, bst, nameZh, nameEn: nameEn.trim(), image, mega: isMega };
 }
 
 async function pool(items, worker, limit) {
@@ -83,7 +96,7 @@ async function main() {
     }
   }, CONCURRENCY);
 
-  for (const r of results) if (r) dex[r.key] = { dex: r.dex, speed: r.speed, nameZh: r.nameZh, nameEn: r.nameEn, image: r.image, mega: r.mega };
+  for (const r of results) if (r) dex[r.key] = { dex: r.dex, speed: r.speed, stats: r.stats, bst: r.bst, nameZh: r.nameZh, nameEn: r.nameEn, image: r.image, mega: r.mega };
   for (const [k, v] of Object.entries(manual)) dex[k] = v;
 
   // 依 key 排序，產生穩定輸出（quiz 重現所需的決定性）。

@@ -1,6 +1,6 @@
 // 瀏覽器端主程式：hash 路由 + 成績碼網址處理 + 各畫面渲染。
 import { TYPES, TYPE_META, multiplier, formatMultiplier } from './data/typechart.js';
-import { generateTypeQuiz, generateSpeedQuiz, scoreQuiz, newSeed, DEFAULT_QUESTION_COUNT } from './quiz.js';
+import { generateTypeQuiz, generateSpeedQuiz, scoreQuiz, newSeed, DEFAULT_QUESTION_COUNT, SPEED_DIFFICULTIES, DEFAULT_SPEED_DIFFICULTY } from './quiz.js';
 import { encodeResult, decodeResult } from './share.js';
 import { getHistory, addHistory } from './history.js';
 import { t, typeName } from './i18n.js';
@@ -73,13 +73,21 @@ function seasonPool(key) {
     .sort((a, b) => (a.key < b.key ? -1 : a.key > b.key ? 1 : 0));
 }
 
-function buildQuiz({ mode, season, seed, total }) {
-  if (mode === 'speed') return generateSpeedQuiz(seed, seasonPool(season), total);
+function buildQuiz({ mode, season, seed, total, difficulty }) {
+  if (mode === 'speed') return generateSpeedQuiz(seed, seasonPool(season), total, difficulty || DEFAULT_SPEED_DIFFICULTY);
   return generateTypeQuiz(seed, total);
 }
 
-function quizLabel(mode, season) {
-  if (mode === 'speed') return `${t('quiz.speed.title')}（${seasonLabel(season)}）`;
+// 速度測驗難度顯示名（'all' 不另標，視為「混合」不加後綴以相容舊碼）。
+function difficultyLabel(difficulty) {
+  return t(`difficulty.${difficulty}`) || '';
+}
+
+function quizLabel(mode, season, difficulty = 'all') {
+  if (mode === 'speed') {
+    const diff = difficulty && difficulty !== 'all' ? ` · ${difficultyLabel(difficulty)}` : '';
+    return `${t('quiz.speed.title')}（${seasonLabel(season)}${diff}）`;
+  }
   return t('quiz.type.title');
 }
 
@@ -152,7 +160,7 @@ function viewHome() {
   node.querySelectorAll('[data-pick]').forEach((b) => {
     b.onclick = () => {
       const mode = b.dataset.pick;
-      setupState = { mode, season: mode === 'speed' ? defaultSeason() : '', seed: newSeed() };
+      setupState = { mode, season: mode === 'speed' ? defaultSeason() : '', difficulty: DEFAULT_SPEED_DIFFICULTY, seed: newSeed() };
       go('#/setup');
     };
   });
@@ -183,7 +191,7 @@ function viewHome() {
     history.forEach((rec) => {
       const pct = Math.round((rec.score / rec.total) * 100);
       const tone = pct >= 80 ? 'good' : pct >= 50 ? 'mid' : 'bad';
-      const label = quizLabel(rec.mode || 'type', rec.season || '');
+      const label = quizLabel(rec.mode || 'type', rec.season || '', rec.difficulty || 'all');
       const item = el(`
         <button class="hist-item" type="button">
           <span class="hist-score hist-score--${tone}">${rec.score}/${rec.total}</span>
@@ -206,10 +214,12 @@ function viewSetup() {
   if (!setupState) return viewHome();
   const { mode } = setupState;
   if (mode === 'speed' && !setupState.season) setupState.season = defaultSeason();
+  if (mode === 'speed' && !setupState.difficulty) setupState.difficulty = DEFAULT_SPEED_DIFFICULTY;
   const season = mode === 'speed' ? setupState.season : '';
+  const difficulty = mode === 'speed' ? setupState.difficulty : 'all';
   const seed = setupState.seed;
 
-  const code = encodeResult({ mode, season, seed, total: DEFAULT_QUESTION_COUNT, score: 0 });
+  const code = encodeResult({ mode, season, seed, total: DEFAULT_QUESTION_COUNT, score: 0, difficulty });
   const url = shareUrlFor(code);
   const title = mode === 'speed' ? t('quiz.speed.title') : t('quiz.type.title');
   const desc = mode === 'speed' ? t('quiz.speed.desc') : t('quiz.type.desc');
@@ -221,7 +231,10 @@ function viewSetup() {
 
       ${mode === 'speed' ? `
       <p class="label">${esc(t('setup.season'))}</p>
-      <div class="season-pick"></div>` : ''}
+      <div class="season-pick"></div>
+      <p class="label">${esc(t('setup.difficulty'))}</p>
+      <div class="difficulty-pick"></div>
+      <p class="muted">${esc(t(`difficulty.${difficulty}.note`))}</p>` : ''}
 
       <button class="btn btn--primary" data-act="start" style="margin-top:14px">${esc(t('setup.start'))}</button>
 
@@ -242,9 +255,17 @@ function viewSetup() {
       b.onclick = () => { setupState.season = key; viewSetup(); };
       pickWrap.appendChild(b);
     });
+
+    const diffWrap = node.querySelector('.difficulty-pick');
+    // UI 只給三檔（'all' 為相容舊碼的內部值，不對外呈現）。
+    SPEED_DIFFICULTIES.filter((d) => d !== 'all').forEach((d) => {
+      const b = el(`<button class="season-btn" aria-pressed="${difficulty === d}">${esc(difficultyLabel(d))}</button>`);
+      b.onclick = () => { setupState.difficulty = d; viewSetup(); };
+      diffWrap.appendChild(b);
+    });
   }
 
-  node.querySelector('[data-act="start"]').onclick = () => startQuiz({ mode, season, seed });
+  node.querySelector('[data-act="start"]').onclick = () => startQuiz({ mode, season, seed, difficulty });
 
   const shareBtn = node.querySelector('[data-act="copy-share"]');
   shareBtn.onclick = async () => {
@@ -265,16 +286,16 @@ function viewSetup() {
 }
 
 // ── 開始測驗 ────────────────────────────────────────────────────
-function startQuiz({ mode = 'type', season = '', seed, challenge = null }) {
+function startQuiz({ mode = 'type', season = '', seed, difficulty = 'all', challenge = null }) {
   const total = challenge ? challenge.total : DEFAULT_QUESTION_COUNT;
   let quiz;
   try {
-    quiz = buildQuiz({ mode, season, seed, total });
+    quiz = buildQuiz({ mode, season, seed, total, difficulty });
   } catch (e) {
     console.error(e);
     return viewHome();
   }
-  session = { quiz, answers: [], index: 0, locked: false, challenge, saved: false, meta: { mode, season } };
+  session = { quiz, answers: [], index: 0, locked: false, challenge, saved: false, meta: { mode, season, difficulty } };
   go('#/quiz');
 }
 
@@ -402,10 +423,11 @@ function reviewItem(q, ok) {
 }
 
 function buildResultSection(quiz, answers, opts = {}) {
-  const meta = opts.meta || { mode: quiz.mode || 'type', season: '' };
+  const meta = opts.meta || { mode: quiz.mode || 'type', season: '', difficulty: quiz.difficulty || 'all' };
+  const difficulty = meta.difficulty || 'all';
   const score = scoreQuiz(quiz, answers);
   const total = quiz.count;
-  const code = encodeResult({ mode: meta.mode, season: meta.season, seed: quiz.seed, total, score });
+  const code = encodeResult({ mode: meta.mode, season: meta.season, seed: quiz.seed, total, score, difficulty });
   const shareUrl = shareUrlFor(code);
 
   let challengeHtml = '';
@@ -425,7 +447,7 @@ function buildResultSection(quiz, answers, opts = {}) {
       ${challengeHtml}
       <div class="card">
         <h2>${esc(title)}</h2>
-        <p class="score-sub" style="margin-bottom:4px">${esc(quizLabel(meta.mode, meta.season))}</p>
+        <p class="score-sub" style="margin-bottom:4px">${esc(quizLabel(meta.mode, meta.season, difficulty))}</p>
         <div class="score-big">${score} / ${total}</div>
         <p class="score-sub">${esc(t('result.score', { score, total }))}</p>
 
@@ -462,7 +484,7 @@ function buildResultSection(quiz, answers, opts = {}) {
     setTimeout(() => (copyBtn.textContent = t('result.copy')), 1500);
   };
   node.querySelector('[data-act="retry"]').onclick = () =>
-    startQuiz({ mode: meta.mode, season: meta.season, seed: newSeed() });
+    startQuiz({ mode: meta.mode, season: meta.season, seed: newSeed(), difficulty });
 
   return { node, score, total, code };
 }
@@ -475,7 +497,7 @@ function viewResult() {
 
   if (!session.saved) {
     addHistory({
-      mode: meta.mode, season: meta.season, seed: quiz.seed,
+      mode: meta.mode, season: meta.season, difficulty: meta.difficulty || 'all', seed: quiz.seed,
       total, score, answers: answers.slice(), code, ts: Date.now(),
     });
     session.saved = true;
@@ -488,10 +510,10 @@ function viewResult() {
 function viewHistoryDetail() {
   const rec = viewingHistory;
   if (!rec) return viewHome();
-  const meta = { mode: rec.mode || 'type', season: rec.season || '' };
+  const meta = { mode: rec.mode || 'type', season: rec.season || '', difficulty: rec.difficulty || 'all' };
   let quiz;
   try {
-    quiz = buildQuiz({ mode: meta.mode, season: meta.season, seed: rec.seed, total: rec.total });
+    quiz = buildQuiz({ mode: meta.mode, season: meta.season, seed: rec.seed, total: rec.total, difficulty: meta.difficulty });
   } catch {
     return viewHome();
   }
@@ -511,7 +533,7 @@ function viewChallenge(decoded) {
   const node = el(`
     <section class="card">
       <h2>${esc(title)}</h2>
-      <p class="score-sub" style="margin-bottom:8px">${esc(quizLabel(decoded.mode, decoded.season))}</p>
+      <p class="score-sub" style="margin-bottom:8px">${esc(quizLabel(decoded.mode, decoded.season, decoded.difficulty))}</p>
       <p class="lead">${esc(body)}</p>
       <button class="btn btn--primary" data-act="accept">${esc(startLabel)}</button>
       <button class="btn btn--ghost" data-nav="home">${esc(t('common.back'))}</button>
@@ -520,6 +542,7 @@ function viewChallenge(decoded) {
     startQuiz({
       mode: decoded.mode,
       season: decoded.season,
+      difficulty: decoded.difficulty,
       seed: decoded.seed,
       challenge: coplay ? null : { total: decoded.total, score: decoded.score },
     });
