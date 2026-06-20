@@ -77,6 +77,14 @@ gh api -X POST repos/AhChao/pokemon-zarbi/pages -f build_type=workflow
 
 依 `static-asset-cache-policy`：本站無 content-hash，故會變動的檔（HTML / JS / CSS / 資料 JSON）用 `Cache-Control: no-cache`——瀏覽器存下 body 但每次用 ETag 重新驗證，未變回 304（零 body、不重新下載），改版即拿到新樣式/程式碼；**不用 `no-store`**（那才會每次整包重載）。穩定的本地 SVG 圖示（`/assets/*`）給 30 天快取省掉重複驗證。寶可夢立繪走外部 PokéAPI/GitHub CDN，由上游長快取。Cloudflare Pages 會自動產生 ETag 並處理 304；前緣需尊重來源 header（Pages 預設如此），這是部署時的驗收點。
 
-## 資料 / 圖片來源（備忘，非商用、頁面不另標 license）
+## 資料 / 圖片來源與授權（備忘）
 
-僅作自己參考：屬性符號 `assets/types/*.svg` 來自 [duiker101/pokemon-type-svg-icons](https://github.com/duiker101/pokemon-type-svg-icons)；寶可夢種族值與立繪來自 [PokéAPI](https://pokeapi.co/)；賽制名單參考 GameWith / Serebii。屬性色與寶可夢相關內容版權屬 Nintendo / Game Freak / The Pokémon Company。左上 logo 與 favicon（`assets/ui/logo-unown.svg`、`assets/ui/favicon.svg`）為原創的「未知圖騰 U 形」風格化造型，把單眼換成問號以呼應快問快答。
+非商用同人專案。本專案程式碼與原創素材採 MIT（見根目錄 `LICENSE`）；使用者可見的致謝在 `README.md`「致謝」段。各來源已查證的授權狀況：
+
+- **寶可夢立繪（runtime）**：來自 [PokéAPI](https://pokeapi.co/) 的 `PokeAPI/sprites` repo，該 repo 以 **CC0 1.0** 散布（`LICENCE.txt`），但明文「All image contents are Copyright The Pokémon Company」——CC0 不強制署名，但圖像版權與商標仍歸 TPC。
+- **寶可夢種族值 / 中英名（build 進 JSON）**：PokéAPI。其 about 頁只聲明名稱為任天堂商標，**未宣告 CC0**；惟種族值/名稱屬事實性資料，不受著作權保護。
+- **屬性符號 `assets/types/*.svg`**：來自 [duiker101/pokemon-type-svg-icons](https://github.com/duiker101/pokemon-type-svg-icons)。**該 repo 沒有正式 LICENSE 檔**（GitHub license API 回 404），README 僅寫 “for any use”，原始設計出自 [Dribbble「Pokedex iOS app」](https://dribbble.com/shots/4862612)。屬性符號本身是遊戲官方圖像，無論誰重繪都回溯 TPC，與其餘 Pokémon IP 同受 README 免責涵蓋。
+  - ponytail: 替代評估（另案）——找一套有明確 CC0/MIT LICENSE、視覺可接受的 18 屬性符號 drop-in，經 Steven 拍板後再換，以消除此處唯一的授權留白。
+- **賽制名單**：人工參考 GameWith / Serebii（見「更新賽季名單」）。
+- **屬性色與寶可夢相關內容**：版權與商標屬 Nintendo / Game Freak / The Pokémon Company。
+- **原創素材**：左上 logo 與 favicon（`assets/ui/logo-unown.svg`、`assets/ui/favicon.svg`）為原創的「未知圖騰 U 形」風格化造型，把單眼換成問號以呼應快問快答；採本專案 MIT 授權。

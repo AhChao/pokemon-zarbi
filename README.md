@@ -1,5 +1,5 @@
-<p align="center">
-  <img src="./assets/ui/favicon.svg" alt="寶可夢快問快答" width="96" height="96" />
+<p align="center"style="background-color:white;">
+  <img src="./assets/ui/favicon-white-bg.svg" alt="寶可夢快問快答" width="96" height="96" />
 </p>
 
 <h1 align="center">寶可夢快問快答</h1>
@@ -22,6 +22,10 @@
 
 ## 關於
 
-非商業的同人作品，純做興趣。寶可夢相關名稱、屬性與形象之版權屬於 Nintendo / Game Freak / The Pokémon Company。
+非商業的同人作品，純做興趣，與任天堂等公司無任何關聯、亦未獲其授權或背書。寶可夢相關名稱、屬性、形象與屬性色之版權及商標屬於 Nintendo / Game Freak / The Pokémon Company。
 
-<sub>想在本機跑或了解實作，請見 <a href="./DEVELOPMENT.md">DEVELOPMENT.md</a>。</sub>
+## 致謝
+
+寶可夢資料與立繪來自 [PokéAPI](https://pokeapi.co/)（立繪取自 PokeAPI/sprites，以 CC0 散布，圖像版權仍屬 The Pokémon Company）。屬性圖示來自 [duiker101/pokemon-type-svg-icons](https://github.com/duiker101/pokemon-type-svg-icons)，原始設計出自 [Dribbble「Pokedex iOS app」](https://dribbble.com/shots/4862612)。本專案程式碼與原創素材採 [MIT 授權](./LICENSE)。
+
+`<sub>`想在本機跑或了解實作，請見 `<a href="./DEVELOPMENT.md">`DEVELOPMENT.md`</a>`。`</sub>`
