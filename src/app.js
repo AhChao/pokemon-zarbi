@@ -1068,6 +1068,9 @@ function viewMasterDone() {
 }
 
 // ── 我是誰出題 builder：自選一份清單 → 產生代碼 ───────────────────
+// 出題題數限制：下限 5、上限 20。
+const WHO_CUSTOM_MIN = 5;
+const WHO_CUSTOM_MAX = 20;
 // 出題瀏覽用的圖鑑：全國圖鑑非 Mega（剪影題以本體為主），依圖鑑編號排序。
 function builderDexEntries() {
   return Object.entries(nationalDex)
@@ -1119,7 +1122,7 @@ function viewWhoBuilder() {
         </div>
         <p class="muted" data-share-code></p>
       </div>
-      <p class="muted" data-need hidden>${esc(t('builder.needOne'))}</p>
+      <p class="muted" data-need hidden>${esc(t('builder.needRange', { min: WHO_CUSTOM_MIN, max: WHO_CUSTOM_MAX }))}</p>
       <button class="btn btn--primary" data-act="make">${esc(t('builder.makeCode'))}</button>
       <button class="btn btn--ghost" data-nav="home">${esc(t('common.back'))}</button>
     </section>`);
@@ -1130,7 +1133,7 @@ function viewWhoBuilder() {
   const needEl = node.querySelector('[data-need]');
 
   const renderSelected = () => {
-    node.querySelector('[data-sel-label]').textContent = t('builder.selected', { n: bs.selected.length });
+    node.querySelector('[data-sel-label]').textContent = t('builder.selected', { n: bs.selected.length, max: WHO_CUSTOM_MAX });
     selWrap.innerHTML = '';
     if (!bs.selected.length) { selWrap.innerHTML = `<p class="muted">${esc(t('builder.selectedEmpty'))}</p>`; return; }
     bs.selected.forEach((k) => {
@@ -1153,8 +1156,15 @@ function viewWhoBuilder() {
       const cellb = el(`<button class="builder-cell${on ? ' builder-cell--on' : ''}" type="button" title="${esc(p.nameZh)}"><img alt="" loading="lazy" /><span class="builder-cell-name">${esc(p.nameZh)}</span></button>`);
       const im = cellb.querySelector('img'); im.src = p.image; im.onerror = () => { im.style.visibility = 'hidden'; };
       cellb.onclick = () => {
-        if (sel.has(p.key)) bs.selected = bs.selected.filter((x) => x !== p.key);
-        else bs.selected = [...bs.selected, p.key];
+        if (sel.has(p.key)) {
+          bs.selected = bs.selected.filter((x) => x !== p.key);
+        } else if (bs.selected.length >= WHO_CUSTOM_MAX) {
+          needEl.textContent = t('builder.maxReached', { max: WHO_CUSTOM_MAX });
+          needEl.hidden = false;
+          return; // 已達上限，不再加入
+        } else {
+          bs.selected = [...bs.selected, p.key];
+        }
         renderSelected(); renderDex(); updateMake();
       };
       dexWrap.appendChild(cellb);
@@ -1162,14 +1172,16 @@ function viewWhoBuilder() {
   };
 
   const updateMake = () => {
-    if (bs.selected.length) {
+    if (bs.selected.length >= WHO_CUSTOM_MIN) {
       const seed = bs.codeSeed || (bs.codeSeed = newSeed());
       const code = encodeWhoCustom({ seed, keys: bs.selected, difficulty: bs.difficulty, scoreMode: bs.scoreMode });
       node.querySelector('[data-share-url]').value = shareUrlFor(code);
       node.querySelector('[data-share-code]').textContent = code;
       shareWrap.hidden = false; needEl.hidden = true;
     } else {
-      shareWrap.hidden = true; needEl.hidden = false;
+      shareWrap.hidden = true;
+      needEl.textContent = t('builder.needRange', { min: WHO_CUSTOM_MIN, max: WHO_CUSTOM_MAX });
+      needEl.hidden = false;
     }
   };
 
@@ -1199,7 +1211,11 @@ function viewWhoBuilder() {
   const filterInput = node.querySelector('[data-filter]');
   filterInput.addEventListener('input', () => { bs.filter = filterInput.value; renderDex(); });
   node.querySelector('[data-act="make"]').onclick = () => {
-    if (!bs.selected.length) { needEl.hidden = false; return; }
+    if (bs.selected.length < WHO_CUSTOM_MIN) {
+      needEl.textContent = t('builder.needRange', { min: WHO_CUSTOM_MIN, max: WHO_CUSTOM_MAX });
+      needEl.hidden = false;
+      return;
+    }
     gaEvent('builder_create', { count: bs.selected.length, difficulty: bs.difficulty, score_mode: bs.scoreMode });
     updateMake(); shareWrap.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   };
