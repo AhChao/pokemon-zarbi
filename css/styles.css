@@ -639,13 +639,17 @@ table.chart.spd td.spd-mons {
   aspect-ratio: 1 / 1;
   object-fit: contain;
   filter: brightness(0);
-  transition: filter .3s ease;
 }
-.who-stage.revealed .who-img { filter: none; }
+/* 只在「揭曉」時淡入彩色；換下一題移除 revealed 時瞬間變回黑影（無 transition），
+   避免新立繪在濾鏡還沒套上前先以彩色閃一下。 */
+.who-stage.revealed .who-img { filter: none; transition: filter .3s ease; }
 /* #7 電視動畫風格球框：灰白外框 + 四角精靈球 + 隨機底色，黑影置中。 */
 .who-frame {
   position: relative;
-  width: 78%; max-width: 280px; margin: 14px auto 18px;
+  /* 寬度取「78% 或 高度預算 30dvh」較小者，高度由 aspect-ratio 推出（只定一維 → 不破比例、不出框）。
+     讓黑影在手機鍵盤彈出時縮小，與輸入框同時可見、不必上滾偷看。 */
+  width: 78%; /* 舊瀏覽器 fallback */
+  width: min(82%, 34dvh); max-width: 300px; margin: 8px auto 10px;
   aspect-ratio: 1 / 1.04;
   background: var(--frame-fill, #9ed8a6);
   border: 7px solid #eef2f4;
@@ -654,21 +658,36 @@ table.chart.spd td.spd-mons {
   display: flex; align-items: center; justify-content: center;
 }
 .who-frame .who-stage { margin: 0; width: 100%; height: 100%; align-items: center; }
-.who-frame .who-img { width: 76%; max-width: none; }
-.who-corner { position: absolute; width: 30px; height: 30px; z-index: 2; }
+/* 立繪盡量大：框內留白縮到原本的約 0.7（76%→83%）。 */
+.who-frame .who-img { width: 83%; max-width: none; }
+/* 精靈球用 % 尺寸，框縮放時跟著等比例縮放（偏移＝寬度一半 → 永遠對齊框角）。 */
+.who-corner { position: absolute; width: 11%; height: 11%; z-index: 2; }
 .who-corner .pokeball-svg { width: 100%; height: 100%; display: block; filter: drop-shadow(0 1px 1px rgba(0, 0, 0, .35)); }
-.who-corner--tl { top: -15px; left: -15px; }
-.who-corner--tr { top: -15px; right: -15px; }
-.who-corner--bl { bottom: -15px; left: -15px; }
-.who-corner--br { bottom: -15px; right: -15px; }
+.who-corner--tl { top: -5.5%; left: -5.5%; }
+.who-corner--tr { top: -5.5%; right: -5.5%; }
+.who-corner--bl { bottom: -5.5%; left: -5.5%; }
+.who-corner--br { bottom: -5.5%; right: -5.5%; }
+/* 換題時若下一張立繪還沒載好：框內轉圈、隱藏舊圖與提示、禁止輸入，避免黑影與提示對不上。 */
+.who-spinner { display: none; position: absolute; inset: 0; z-index: 3; align-items: center; justify-content: center; }
+.who-loading .who-spinner { display: flex; }
+.who-spinner::after {
+  content: ''; width: 38px; height: 38px;
+  border: 4px solid rgba(0, 0, 0, .18); border-top-color: rgba(0, 0, 0, .6);
+  border-radius: 50%; animation: who-spin .8s linear infinite;
+}
+@keyframes who-spin { to { transform: rotate(360deg); } }
+.who-loading .who-img { visibility: hidden; }
+.who-loading .who-hint { visibility: hidden; }
 .who-hint {
   text-align: center;
   color: var(--c-muted);
   font-size: .95rem;
   letter-spacing: .14em;
-  margin: 0 0 12px;
+  margin: 0 0 8px;
 }
 .who-hint strong { color: var(--c-text); font-weight: 800; }
+/* 我是誰：「我是誰」標籤放在輸入框同一行左邊（取代上方那句 prompt，省一行空間給立繪）。 */
+.who-label { flex: 0 0 auto; align-self: center; font-weight: 800; color: var(--c-muted); white-space: nowrap; }
 .who-input { margin-top: 0; }
 .who-answer { text-align: center; font-weight: 800; font-size: 1.05rem; margin: 12px 0 0; }
 .rv-img { width: 34px; height: 34px; object-fit: contain; flex: 0 0 auto; }

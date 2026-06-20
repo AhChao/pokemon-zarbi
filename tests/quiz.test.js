@@ -158,6 +158,7 @@ test('我是誰計分：多邊獸Ⅱ 可打阿拉伯數字 2', () => {
 test('我是誰計分：中黑點、括號等符號略過', () => {
   assert.ok(whoAnswerCorrect({ mode: 'who', key: 'tapu-koko', nameZh: '卡璞・鳴鳴' }, '卡璞鳴鳴'));
   assert.ok(whoAnswerCorrect({ mode: 'who', key: 'tapu-koko', nameZh: '卡璞・鳴鳴' }, '卡璞・鳴鳴'));
+  assert.ok(whoAnswerCorrect({ mode: 'who', key: 'tapu-koko', nameZh: '卡璞・鳴鳴' }, '卡璞。鳴鳴')); // 句號也容錯
   const tauros = { mode: 'who', key: 'tauros-paldea-combat-breed', nameZh: '帕底亞肯泰羅（鬥戰種）' };
   assert.ok(whoAnswerCorrect(tauros, '帕底亞肯泰羅鬥戰種')); // 去括號
 });

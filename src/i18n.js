@@ -50,6 +50,7 @@ const DICT = {
     'who.difficulty.normal.note': '不含 Mega，以圈圈呈現字數',
     'who.difficulty.hard.note': '含 Mega，沒有提示，最考驗熟練度',
     'who.prompt': '這是誰？打出中文名字',
+    'who.label': '我是誰',
     'who.placeholder': '輸入名字…',
     'who.submit': '確認',
     'dex.title': '圖鑑',

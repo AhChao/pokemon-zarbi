@@ -93,6 +93,60 @@ function setView(node) {
   window.scrollTo(0, 0);
 }
 
+// 手機：輸入框聚焦（軟鍵盤彈出）後，只在「輸入框真的被鍵盤蓋到」時補捲剛好露出它的量，
+// 絕不大幅拉動視窗（搭配 viewport interactive-widget=overlays-content，鍵盤只覆蓋、不擠壓版面）。
+function keepInputVisible(input) {
+  if (!input) return;
+  input.addEventListener('focus', () => setTimeout(() => {
+    try {
+      const vv = window.visualViewport;
+      const visibleBottom = vv ? vv.offsetTop + vv.height : window.innerHeight;
+      const over = input.getBoundingClientRect().bottom - (visibleBottom - 8);
+      if (over > 0) window.scrollBy({ top: over, behavior: 'smooth' }); // 只補被蓋住的那一點，讓鍵盤上緣切齊輸入框下緣
+    } catch { /* 略過 */ }
+  }, 280));
+}
+
+// 載入題目立繪：載入期間框內轉圈、禁止輸入、隱藏舊圖與提示，直到圖片載好（或失敗）才解鎖並聚焦，
+// 避免「上面黑影還沒換、下面提示文字已換」對不上（提示是純文字會瞬間出現）。
+function loadWhoImage(node, q, hint, opts = {}) {
+  const body = node.querySelector('[data-qbody]');
+  const img = body.querySelector('.who-img');
+  const input = body.querySelector('[data-who-input]');
+  const hintEl = body.querySelector('.who-hint');
+  if (hintEl) hintEl.innerHTML = hint || '';
+  body.classList.add('who-loading');
+  if (input) input.disabled = true;
+  let settled = false;
+  const finish = (ok) => {
+    if (settled) return;
+    settled = true;
+    img.style.visibility = ok ? '' : 'hidden';
+    body.classList.remove('who-loading');
+    if (input) { input.disabled = false; if (opts.focus) input.focus(); }
+  };
+  img.onload = () => finish(true);
+  img.onerror = () => finish(false);
+  img.src = q.image;
+  if (img.complete) finish(img.naturalWidth > 0); // 已在快取：立即完成
+}
+
+// 背景靜默預載立繪：作答當下就把後續題目的圖片偷偷下載進快取，換題時即取即顯、免轉圈等待。
+// 前端外觀完全不變（new Image() 不進 DOM），只是觸發瀏覽器下載。
+const prefetchedImgs = new Set();
+const prefetchKeep = []; // 保留 Image 參考，避免下載中被 GC
+function prefetchImages(urls) {
+  for (const u of urls) {
+    if (!u || prefetchedImgs.has(u)) continue;
+    prefetchedImgs.add(u);
+    const im = new Image();
+    im.decoding = 'async';
+    im.src = u;
+    prefetchKeep.push(im);
+    if (prefetchKeep.length > 80) prefetchKeep.shift();
+  }
+}
+
 // ── 主題切換（瀏覽器預設 / 亮色 / 暗色）──────────────────────────
 // 自繪 SVG：亮＝空心點、暗＝實心點、瀏覽器預設＝地球。偏好存 localStorage，預設跟瀏覽器。
 const THEME_KEY = 'poke-quest.theme';
@@ -588,6 +642,9 @@ function startQuiz({ mode = 'type', season = '', seed, difficulty = 'all', count
     return viewHome();
   }
   session = { quiz, answers: [], index: 0, locked: false, challenge, saved: false, meta: { mode, season, difficulty, count: total, scoreMode: sm } };
+  // 一開局就背景預載全部題目立繪（我是誰黑影、速度題兩隻），之後換題免等。
+  if (mode === 'who') prefetchImages(quiz.questions.map((q) => q.image));
+  else if (mode === 'speed') prefetchImages(quiz.questions.flatMap((q) => q.options.map((o) => o.image)));
   gaEvent('quiz_start', { mode, season, difficulty, count: total, score_mode: sm, is_challenge: !!challenge });
   go('#/quiz');
 }
@@ -636,19 +693,18 @@ function viewQuiz() {
         <span class="who-corner who-corner--tr">${pokeballSvg()}</span>
         <span class="who-corner who-corner--bl">${pokeballSvg()}</span>
         <span class="who-corner who-corner--br">${pokeballSvg()}</span>
+        <span class="who-spinner" aria-hidden="true"></span>
         <div class="who-stage${session.meta.difficulty === 'veryeasy' ? ' revealed' : ''}"><img class="who-img" alt="" /></div>
       </div>
-      <p class="q-prompt">${esc(t('who.prompt'))}</p>
       ${hint ? `<p class="who-hint">${hint}</p>` : ''}
       <div class="code-box who-input">
+        <span class="who-label">${esc(t('who.label'))}</span>
         <input type="text" inputmode="text" autocomplete="off" autocapitalize="off" spellcheck="false"
                placeholder="${esc(t('who.placeholder'))}" aria-label="${esc(t('who.prompt'))}" data-who-input />
         <button class="btn btn--accent" data-act="who-submit">${esc(t('who.submit'))}</button>
       </div>`;
-    const img = body.querySelector('.who-img');
-    img.src = q.image;
-    img.onerror = () => { img.style.visibility = 'hidden'; };
     const input = body.querySelector('[data-who-input]');
+    keepInputVisible(input);
     const submit = () => answerWho(input.value, node);
     body.querySelector('[data-act="who-submit"]').onclick = submit;
     input.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); submit(); } });
@@ -678,7 +734,7 @@ function viewQuiz() {
   }
 
   setView(node);
-  if (q.mode === 'who') node.querySelector('[data-who-input]')?.focus();
+  if (q.mode === 'who') loadWhoImage(node, q, whoHint(q, session.meta.difficulty), { focus: true });
 }
 
 // 地區形態的中文前綴：提示時整段直接顯示（露「阿」這種前綴第一個字沒意義）。
@@ -704,6 +760,25 @@ function whoHint(q, difficulty) {
     return lead + chars.map(() => '○').join(' ');
   }
   return '';
+}
+
+// 我是誰：原地換到下一題（不重建整頁、不捲到頂），避免換題時的大跳動與鍵盤抖動。
+function repaintWho(node) {
+  const { quiz, index } = session;
+  const q = quiz.questions[index];
+  const body = node.querySelector('[data-qbody]');
+  node.querySelector('.quiz__meta span').textContent = t('quiz.progress', { n: index + 1, total: quiz.count });
+  node.querySelector('.progress__bar').style.width = `${Math.round((index / quiz.count) * 100)}%`;
+  const frame = body.querySelector('.who-frame');
+  if (frame) frame.style.setProperty('--frame-fill', frameFill(quiz.seed, index));
+  body.querySelector('.who-stage')?.classList.toggle('revealed', session.meta.difficulty === 'veryeasy');
+  body.querySelector('.who-answer')?.remove();
+  body.querySelector('[data-who-input]').value = '';
+  const submitBtn = body.querySelector('[data-act="who-submit"]');
+  if (submitBtn) submitBtn.disabled = false;
+  const fb = node.querySelector('.feedback'); fb.textContent = ''; fb.className = 'feedback';
+  const next = node.querySelector('[data-act="next"]'); next.hidden = true; next.onclick = null;
+  loadWhoImage(node, q, whoHint(q, session.meta.difficulty), { focus: true }); // 等新立繪載好才解鎖、聚焦
 }
 
 // 我是誰作答：比對輸入、揭曉黑影與正解名、鎖定輸入。
@@ -732,7 +807,7 @@ function answerWho(typed, node) {
     if (last) { go('#/result'); return; }
     session.index++;
     session.locked = false;
-    render();
+    repaintWho(node); // 原地換題，不走 render() → 不捲到頂、不重建 DOM
   };
   next.focus();
 }
@@ -777,6 +852,8 @@ function nextMaster() {
   if (!key) { masterState.current = null; return; }
   const p = masterState.byKey.get(key);
   masterState.current = { key: p.key, mode: 'who', nameZh: p.nameZh, nameEn: p.nameEn, image: p.image, mega: !!p.mega, dex: p.dex };
+  // 背景預載接下來幾隻的立繪（池可能很大 → 用滑動視窗，不一次全抓）。
+  prefetchImages([p.image, ...masterState.queue.slice(0, 10).map((k) => masterState.byKey.get(k)?.image)].filter(Boolean));
 }
 
 function viewMaster() {
@@ -800,11 +877,12 @@ function viewMaster() {
           <span class="who-corner who-corner--tr">${pokeballSvg()}</span>
           <span class="who-corner who-corner--bl">${pokeballSvg()}</span>
           <span class="who-corner who-corner--br">${pokeballSvg()}</span>
+          <span class="who-spinner" aria-hidden="true"></span>
           <div class="who-stage${ms.difficulty === 'veryeasy' ? ' revealed' : ''}"><img class="who-img" alt="" /></div>
         </div>
-        <p class="q-prompt">${esc(t('who.prompt'))}</p>
         ${hint ? `<p class="who-hint">${hint}</p>` : ''}
         <div class="code-box who-input">
+          <span class="who-label">${esc(t('who.label'))}</span>
           <input type="text" inputmode="text" autocomplete="off" autocapitalize="off" spellcheck="false"
                  placeholder="${esc(t('who.placeholder'))}" aria-label="${esc(t('who.prompt'))}" data-who-input />
           <button class="btn btn--accent" data-act="who-submit">${esc(t('who.submit'))}</button>
@@ -814,14 +892,34 @@ function viewMaster() {
       <button class="btn btn--primary" data-act="next" hidden></button>
       <button class="btn btn--ghost" data-nav="home">${esc(t('common.back'))}</button>
     </section>`);
-  const img = node.querySelector('.who-img');
-  img.src = q.image; img.onerror = () => { img.style.visibility = 'hidden'; };
   const input = node.querySelector('[data-who-input]');
+  keepInputVisible(input);
   const submit = () => answerMaster(input.value, node);
   node.querySelector('[data-act="who-submit"]').onclick = submit;
   input.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); submit(); } });
   setView(node);
-  input.focus();
+  loadWhoImage(node, q, hint, { focus: true }); // 等立繪載好才解鎖、聚焦
+}
+
+// 寶可夢大師：原地換到下一隻（同我是誰，不重建整頁、不捲到頂）。
+function repaintMaster(node) {
+  const ms = masterState;
+  const q = ms.current;
+  const body = node.querySelector('[data-qbody]');
+  const metaSpans = node.querySelectorAll('.quiz__meta span');
+  if (metaSpans[0]) metaSpans[0].textContent = t('master.progress', { done: ms.doneCount, total: ms.total });
+  if (metaSpans[1]) metaSpans[1].textContent = t('master.mistakes', { n: ms.rec.mistakes });
+  node.querySelector('.progress__bar').style.width = `${Math.round((ms.doneCount / ms.total) * 100)}%`;
+  const frame = body.querySelector('.who-frame');
+  if (frame) frame.style.setProperty('--frame-fill', frameFill(ms.poolKey, ms.doneCount + ms.rec.mistakes));
+  body.querySelector('.who-stage')?.classList.toggle('revealed', ms.difficulty === 'veryeasy');
+  body.querySelector('.who-answer')?.remove();
+  body.querySelector('[data-who-input]').value = '';
+  const submitBtn = body.querySelector('[data-act="who-submit"]');
+  if (submitBtn) submitBtn.disabled = false;
+  const fb = node.querySelector('.feedback'); fb.textContent = ''; fb.className = 'feedback';
+  const next = node.querySelector('[data-act="next"]'); next.hidden = true; next.onclick = null;
+  loadWhoImage(node, q, whoHint(q, ms.difficulty), { focus: true }); // 等新立繪載好才解鎖、聚焦
 }
 
 function answerMaster(typed, node) {
@@ -858,7 +956,7 @@ function answerMaster(typed, node) {
   const next = node.querySelector('[data-act="next"]');
   next.textContent = (right && ms.queue.length === 0) ? t('quiz.finish') : t('quiz.next');
   next.hidden = false;
-  next.onclick = () => { nextMaster(); render(); };
+  next.onclick = () => { nextMaster(); if (!masterState.current) render(); else repaintMaster(node); };
   next.focus();
 }
 
@@ -1128,6 +1226,7 @@ function startCustomWho(decoded) {
   try { quiz = generateWhoQuizFromKeys(decoded.seed, pool, decoded.difficulty); }
   catch (e) { console.error(e); return viewHome(); }
   session = { quiz, answers: [], index: 0, locked: false, challenge: null, saved: false, meta: { mode: 'who', season: '', difficulty: decoded.difficulty, count: quiz.count, scoreMode: decoded.scoreMode } };
+  prefetchImages(quiz.questions.map((q) => q.image)); // 背景預載自訂題庫立繪
   go('#/quiz');
 }
 
