@@ -1,7 +1,27 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { encodeResult, decodeResult } from '../src/share.js';
+import { encodeResult, decodeResult, encodeDokuTrap, encodeWhoCustom } from '../src/share.js';
 import { generateTypeQuiz } from '../src/quiz.js';
+
+test('自訂題庫碼 round-trip：清單 + 難度 + 計分', () => {
+  const keys = ['pikachu', 'charizard', 'gengar', 'ninetales-alola'];
+  for (const [difficulty, scoreMode] of [['easy', 'count'], ['normal', 'char'], ['hard', 'normal']]) {
+    const code = encodeWhoCustom({ seed: 'cw', keys, difficulty, scoreMode });
+    assert.deepEqual(decodeResult(code), { mode: 'who-custom', difficulty, scoreMode, seed: 'cw', keys });
+  }
+});
+
+test('挖坑碼 round-trip：9 個坑 + 提示模式', () => {
+  const pits = ['pikachu', 'charizard', 'gengar', 'snorlax', 'mewtwo', 'gyarados', 'lapras', 'eevee', 'ditto'];
+  for (const hintMode of ['hint', 'nohint']) {
+    const code = encodeDokuTrap({ seed: 'pit-seed', pits, hintMode });
+    assert.deepEqual(decodeResult(code), { mode: 'doku-trap', seed: 'pit-seed', hintMode, pits });
+  }
+});
+
+test('挖坑碼：坑數不是 9 會丟錯', () => {
+  assert.throws(() => encodeDokuTrap({ seed: 's', pits: ['a', 'b'] }));
+});
 
 test('屬性成績碼 round-trip', () => {
   const code = encodeResult({ mode: 'type', seed: 'abc123', total: 10, score: 7 });
@@ -14,7 +34,7 @@ test('速度成績碼帶賽季 round-trip', () => {
 });
 
 test('速度成績碼帶難度 round-trip', () => {
-  for (const difficulty of ['easy', 'medium', 'hard']) {
+  for (const difficulty of ['easy', 'medium', 'hard', 'random']) {
     const code = encodeResult({ mode: 'speed', season: 'm-a', seed: 'd1', total: 10, score: 4, difficulty });
     assert.deepEqual(decodeResult(code),
       { mode: 'speed', season: 'm-a', seed: 'd1', total: 10, score: 4, difficulty });

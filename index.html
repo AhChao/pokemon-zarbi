@@ -8,6 +8,18 @@
   <title>寶可夢快問快答</title>
   <link rel="icon" type="image/svg+xml" href="./assets/ui/favicon.svg" />
   <link rel="stylesheet" href="./css/styles.css" />
+  <script>
+    // 主題早綁定（避免閃爍）：讀使用者偏好（system/light/dark，預設跟瀏覽器），解析成實際亮/暗。
+    (function () {
+      try {
+        var pref = localStorage.getItem('poke-quest.theme') || 'system';
+        var dark = pref === 'dark' || (pref === 'system' && matchMedia('(prefers-color-scheme: dark)').matches);
+        document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+      } catch (e) {
+        document.documentElement.dataset.theme = 'light';
+      }
+    })();
+  </script>
 </head>
 <body>
   <header class="topbar">
@@ -15,6 +27,7 @@
       <span class="brand__mark" aria-hidden="true"><svg class="ui-icon" viewBox="0 0 400 400"><defs><mask id="brand-eye"><rect width="400" height="400" fill="#fff"/><circle cx="200" cy="160" r="50" fill="#000"/></mask></defs><g stroke="currentColor" stroke-width="32" stroke-linecap="round" stroke-linejoin="round" fill="none"><path d="M 50,170 A 150,150 0 0,0 350,170"/><line x1="130" y1="230" x2="105" y2="255"/><line x1="200" y1="240" x2="200" y2="320"/><line x1="270" y1="230" x2="295" y2="255"/><line x1="200" y1="70" x2="200" y2="50"/></g><circle cx="200" cy="160" r="80" fill="currentColor" mask="url(#brand-eye)"/><path d="M 175,135 C 175,110 225,110 225,135 C 225,155 200,160 200,175" stroke="currentColor" stroke-width="12" stroke-linecap="round" fill="none"/><circle cx="200" cy="195" r="7" fill="currentColor"/></svg></span>
       <span class="brand__name">寶可夢快問快答</span>
     </button>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="切換主題"></button>
   </header>
 
   <main id="app" class="app" aria-live="polite"></main>

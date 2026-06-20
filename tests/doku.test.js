@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
-import { generateDoku, baseName, cellSatisfied } from '../src/doku.js';
+import { generateDoku, baseName, baseNameLen, cellSatisfied } from '../src/doku.js';
 
 const dex = JSON.parse(await readFile(new URL('../src/data/dex-national.json', import.meta.url), 'utf8'));
 
@@ -37,4 +37,12 @@ test('名字字數去形態前綴：超級/地區形態歸到本體名', () => {
   assert.equal(baseName({ key: 'charizard-mega-x', ...dex['charizard-mega-x'] }), '噴火龍');
   assert.equal(baseName({ key: 'ninetales-alola', ...dex['ninetales-alola'] }), '九尾');
   assert.equal(len('pikachu'), 3);
+});
+
+test('名字字數不算符號：括號、中黑點不計入', () => {
+  // 帕底亞肯泰羅（鬥戰種）→ 去地區前綴「帕底亞」、去括號 →「肯泰羅鬥戰種」6 字
+  assert.equal(baseNameLen({ key: 'tauros-paldea-combat-breed', ...dex['tauros-paldea-combat-breed'] }), 6);
+  // 卡璞・鳴鳴 → 去中黑點 →「卡璞鳴鳴」4 字
+  assert.equal(baseNameLen({ key: 'tapu-koko', ...dex['tapu-koko'] }), 4);
+  assert.equal(baseNameLen({ key: 'pikachu', ...dex['pikachu'] }), 3);
 });

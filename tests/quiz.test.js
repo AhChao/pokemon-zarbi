@@ -148,6 +148,45 @@ test('我是誰計分：名字內含英數可大小寫互通（3D龍）', () => 
   assert.ok(!whoAnswerCorrect(q, 'porygon')); // 不收英文名
 });
 
+test('我是誰計分：多邊獸Ⅱ 可打阿拉伯數字 2', () => {
+  const q = { mode: 'who', key: 'porygon2', nameZh: '多邊獸Ⅱ', nameEn: 'Porygon2' };
+  assert.ok(whoAnswerCorrect(q, '多邊獸2'));   // 羅馬數字 Ⅱ → 2
+  assert.ok(whoAnswerCorrect(q, '多邊獸Ⅱ'));   // 原字也可
+  assert.ok(whoAnswerCorrect(q, '多邊獸２'));   // 全形 2
+});
+
+test('我是誰計分：中黑點、括號等符號略過', () => {
+  assert.ok(whoAnswerCorrect({ mode: 'who', key: 'tapu-koko', nameZh: '卡璞・鳴鳴' }, '卡璞鳴鳴'));
+  assert.ok(whoAnswerCorrect({ mode: 'who', key: 'tapu-koko', nameZh: '卡璞・鳴鳴' }, '卡璞・鳴鳴'));
+  const tauros = { mode: 'who', key: 'tauros-paldea-combat-breed', nameZh: '帕底亞肯泰羅（鬥戰種）' };
+  assert.ok(whoAnswerCorrect(tauros, '帕底亞肯泰羅鬥戰種')); // 去括號
+});
+
+test('我是誰計分：提示難度地區名可有可無、其他難度需完整', () => {
+  const q = { mode: 'who', key: 'ninetales-alola', nameZh: '阿羅拉九尾', nameEn: 'Alolan Ninetales' };
+  // 提示難度（veryeasy/easy）：打不打地區名都算對
+  for (const d of ['veryeasy', 'easy']) {
+    assert.ok(whoAnswerCorrect(q, '阿羅拉九尾', d), `${d} 完整名應對`);
+    assert.ok(whoAnswerCorrect(q, '九尾', d), `${d} 省略地區名應對`);
+  }
+  // 其他難度（normal/hard）：必須完整名
+  for (const d of ['normal', 'hard']) {
+    assert.ok(whoAnswerCorrect(q, '阿羅拉九尾', d), `${d} 完整名應對`);
+    assert.ok(!whoAnswerCorrect(q, '九尾', d), `${d} 省略地區名不應對`);
+  }
+  // 非地區形態不受影響：提示難度也不能少打字
+  const pika = { mode: 'who', key: 'pikachu', nameZh: '皮卡丘' };
+  assert.ok(!whoAnswerCorrect(pika, '卡丘', 'easy'));
+});
+
+test('速度測驗：random 難度每題落在 easy/medium/hard 任一桶、同 seed 可重現', () => {
+  const quiz = generateSpeedQuiz('rng-band', BANDED, 10, 'random');
+  assert.equal(quiz.difficulty, 'random');
+  assert.ok(quiz.questions.length > 0);
+  for (const q of quiz.questions) assert.ok(q.diff >= 1, `diff ${q.diff} 應 >=1`);
+  assert.deepEqual(quiz, generateSpeedQuiz('rng-band', BANDED, 10, 'random'));
+});
+
 test('計分通用於我是誰模式', () => {
   const quiz = generateWhoQuiz('grade-who', WHO_POOL, 4, 'normal');
   const allRight = quiz.questions.map((q) => q.nameZh);

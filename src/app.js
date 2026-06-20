@@ -1,9 +1,10 @@
 // 瀏覽器端主程式：hash 路由 + 成績碼網址處理 + 各畫面渲染。
 import { TYPES, TYPE_META, multiplier, formatMultiplier } from './data/typechart.js';
-import { generateTypeQuiz, generateSpeedQuiz, generateWhoQuiz, whoAnswerCorrect, whoCharScore, scoreQuizChar, normalizeName, speedLines, scoreQuiz, newSeed, DEFAULT_QUESTION_COUNT, MIN_QUESTION_COUNT, MAX_QUESTION_COUNT, SPEED_DIFFICULTIES, DEFAULT_SPEED_DIFFICULTY, WHO_DIFFICULTIES, DEFAULT_WHO_DIFFICULTY } from './quiz.js';
+import { generateTypeQuiz, generateSpeedQuiz, generateWhoQuiz, generateWhoQuizFromKeys, whoAnswerCorrect, whoCharScore, scoreQuizChar, normalizeName, speedLines, scoreQuiz, newSeed, DEFAULT_QUESTION_COUNT, MIN_QUESTION_COUNT, MAX_QUESTION_COUNT, SPEED_DIFFICULTIES, DEFAULT_SPEED_DIFFICULTY, WHO_DIFFICULTIES, DEFAULT_WHO_DIFFICULTY } from './quiz.js';
 import { generateDoku, cellSatisfied, PICK_RESULT_LIMIT } from './doku.js';
-import { encodeResult, decodeResult } from './share.js';
+import { encodeResult, decodeResult, encodeDokuTrap, encodeWhoCustom } from './share.js';
 import { getHistory, addHistory } from './history.js';
+import { masterAvailable, getMaster, saveMaster, resetMaster, pushWrong } from './master.js';
 import { t, typeName } from './i18n.js';
 
 const app = document.getElementById('app');
@@ -62,6 +63,25 @@ function uiIcon(name) {
   return `<svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true">${UI_ICONS[name]}</svg>`;
 }
 
+// 精靈球 SVG（多色，非 currentColor）：用於「我是誰」電視動畫風格球框四角。
+function pokeballSvg() {
+  return `<svg class="pokeball-svg" viewBox="0 0 24 24" aria-hidden="true">
+    <circle cx="12" cy="12" r="11" fill="#fff" stroke="#222" stroke-width="1.4"/>
+    <path d="M1.2 12a10.8 10.8 0 0 1 21.6 0Z" fill="#e3350d"/>
+    <line x1="1.2" y1="12" x2="22.8" y2="12" stroke="#222" stroke-width="1.8"/>
+    <circle cx="12" cy="12" r="3.4" fill="#fff" stroke="#222" stroke-width="1.6"/>
+    <circle cx="12" cy="12" r="1.4" fill="#fff" stroke="#222" stroke-width="1"/>
+  </svg>`;
+}
+
+// 「我是誰」球框內底色：由 seed＋題序決定（可分享 → 兩端同色），剪影是黑的故選中亮度底色。
+const FRAME_COLORS = ['#9ed8a6', '#9ec9e8', '#e8c79e', '#d8a6cf', '#c0d89e', '#e89e9e', '#9ed8cf', '#c9b0e8', '#e8d99e', '#a6b8d8'];
+function frameFill(seedStr, idx) {
+  let h = 0;
+  for (const c of `${seedStr}:${idx}`) h = (h * 31 + c.charCodeAt(0)) >>> 0;
+  return FRAME_COLORS[h % FRAME_COLORS.length];
+}
+
 function badge(typeKey, big = false) {
   const m = TYPE_META[typeKey];
   return `<span class="type-badge${big ? ' type-badge--lg' : ''}" style="background:${m.color}">${typeIcon(typeKey)}${esc(typeName(typeKey))}</span>`;
@@ -71,6 +91,46 @@ function setView(node) {
   app.innerHTML = '';
   app.appendChild(node);
   window.scrollTo(0, 0);
+}
+
+// ── 主題切換（瀏覽器預設 / 亮色 / 暗色）──────────────────────────
+// 自繪 SVG：亮＝空心點、暗＝實心點、瀏覽器預設＝地球。偏好存 localStorage，預設跟瀏覽器。
+const THEME_KEY = 'poke-quest.theme';
+const THEME_ORDER = ['system', 'light', 'dark'];
+const THEME_SVG = {
+  light: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="6" fill="none" stroke="currentColor" stroke-width="2.4"/></svg>',
+  dark: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="6.5" fill="currentColor"/></svg>',
+  system: '<svg viewBox="0 0 24 24" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="8.5"/><ellipse cx="12" cy="12" rx="3.6" ry="8.5"/><line x1="3.5" y1="12" x2="20.5" y2="12"/><line x1="5.2" y1="7" x2="18.8" y2="7"/><line x1="5.2" y1="17" x2="18.8" y2="17"/></g></svg>',
+};
+const THEME_LABEL = { system: '主題：瀏覽器預設', light: '主題：亮色', dark: '主題：暗色' };
+
+function readThemePref() {
+  try { return localStorage.getItem(THEME_KEY) || 'system'; } catch { return 'system'; }
+}
+function systemPrefersDark() {
+  return typeof matchMedia === 'function' && matchMedia('(prefers-color-scheme: dark)').matches;
+}
+function applyTheme(pref) {
+  const dark = pref === 'dark' || (pref === 'system' && systemPrefersDark());
+  document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+}
+function initTheme() {
+  const btn = document.querySelector('[data-theme-toggle]');
+  if (!btn) return;
+  let pref = readThemePref();
+  const paint = () => { btn.innerHTML = THEME_SVG[pref]; btn.setAttribute('aria-label', THEME_LABEL[pref]); btn.title = THEME_LABEL[pref]; };
+  applyTheme(pref); paint();
+  btn.onclick = () => {
+    pref = THEME_ORDER[(THEME_ORDER.indexOf(pref) + 1) % THEME_ORDER.length];
+    try { localStorage.setItem(THEME_KEY, pref); } catch { /* 存不了就只在本次有效 */ }
+    applyTheme(pref); paint();
+  };
+  // 「瀏覽器預設」時，系統亮/暗切換要即時跟著變。
+  if (typeof matchMedia === 'function') {
+    const mq = matchMedia('(prefers-color-scheme: dark)');
+    const onChange = () => { if (pref === 'system') applyTheme('system'); };
+    if (mq.addEventListener) mq.addEventListener('change', onChange); else if (mq.addListener) mq.addListener(onChange);
+  }
 }
 
 function go(hash) {
@@ -147,6 +207,7 @@ function whoPool(poolKey) {
     .sort((a, b) => (a.key < b.key ? -1 : a.key > b.key ? 1 : 0));
 }
 function poolLabel(poolKey) {
+  if (!poolKey) return t('builder.poolLabel');
   if (poolKey === 'all') return '全部世代（混合）';
   const g = GENERATIONS.find((x) => x.key === poolKey);
   if (g) return `第${g.cn}世代（${g.region}）`;
@@ -182,7 +243,15 @@ function quizLabel(mode, season, difficulty = 'all') {
 let session = null;        // { quiz, answers, index, locked, challenge, saved, meta }
 let viewingHistory = null; // 目前點開查看的歷史紀錄
 let setupState = null;     // { mode, season, seed } — 準備畫面
-let dokuState = null;      // { seed, puzzle, picks:[9], challenge } — 數獨盤面
+let dokuSetup = null;      // { play, hintMode, seed } — 數獨準備畫面
+let dokuState = null;      // { seed, puzzle, picks:[9], hintMode, play, pits, challenge } — 數獨盤面
+let masterState = null;    // 寶可夢大師模式（本機）的進行狀態
+let builderState = null;   // 我是誰出題 builder 的狀態
+
+// 解碼任一種分享碼：一般成績碼 / 挖坑碼 / 自訂題庫碼都由 decodeResult 統一處理。
+function decodeShare(code) {
+  return decodeResult(code);
+}
 
 // 相對時間文字。
 function relTime(ts) {
@@ -263,8 +332,8 @@ function viewHome() {
   node.querySelectorAll('[data-pick]').forEach((b) => {
     b.onclick = () => {
       const mode = b.dataset.pick;
-      // 數獨是獨立盤面、不走線性測驗的 setup（無賽季/難度/題數），直接開新盤。
-      if (mode === 'doku') { dokuState = { seed: newSeed(), challenge: null }; go('#/doku'); return; }
+      // 數獨走自己的 setup（選玩法：一般練習／挖坑出題；作答方式：提示／無提示）。
+      if (mode === 'doku') { dokuSetup = { play: 'practice', hintMode: 'hint', seed: newSeed() }; go('#/doku-setup'); return; }
       let season = '', difficulty = 'all';
       if (mode === 'speed') { season = defaultSeason(); difficulty = DEFAULT_SPEED_DIFFICULTY; }
       else if (mode === 'who') { season = defaultWhoPool(); difficulty = DEFAULT_WHO_DIFFICULTY; }
@@ -281,7 +350,7 @@ function viewHome() {
     if (!raw) return;
     const m = raw.match(/[?&]c=([^&\s]+)/);
     const code = m ? decodeURIComponent(m[1]) : raw;
-    const decoded = decodeResult(code);
+    const decoded = decodeShare(code);
     if (!decoded) {
       codeErr.textContent = t('home.codeBad');
       codeInput.focus();
@@ -426,6 +495,19 @@ function viewSetup() {
       b.onclick = () => { setupState.difficulty = d; viewSetup(); };
       diffWrap.appendChild(b);
     });
+
+    // 寶可夢大師模式 + 出題模式入口（衍生玩法）：放到「換一份題目」連結之下。
+    const masterWrap = el(`
+      <div class="master-entry">
+        <button class="btn btn--ghost" data-act="master">${esc(t('master.btn'))}</button>
+        <p class="muted">${esc(t('master.btnNote'))}</p>
+        <button class="btn btn--ghost" data-act="builder">${esc(t('builder.btn'))}</button>
+      </div>`);
+    masterWrap.querySelector('[data-act="master"]').onclick = () => startMaster(setupState.season, setupState.difficulty);
+    masterWrap.querySelector('[data-act="builder"]').onclick = () => { builderState = null; go('#/who-builder'); };
+    const rerollP = node.querySelector('[data-act="reroll"]')?.closest('p');
+    if (rerollP) rerollP.after(masterWrap);
+    else node.querySelector('[data-act="start"]').before(masterWrap);
   }
 
   const smWrap = node.querySelector('[data-scoremodes]');
@@ -517,7 +599,13 @@ function viewQuiz() {
   if (q.mode === 'who') {
     const hint = whoHint(q, session.meta.difficulty);
     body.innerHTML = `
-      <div class="who-stage${session.meta.difficulty === 'veryeasy' ? ' revealed' : ''}"><img class="who-img" alt="" /></div>
+      <div class="who-frame" style="--frame-fill:${frameFill(quiz.seed, index)}">
+        <span class="who-corner who-corner--tl">${pokeballSvg()}</span>
+        <span class="who-corner who-corner--tr">${pokeballSvg()}</span>
+        <span class="who-corner who-corner--bl">${pokeballSvg()}</span>
+        <span class="who-corner who-corner--br">${pokeballSvg()}</span>
+        <div class="who-stage${session.meta.difficulty === 'veryeasy' ? ' revealed' : ''}"><img class="who-img" alt="" /></div>
+      </div>
       <p class="q-prompt">${esc(t('who.prompt'))}</p>
       ${hint ? `<p class="who-hint">${hint}</p>` : ''}
       <div class="code-box who-input">
@@ -592,7 +680,7 @@ function answerWho(typed, node) {
   session.locked = true;
   const q = session.quiz.questions[session.index];
   session.answers[session.index] = typed;
-  const right = whoAnswerCorrect(q, typed);
+  const right = whoAnswerCorrect(q, typed, session.meta.difficulty);
 
   node.querySelector('.who-stage')?.classList.add('revealed');
   node.querySelectorAll('.who-input input, .who-input button').forEach((e) => { e.disabled = true; });
@@ -615,6 +703,391 @@ function answerWho(typed, node) {
     render();
   };
   next.focus();
+}
+
+// ── 寶可夢大師模式（本機）：走完整個池、每隻答對前都會再出現、全對即成為大師 ──
+// 今天的日期鍵（征服天數用）。
+function todayKey() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
+function startMaster(poolKey, difficulty) {
+  const available = masterAvailable();
+  // 池依難度套用 Mega 規則（hard 才含 Mega），與一般我是誰一致。
+  const all = whoPool(poolKey).filter((p) => difficulty === 'hard' || !p.mega);
+  if (!all.length) return viewHome();
+  const rec = getMaster(poolKey); // localStorage 不可用時也會回一筆空白 rec（純記憶體用）
+  // 開始這個池：補首次時間戳、回鍋次數 +1、記下今天。
+  if (!rec.startedAt) rec.startedAt = Date.now();
+  rec.sessions = (rec.sessions || 0) + 1;
+  const today = todayKey();
+  if (!rec.days.includes(today)) rec.days.push(today);
+  if (available) saveMaster(poolKey, rec);
+
+  const doneSet = new Set(rec.done);
+  const byKey = new Map(all.map((p) => [p.key, p]));
+  // 尚未答對者洗牌成佇列（本機隨機即可）。
+  const queue = all.filter((p) => !doneSet.has(p.key)).map((p) => p.key);
+  for (let i = queue.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [queue[i], queue[j]] = [queue[j], queue[i]]; }
+  masterState = {
+    poolKey, difficulty, byKey, rec, available, queue,
+    total: all.length, doneCount: rec.done.length, current: null, locked: false,
+  };
+  nextMaster();
+  go('#/master');
+}
+
+function nextMaster() {
+  if (!masterState) return;
+  masterState.locked = false;
+  const key = masterState.queue.shift();
+  if (!key) { masterState.current = null; return; }
+  const p = masterState.byKey.get(key);
+  masterState.current = { key: p.key, mode: 'who', nameZh: p.nameZh, nameEn: p.nameEn, image: p.image, mega: !!p.mega, dex: p.dex };
+}
+
+function viewMaster() {
+  if (!masterState) return viewHome();
+  const ms = masterState;
+  if (!ms.current) return viewMasterDone();
+  const q = ms.current;
+  const hint = whoHint(q, ms.difficulty);
+  const pct = Math.round((ms.doneCount / ms.total) * 100);
+  const node = el(`
+    <section class="card">
+      <div class="quiz__meta">
+        <span>${esc(t('master.progress', { done: ms.doneCount, total: ms.total }))}</span>
+        <span>${esc(t('master.mistakes', { n: ms.rec.mistakes }))}</span>
+      </div>
+      <div class="progress"><div class="progress__bar" style="width:${pct}%"></div></div>
+      ${ms.available ? '' : `<p class="feedback feedback--bad" style="text-align:left;min-height:0">${esc(t('master.noStore'))}</p>`}
+      <div data-qbody>
+        <div class="who-frame" style="--frame-fill:${frameFill(ms.poolKey, ms.doneCount + ms.rec.mistakes)}">
+          <span class="who-corner who-corner--tl">${pokeballSvg()}</span>
+          <span class="who-corner who-corner--tr">${pokeballSvg()}</span>
+          <span class="who-corner who-corner--bl">${pokeballSvg()}</span>
+          <span class="who-corner who-corner--br">${pokeballSvg()}</span>
+          <div class="who-stage${ms.difficulty === 'veryeasy' ? ' revealed' : ''}"><img class="who-img" alt="" /></div>
+        </div>
+        <p class="q-prompt">${esc(t('who.prompt'))}</p>
+        ${hint ? `<p class="who-hint">${hint}</p>` : ''}
+        <div class="code-box who-input">
+          <input type="text" inputmode="text" autocomplete="off" autocapitalize="off" spellcheck="false"
+                 placeholder="${esc(t('who.placeholder'))}" aria-label="${esc(t('who.prompt'))}" data-who-input />
+          <button class="btn btn--accent" data-act="who-submit">${esc(t('who.submit'))}</button>
+        </div>
+      </div>
+      <p class="feedback"></p>
+      <button class="btn btn--primary" data-act="next" hidden></button>
+      <button class="btn btn--ghost" data-nav="home">${esc(t('common.back'))}</button>
+    </section>`);
+  const img = node.querySelector('.who-img');
+  img.src = q.image; img.onerror = () => { img.style.visibility = 'hidden'; };
+  const input = node.querySelector('[data-who-input]');
+  const submit = () => answerMaster(input.value, node);
+  node.querySelector('[data-act="who-submit"]').onclick = submit;
+  input.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); submit(); } });
+  setView(node);
+  input.focus();
+}
+
+function answerMaster(typed, node) {
+  const ms = masterState;
+  if (ms.locked) return;
+  ms.locked = true;
+  const q = ms.current;
+  const right = whoAnswerCorrect(q, typed, ms.difficulty);
+  node.querySelector('.who-stage')?.classList.add('revealed');
+  node.querySelectorAll('.who-input input, .who-input button').forEach((e) => { e.disabled = true; });
+  node.querySelector('[data-qbody]').appendChild(
+    el(`<p class="who-answer">${q.mega ? `${esc(q.nameZh)} <span class="mega-tag">MEGA</span>` : esc(q.nameZh)}</p>`));
+  const fb = node.querySelector('.feedback');
+  fb.textContent = right ? t('who.correct', { name: q.nameZh }) : t('who.wrong', { name: q.nameZh });
+  fb.classList.add(right ? 'feedback--good' : 'feedback--bad');
+
+  const rec = ms.rec;
+  const today = todayKey();
+  if (!rec.days.includes(today)) rec.days.push(today);
+  if (right) {
+    const firstTry = !rec.attempts[q.key]; // 該隻先前沒答錯過 → 一次命中
+    if (firstTry) { rec.curStreak++; if (rec.curStreak > rec.bestStreak) rec.bestStreak = rec.curStreak; }
+    else rec.curStreak = 0; // 需要重試的不算乾淨連勝
+    if (!rec.done.includes(q.key)) rec.done.push(q.key);
+    ms.doneCount = rec.done.length;
+  } else {
+    rec.mistakes++;
+    rec.attempts[q.key] = (rec.attempts[q.key] || 0) + 1;
+    pushWrong(rec, q.key, typed);
+    rec.curStreak = 0;
+    ms.queue.push(q.key); // 答錯：排到後面，之後會再出現（直到答對）
+  }
+  if (ms.available) saveMaster(ms.poolKey, rec);
+  const next = node.querySelector('[data-act="next"]');
+  next.textContent = (right && ms.queue.length === 0) ? t('quiz.finish') : t('quiz.next');
+  next.hidden = false;
+  next.onclick = () => { nextMaster(); render(); };
+  next.focus();
+}
+
+// 稱號：依失誤數對池大小的比例分級。
+function masterTitle(mistakes, total) {
+  if (mistakes === 0) return t('master.title.perfect');
+  if (mistakes <= total * 0.1) return t('master.title.elite');
+  if (mistakes <= total * 0.3) return t('master.title.official');
+  return t('master.title.rookie');
+}
+
+// 由本機紀錄＋池資料算出完成頁要秀的 fun fact。
+function computeMasterFacts(ms) {
+  const { rec, byKey, total } = ms;
+  const f = {
+    total, mistakes: rec.mistakes,
+    accuracy: Math.round((total / (total + rec.mistakes)) * 100),
+    streak: rec.bestStreak, days: rec.days.length, sessions: rec.sessions,
+    title: masterTitle(rec.mistakes, total),
+    flawlessTypes: [],
+  };
+
+  // 剋星：答錯最多次的那隻。
+  let nemKey = null, nemN = 0;
+  for (const k in rec.attempts) { if (rec.attempts[k] > nemN && byKey.has(k)) { nemN = rec.attempts[k]; nemKey = k; } }
+  if (nemKey) f.nemesis = { entry: byKey.get(nemKey), n: nemN };
+
+  // 所有錯字 → 算與正解的接近度（char-score 0..10）。
+  const wrongList = [];
+  for (const k in rec.wrongs) {
+    const e = byKey.get(k); if (!e) continue;
+    for (const s of rec.wrongs[k]) wrongList.push({ entry: e, str: s, score: whoCharScore({ nameZh: e.nameZh }, s) });
+  }
+  if (wrongList.length) {
+    f.nickname = wrongList.reduce((a, b) => (b.score < a.score ? b : a)); // 最離譜的
+    f.close = wrongList.filter((w) => w.score < 10 && w.score >= 5).sort((a, b) => b.score - a.score)[0] || null; // 最接近的
+  }
+
+  // 屬性零失誤制霸：該屬性池內成員（≥2）全部一次命中。
+  for (const tk of TYPES) {
+    const members = [...byKey.values()].filter((e) => (e.types || []).includes(tk));
+    if (members.length >= 2 && members.every((e) => !rec.attempts[e.key])) f.flawlessTypes.push(typeName(tk));
+  }
+
+  // 招牌立繪：用剋星，否則隨機一隻已收服。
+  f.hero = f.nemesis ? f.nemesis.entry : byKey.get(rec.done[Math.floor(Math.random() * rec.done.length)] || rec.done[0]);
+  return f;
+}
+
+function viewMasterDone() {
+  const ms = masterState;
+  const f = computeMasterFacts(ms);
+  const corners = ['tl', 'tr', 'bl', 'br'].map((c) => `<span class="who-corner who-corner--${c}">${pokeballSvg()}</span>`).join('');
+  const heroFrame = `
+    <div class="who-frame master-hero" style="--frame-fill:${frameFill(ms.poolKey, f.total)}">
+      ${corners}
+      <div class="who-stage revealed"><img class="who-img" alt="${esc(f.hero ? f.hero.nameZh : '')}" src="${esc(f.hero ? f.hero.image : '')}" /></div>
+    </div>`;
+
+  const stat = (label, val) => `<div class="master-stat"><span class="master-stat-val">${esc(val)}</span><span class="master-stat-label">${esc(label)}</span></div>`;
+  const stats = [
+    stat(t('master.stat.mistakes'), String(f.mistakes)),
+    stat(t('master.stat.accuracy'), `${f.accuracy}%`),
+    stat(t('master.stat.streak'), t('master.stat.streakVal', { n: f.streak })),
+    stat(t('master.stat.journey'), t('master.stat.journeyVal', { d: f.days, s: f.sessions })),
+  ].join('');
+
+  const memCard = (cls, title, img, line) => `
+    <div class="memory-card ${cls}">
+      <span class="memory-title">${esc(title)}</span>
+      <div class="memory-body">
+        ${img ? `<img class="memory-img" alt="" src="${esc(img)}" />` : ''}
+        <p class="memory-line">${line}</p>
+      </div>
+    </div>`;
+  const mems = [];
+  if (f.nemesis) mems.push(memCard('mem-nemesis', t('master.fact.nemesisTitle'), f.nemesis.entry.image,
+    `<strong>${esc(f.nemesis.entry.nameZh)}</strong> ${esc(t('master.fact.nemesis', { n: f.nemesis.n }))}`));
+  if (f.nickname) mems.push(memCard('mem-nick', t('master.fact.nicknameTitle'), f.nickname.entry.image,
+    esc(t('master.fact.nickname', { name: f.nickname.str }))));
+  if (f.close) mems.push(memCard('mem-close', t('master.fact.closeTitle'), f.close.entry.image,
+    esc(t('master.fact.close', { typed: f.close.str, name: f.close.entry.nameZh }))));
+
+  const flawlessLine = f.flawlessTypes.length
+    ? `<p class="master-flawless">${esc(t('master.fact.flawless', { types: f.flawlessTypes.join('、') }))}</p>` : '';
+
+  const node = el(`
+    <section class="card master-done">
+      <p class="master-congrats">${esc(t('master.congratsTitle'))}</p>
+      ${heroFrame}
+      <div class="master-badge">${esc(f.title)}</div>
+      <p class="master-caught">${esc(t('master.caughtAll', { pool: poolLabel(ms.poolKey), n: f.total }))}</p>
+      <div class="master-grid">${stats}</div>
+      ${flawlessLine}
+      ${mems.length ? `<p class="label master-mem-label">${esc(t('master.memTitle'))}</p><div class="master-mems">${mems.join('')}</div>` : ''}
+      <p class="muted master-shot">${esc(t('master.screenshot'))}</p>
+      <button class="btn btn--primary" data-act="again">${esc(t('master.again'))}</button>
+      <button class="btn btn--ghost" data-nav="home">${esc(t('common.back'))}</button>
+    </section>`);
+  node.querySelector('[data-act="again"]').onclick = () => {
+    if (ms.available) resetMaster(ms.poolKey);
+    startMaster(ms.poolKey, ms.difficulty);
+  };
+  setView(node);
+}
+
+// ── 我是誰出題 builder：自選一份清單 → 產生代碼 ───────────────────
+// 出題瀏覽用的圖鑑：全國圖鑑非 Mega（剪影題以本體為主），依圖鑑編號排序。
+function builderDexEntries() {
+  return Object.entries(nationalDex)
+    .filter(([, v]) => !v.mega)
+    .map(([key, v]) => ({ key, ...v }))
+    .sort((a, b) => (a.ndex || 0) - (b.ndex || 0) || (a.key < b.key ? -1 : 1));
+}
+
+function viewWhoBuilder() {
+  if (!builderState) builderState = { selected: [], difficulty: DEFAULT_WHO_DIFFICULTY, scoreMode: 'count', filter: '', dexOpen: true, setOpen: true };
+  const bs = builderState;
+  const allEntries = builderDexEntries();
+  const byKey = new Map(allEntries.map((e) => [e.key, e]));
+
+  const node = el(`
+    <section class="card">
+      <h2>${esc(t('builder.title'))}</h2>
+      <p class="muted">${esc(t('builder.intro'))}</p>
+
+      <p class="label" data-sel-label></p>
+      <div class="builder-selected" data-selected></div>
+
+      <button class="collapse-head" data-toggle="set" aria-expanded="${bs.setOpen}">
+        <span>${esc(t('builder.setSection'))}</span><span class="collapse-caret">${bs.setOpen ? '▾' : '▸'}</span>
+      </button>
+      <div class="collapse-body" data-body="set"${bs.setOpen ? '' : ' hidden'}>
+        <p class="label">${esc(t('setup.difficulty'))}</p>
+        <div class="season-pick" data-diff></div>
+        <p class="label">${esc(t('setup.scoreMode'))}</p>
+        <div class="season-pick" data-sm></div>
+      </div>
+
+      <button class="collapse-head" data-toggle="dex" aria-expanded="${bs.dexOpen}">
+        <span>${esc(t('builder.dexSection'))}</span><span class="collapse-caret">${bs.dexOpen ? '▾' : '▸'}</span>
+      </button>
+      <div class="collapse-body" data-body="dex"${bs.dexOpen ? '' : ' hidden'}>
+        <div class="code-box">
+          <input type="text" inputmode="text" autocomplete="off" autocapitalize="off" spellcheck="false"
+                 placeholder="${esc(t('builder.search'))}" aria-label="${esc(t('builder.search'))}" data-filter />
+        </div>
+        <div class="builder-dex" data-dex></div>
+      </div>
+
+      <div class="doku-share" data-share hidden>
+        <p class="label">${esc(t('builder.yourCode'))}</p>
+        <div class="code-box">
+          <input type="text" readonly aria-label="分享連結" data-share-url />
+          <button class="btn btn--accent" data-act="copy">${esc(t('result.copy'))}</button>
+        </div>
+        <p class="muted" data-share-code></p>
+      </div>
+      <p class="muted" data-need hidden>${esc(t('builder.needOne'))}</p>
+      <button class="btn btn--primary" data-act="make">${esc(t('builder.makeCode'))}</button>
+      <button class="btn btn--ghost" data-nav="home">${esc(t('common.back'))}</button>
+    </section>`);
+
+  const selWrap = node.querySelector('[data-selected]');
+  const dexWrap = node.querySelector('[data-dex]');
+  const shareWrap = node.querySelector('[data-share]');
+  const needEl = node.querySelector('[data-need]');
+
+  const renderSelected = () => {
+    node.querySelector('[data-sel-label]').textContent = t('builder.selected', { n: bs.selected.length });
+    selWrap.innerHTML = '';
+    if (!bs.selected.length) { selWrap.innerHTML = `<p class="muted">${esc(t('builder.selectedEmpty'))}</p>`; return; }
+    bs.selected.forEach((k) => {
+      const p = byKey.get(k);
+      if (!p) return;
+      const chip = el(`<button class="builder-chip" type="button" title="${esc(p.nameZh)}"><img alt="" loading="lazy" /><span>${esc(p.nameZh)}</span><span class="builder-chip-x">${uiIcon('close')}</span></button>`);
+      const im = chip.querySelector('img'); im.src = p.image; im.onerror = () => { im.style.visibility = 'hidden'; };
+      chip.onclick = () => { bs.selected = bs.selected.filter((x) => x !== k); renderSelected(); renderDex(); updateMake(); };
+      selWrap.appendChild(chip);
+    });
+  };
+
+  const renderDex = () => {
+    const q = normalizeName(bs.filter);
+    const list = (q ? allEntries.filter((p) => normalizeName(p.nameZh).includes(q) || normalizeName(p.nameEn).includes(q)) : allEntries);
+    dexWrap.innerHTML = '';
+    const sel = new Set(bs.selected);
+    list.forEach((p) => {
+      const on = sel.has(p.key);
+      const cellb = el(`<button class="builder-cell${on ? ' builder-cell--on' : ''}" type="button" title="${esc(p.nameZh)}"><img alt="" loading="lazy" /><span class="builder-cell-name">${esc(p.nameZh)}</span></button>`);
+      const im = cellb.querySelector('img'); im.src = p.image; im.onerror = () => { im.style.visibility = 'hidden'; };
+      cellb.onclick = () => {
+        if (sel.has(p.key)) bs.selected = bs.selected.filter((x) => x !== p.key);
+        else bs.selected = [...bs.selected, p.key];
+        renderSelected(); renderDex(); updateMake();
+      };
+      dexWrap.appendChild(cellb);
+    });
+  };
+
+  const updateMake = () => {
+    if (bs.selected.length) {
+      const seed = bs.codeSeed || (bs.codeSeed = newSeed());
+      const code = encodeWhoCustom({ seed, keys: bs.selected, difficulty: bs.difficulty, scoreMode: bs.scoreMode });
+      node.querySelector('[data-share-url]').value = shareUrlFor(code);
+      node.querySelector('[data-share-code]').textContent = code;
+      shareWrap.hidden = false; needEl.hidden = true;
+    } else {
+      shareWrap.hidden = true; needEl.hidden = false;
+    }
+  };
+
+  // 難度 / 計分按鈕。
+  const diffWrap = node.querySelector('[data-diff]');
+  WHO_DIFFICULTIES.forEach((d) => {
+    const b = el(`<button class="season-btn" aria-pressed="${bs.difficulty === d}">${esc(difficultyLabel(d))}</button>`);
+    b.onclick = () => { bs.difficulty = d; bs.codeSeed = null; viewWhoBuilder(); };
+    diffWrap.appendChild(b);
+  });
+  const smWrap = node.querySelector('[data-sm]');
+  scoreModesFor('who').forEach((sm) => {
+    const b = el(`<button class="season-btn" aria-pressed="${bs.scoreMode === sm}">${esc(t(`score.${sm}`))}</button>`);
+    b.onclick = () => { bs.scoreMode = sm; bs.codeSeed = null; viewWhoBuilder(); };
+    smWrap.appendChild(b);
+  });
+
+  // 收合區塊。
+  node.querySelectorAll('[data-toggle]').forEach((h) => {
+    h.onclick = () => {
+      const which = h.dataset.toggle;
+      if (which === 'set') bs.setOpen = !bs.setOpen; else bs.dexOpen = !bs.dexOpen;
+      viewWhoBuilder();
+    };
+  });
+
+  const filterInput = node.querySelector('[data-filter]');
+  filterInput.addEventListener('input', () => { bs.filter = filterInput.value; renderDex(); });
+  node.querySelector('[data-act="make"]').onclick = () => { if (!bs.selected.length) { needEl.hidden = false; return; } updateMake(); shareWrap.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); };
+  const copyBtn = node.querySelector('[data-act="copy"]');
+  copyBtn.onclick = async () => {
+    const input = node.querySelector('[data-share-url]');
+    try { await navigator.clipboard.writeText(input.value); } catch { input.select(); document.execCommand('copy'); }
+    copyBtn.textContent = t('result.copied');
+    setTimeout(() => (copyBtn.textContent = t('result.copy')), 1500);
+  };
+
+  renderSelected();
+  renderDex();
+  updateMake();
+  setView(node);
+}
+
+// 自訂題庫挑戰：用代碼帶的清單組一份我是誰直接開始。
+function startCustomWho(decoded) {
+  const pool = decoded.keys.map((k) => (nationalDex[k] ? { key: k, ...nationalDex[k] } : null)).filter(Boolean);
+  if (!pool.length) return viewHome();
+  let quiz;
+  try { quiz = generateWhoQuizFromKeys(decoded.seed, pool, decoded.difficulty); }
+  catch (e) { console.error(e); return viewHome(); }
+  session = { quiz, answers: [], index: 0, locked: false, challenge: null, saved: false, meta: { mode: 'who', season: '', difficulty: decoded.difficulty, count: quiz.count, scoreMode: decoded.scoreMode } };
+  go('#/quiz');
 }
 
 function answer(choice, node) {
@@ -814,6 +1287,35 @@ function viewHistoryDetail() {
 
 // ── 挑戰邀請畫面（從成績碼連結 / 輸入代碼進來）─────────────────
 function viewChallenge(decoded) {
+  // 自訂題庫挑戰：用作者精選的清單玩一份我是誰。
+  if (decoded.mode === 'who-custom') {
+    const node = el(`
+      <section class="card">
+        <h2>${esc(t('builder.challengeTitle'))}</h2>
+        <p class="score-sub" style="margin-bottom:8px">${esc(t('quiz.who.title'))}</p>
+        <p class="lead">${esc(t('builder.challengeBody', { n: decoded.keys.length, difficulty: difficultyLabel(decoded.difficulty) }))}</p>
+        <button class="btn btn--primary" data-act="accept">${esc(t('builder.challengeStart'))}</button>
+        <button class="btn btn--ghost" data-nav="home">${esc(t('common.back'))}</button>
+      </section>`);
+    node.querySelector('[data-act="accept"]').onclick = () => startCustomWho(decoded);
+    return setView(node);
+  }
+  // 挖坑挑戰：帶 seed 進同一盤，9 個坑要避開、每格選別的合法解。
+  if (decoded.mode === 'doku-trap') {
+    const node = el(`
+      <section class="card">
+        <h2>${esc(t('doku.trap.challengeTitle'))}</h2>
+        <p class="score-sub" style="margin-bottom:8px">${esc(t('quiz.doku.title'))}</p>
+        <p class="lead">${esc(t('doku.trap.challengeBody'))}</p>
+        <button class="btn btn--primary" data-act="accept">${esc(t('doku.trap.challengeStart'))}</button>
+        <button class="btn btn--ghost" data-nav="home">${esc(t('common.back'))}</button>
+      </section>`);
+    node.querySelector('[data-act="accept"]').onclick = () => {
+      dokuState = { seed: decoded.seed, hintMode: decoded.hintMode || 'hint', play: 'trap-solve', pits: decoded.pits, challenge: null };
+      go('#/doku');
+    };
+    return setView(node);
+  }
   // 數獨：獨立盤面，不走線性測驗的 startQuiz；帶 seed 進盤、保留對手分數作完局比較。
   if (decoded.mode === 'doku') {
     const coplayD = decoded.score === 0;
@@ -961,15 +1463,17 @@ function viewSpeedChart() {
   const node = el(`
     <section>
       <div class="card">
-        <h2>${esc(t('speedline.title'))}</h2>
-        <p class="muted">${esc(t('speedline.hint'))}</p>
-        <div class="season-pick" data-seasons></div>
-        <div class="code-box spd-search">
-          <input type="text" inputmode="text" autocomplete="off" spellcheck="false"
-                 placeholder="${esc(t('speedline.search'))}" aria-label="${esc(t('speedline.searchBtn'))}" data-spd-search />
-          <button class="btn btn--accent" data-act="spd-go" aria-label="${esc(t('speedline.searchBtn'))}">${uiIcon('search')}</button>
+        <div class="spd-head">
+          <h2>${esc(t('speedline.title'))}</h2>
+          <p class="muted">${esc(t('speedline.hint'))}</p>
+          <div class="season-pick" data-seasons></div>
+          <div class="code-box spd-search">
+            <input type="text" inputmode="text" autocomplete="off" spellcheck="false"
+                   placeholder="${esc(t('speedline.search'))}" aria-label="${esc(t('speedline.searchBtn'))}" data-spd-search />
+            <button class="btn btn--accent" data-act="spd-go" aria-label="${esc(t('speedline.searchBtn'))}">${uiIcon('search')}</button>
+          </div>
+          <p class="feedback feedback--bad spd-search__msg" data-spd-msg hidden></p>
         </div>
-        <p class="feedback feedback--bad spd-search__msg" data-spd-msg hidden></p>
         <div class="table-wrap" data-table></div>
         <p class="muted spd-legend">${esc(t('speedline.legend'))}</p>
         <button class="btn btn--ghost" data-nav="setup">${esc(t('common.back'))}</button>
@@ -1167,31 +1671,37 @@ function condText(cat) {
 }
 
 function viewDoku() {
-  if (!dokuState || !dokuState.seed) dokuState = { seed: newSeed(), challenge: null };
+  if (!dokuState || !dokuState.seed) dokuState = { seed: newSeed(), hintMode: 'hint', play: 'practice', pits: null, challenge: null };
   // 同 seed → 同盤；換 seed 才重算並清空作答。
   if (!dokuState.puzzle || dokuState.puzzle.seed !== String(dokuState.seed)) {
     dokuState.puzzle = generateDoku(dokuState.seed, nationalDex);
     dokuState.picks = Array(9).fill(null);
+    dokuState.revealed = false;
   }
   const pz = dokuState.puzzle;
+  const hintMode = dokuState.hintMode || 'hint';
+  const isAuthor = dokuState.play === 'trap-author';
+  const isSolve = dokuState.play === 'trap-solve';
+  const introText = isAuthor ? t('doku.trap.authoringHint') : isSolve ? t('doku.trap.challengeBody') : t('doku.intro');
 
   const node = el(`
     <section>
       <div data-cmp hidden></div>
       <div class="card">
         <h2>${esc(t('doku.title'))}</h2>
-        <p class="muted">${esc(t('doku.intro'))}</p>
+        <p class="muted">${esc(introText)}</p>
         <div class="doku" data-board></div>
         <p class="doku-score" data-score></p>
-        <div class="doku-share">
-          <p class="label">${esc(t('doku.yourCode'))}</p>
+        <div class="doku-share" data-share hidden>
+          <p class="label" data-share-label></p>
           <div class="code-box">
             <input type="text" readonly aria-label="分享連結" data-share-url />
             <button class="btn btn--accent" data-act="copy-doku">${esc(t('result.copy'))}</button>
           </div>
           <p class="muted" data-share-code></p>
         </div>
-        <button class="btn btn--ghost" data-act="reveal" hidden>${esc(t('doku.reveal'))}</button>
+        <p class="muted" data-trap-need hidden>${esc(t('doku.trap.needFill'))}</p>
+        <button class="btn btn--ghost" data-act="reveal" hidden></button>
         <button class="btn btn--primary" data-act="newpuzzle">${esc(t('doku.newPuzzle'))}</button>
         <button class="btn btn--ghost" data-nav="home">${esc(t('common.back'))}</button>
         <p class="doku-ref"><a href="https://pokedoku.com/" target="_blank" rel="noopener noreferrer">${esc(t('doku.ref'))}</a></p>
@@ -1202,25 +1712,43 @@ function viewDoku() {
   const scoreEl = node.querySelector('[data-score]');
   const revealBtn = node.querySelector('[data-act="reveal"]');
   const cmpEl = node.querySelector('[data-cmp]');
+  const shareWrap = node.querySelector('[data-share]');
+  const trapNeed = node.querySelector('[data-trap-need]');
 
   const rebuild = () => { renderBoard(); updateStatus(); };
 
+  // 開啟作答：提示＝搜尋清單、無提示＝純打字；挖坑挑戰要排除該格的「坑」。
+  const fillCell = (idx) => {
+    const pit = isSolve && dokuState.pits ? dokuState.pits[idx] : null;
+    if (hintMode === 'nohint') openDokuTextInput(idx, rebuild, pit);
+    else openDokuPicker(idx, rebuild, pit);
+  };
+
   function buildDokuCell(idx) {
     const pick = dokuState.picks[idx];
+    // #3：揭露參考答案放在獨立小條，不蓋掉使用者原本填的（只在一般練習、答錯或空白時顯示）。
+    const ref = dokuState.revealed && (!pick || !pick.correct) ? pz.cells[idx] : null;
+    const refStrip = ref ? `
+      <span class="doku-ref-ans">
+        <span class="doku-ref-label">${esc(t('doku.refLabel'))}</span>
+        <img class="doku-ref-img" alt="" src="${esc(ref.canonicalImage)}" />
+        <span class="doku-ref-name">${esc(ref.canonicalName)}</span>
+      </span>` : '';
     if (!pick) {
-      const cell = el(`<button class="doku-cell" data-cell="${idx}" aria-label="${esc(t('doku.cellEmpty'))}"></button>`);
-      cell.onclick = () => openDokuPicker(idx, rebuild);
+      const cell = el(`<button class="doku-cell doku-cell--empty" data-cell="${idx}" aria-label="${esc(t('doku.cellEmpty'))}">${refStrip}</button>`);
+      cell.onclick = () => fillCell(idx);
       return cell;
     }
-    const tone = pick.reveal ? 'reveal' : pick.correct ? 'ok' : 'no';
-    const cell = el(`
-      <div class="doku-cell doku-cell--${tone}">
-        <img class="doku-thumb" alt="${esc(pick.name)}" />
-        <span class="doku-cell-name">${esc(pick.name)}${pick.mega ? ' <span class="mega-tag">MEGA</span>' : ''}</span>
-      </div>`);
-    const img = cell.querySelector('img');
-    img.src = pick.image;
-    img.onerror = () => { img.style.visibility = 'hidden'; };
+    const tone = pick.correct ? 'ok' : 'no';
+    // #2 無提示：查無對應寶可夢時顯示使用者打的字，而非立繪縮圖。
+    const main = pick.typed
+      ? `<span class="doku-cell-name doku-cell-name--typed">${esc(pick.name)}</span>`
+      : `<img class="doku-thumb" alt="${esc(pick.name)}" /><span class="doku-cell-name">${esc(pick.name)}${pick.mega ? ' <span class="mega-tag">MEGA</span>' : ''}</span>`;
+    const cell = el(`<div class="doku-cell doku-cell--${tone}${isAuthor ? ' doku-cell--editable' : ''}">${main}${refStrip}</div>`);
+    const img = cell.querySelector('.doku-thumb');
+    if (img) { img.src = pick.image; img.onerror = () => { img.style.visibility = 'hidden'; }; }
+    // 挖坑出題：未鎖定，點任一格可改填，直到滿意再產生代碼。
+    if (isAuthor) cell.onclick = () => fillCell(idx);
     return cell;
   }
 
@@ -1236,16 +1764,52 @@ function viewDoku() {
 
   function updateStatus() {
     const picks = dokuState.picks;
-    const guessed = picks.filter((p) => p && !p.reveal).length;
-    const ok = picks.filter((p) => p && !p.reveal && p.correct).length;
+    const filled = picks.filter(Boolean).length;
+    const ok = picks.filter((p) => p && p.correct).length;
     const allFilled = picks.every(Boolean);
-    scoreEl.textContent = allFilled ? t('doku.done', { ok }) : t('doku.progress', { n: guessed, ok });
+
+    if (isAuthor) {
+      // 坑必須是真實寶可夢（無提示打錯字的 typed 格 key 為 null，不能當坑）。
+      const allValid = allFilled && picks.every((p) => p.key);
+      scoreEl.textContent = t('doku.progress', { n: filled, ok });
+      scoreEl.className = 'doku-score';
+      trapNeed.hidden = allValid;
+      revealBtn.hidden = false;       // 出題時隨機補滿可重複按（每次重抽不同的坑）
+      revealBtn.textContent = t('doku.trap.fillReveal');
+      if (allValid) {
+        // 坑＝每格填的那隻；全填滿且皆有效才產生挖坑代碼。
+        const code = encodeDokuTrap({ seed: pz.seed, pits: picks.map((p) => p.key), hintMode });
+        shareWrap.querySelector('[data-share-label]').textContent = t('doku.trap.yourCode');
+        node.querySelector('[data-share-url]').value = shareUrlFor(code);
+        node.querySelector('[data-share-code]').textContent = code;
+      }
+      shareWrap.hidden = !allValid;
+      cmpEl.hidden = true;
+      return;
+    }
+
+    if (isSolve) {
+      scoreEl.textContent = allFilled ? t('doku.trap.done', { ok }) : t('doku.trap.progress', { n: filled, ok });
+      scoreEl.className = 'doku-score' + (allFilled ? ' doku-score--done' : '');
+      revealBtn.hidden = true;       // 避坑挑戰不提供揭露（會破壞挑戰）
+      shareWrap.hidden = true;
+      trapNeed.hidden = true;
+      cmpEl.hidden = true;
+      return;
+    }
+
+    // 一般練習
+    scoreEl.textContent = allFilled ? t('doku.done', { ok }) : t('doku.progress', { n: filled, ok });
     scoreEl.className = 'doku-score' + (allFilled ? ' doku-score--done' : '');
-    revealBtn.hidden = !picks.some((p) => !p);
+    revealBtn.hidden = dokuState.revealed || (allFilled && ok === 9);
+    revealBtn.textContent = t('doku.reveal');
+    trapNeed.hidden = true;
 
     const code = encodeResult({ mode: 'doku', season: '', seed: pz.seed, total: 9, score: ok, difficulty: 'all' });
+    shareWrap.querySelector('[data-share-label]').textContent = t('doku.yourCode');
     node.querySelector('[data-share-url]').value = shareUrlFor(code);
     node.querySelector('[data-share-code]').textContent = code;
+    shareWrap.hidden = false;
 
     if (allFilled && dokuState.challenge) {
       const them = dokuState.challenge.score;
@@ -1260,14 +1824,27 @@ function viewDoku() {
   }
 
   revealBtn.onclick = () => {
-    dokuState.picks.forEach((p, i) => {
-      if (p) return;
-      const cell = pz.cells[i];
-      dokuState.picks[i] = { reveal: true, key: cell.canonicalKey, name: cell.canonicalName, image: cell.canonicalImage, mega: cell.canonicalMega, correct: false };
-    });
+    if (isAuthor) {
+      // 隨機補滿／重抽：手動填的格子保留，空格與先前「隨機填」的格子重抽新的合法解。
+      // 可重複按 → 每次重新洗出不同的坑（手動指定的不動）。
+      const used = new Set(dokuState.picks.filter((p) => p && !p.byReveal).map((p) => p.ndex));
+      dokuState.picks = dokuState.picks.map((p, i) => {
+        if (p && !p.byReveal) return p;
+        const cands = cellEntries(i).filter((e) => !used.has(e.ndex));
+        const pool = cands.length ? cands : cellEntries(i);
+        const pick = pool[Math.floor(Math.random() * pool.length)];
+        used.add(pick.ndex);
+        return { key: pick.key, ndex: pick.ndex, name: pick.nameZh, image: pick.image, mega: !!pick.mega, correct: true, byReveal: true };
+      });
+    } else {
+      dokuState.revealed = true;     // 一般練習：顯示參考答案（不蓋掉原本填的）
+    }
     rebuild();
   };
-  node.querySelector('[data-act="newpuzzle"]').onclick = () => { dokuState = { seed: newSeed(), challenge: null }; viewDoku(); };
+  node.querySelector('[data-act="newpuzzle"]').onclick = () => {
+    dokuState = { seed: newSeed(), hintMode, play: isAuthor ? 'trap-author' : 'practice', pits: null, challenge: null };
+    viewDoku();
+  };
 
   const copyBtn = node.querySelector('[data-act="copy-doku"]');
   copyBtn.onclick = async () => {
@@ -1285,12 +1862,13 @@ function viewDoku() {
 // 數獨格子搜尋彈窗：即時過濾全國圖鑑（中／英子字串）→ 每筆附小立繪 → 點選驗證填入。
 // 重用 normalizeName 比對、dex 立繪渲染；互動照 searchable-select 合約（自動聚焦／↑↓／Enter／Esc），
 // 並套 ime-safe 合約（中文組字中的 Enter 屬於 IME，不誤送）。
-function openDokuPicker(idx, onPicked) {
+function openDokuPicker(idx, onPicked, pit = null) {
   if (!dokuState || !dokuState.puzzle) return;
   const pz = dokuState.puzzle;
   const rowCat = pz.rows[Math.floor(idx / 3)], colCat = pz.cols[idx % 3];
-  const usedNdex = new Set(dokuState.picks.filter((p) => p && !p.reveal).map((p) => p.ndex));
-  const entries = Object.entries(nationalDex).map(([key, v]) => ({ key, ...v }));
+  const usedNdex = new Set(dokuState.picks.filter(Boolean).map((p) => p.ndex));
+  // 挖坑挑戰：把出題人挖的坑從候選中濾掉，朋友就不會（也不能）選到同一隻。
+  const entries = Object.entries(nationalDex).map(([key, v]) => ({ key, ...v })).filter((p) => !pit || p.key !== pit);
 
   const overlay = el(`
     <div class="modal-overlay" role="dialog" aria-modal="true" aria-label="${esc(t('doku.title'))}">
@@ -1386,6 +1964,122 @@ function openDokuPicker(idx, onPicked) {
   setTimeout(() => input.focus(), 0);
 }
 
+// 某格所有合法解（全國圖鑑中同時滿足該列與該行條件者）。供挖坑揭露隨機補滿用。
+function cellEntries(idx) {
+  const pz = dokuState.puzzle;
+  const rowCat = pz.rows[Math.floor(idx / 3)], colCat = pz.cols[idx % 3];
+  return Object.entries(nationalDex).map(([key, v]) => ({ key, ...v })).filter((p) => cellSatisfied(p, rowCat, colCat));
+}
+
+// 無提示作答彈窗：純文字輸入、不給候選清單；查無對應寶可夢時，格子顯示使用者打的字。
+function openDokuTextInput(idx, onPicked, pit = null) {
+  if (!dokuState || !dokuState.puzzle) return;
+  const pz = dokuState.puzzle;
+  const rowCat = pz.rows[Math.floor(idx / 3)], colCat = pz.cols[idx % 3];
+  const usedNdex = new Set(dokuState.picks.filter(Boolean).map((p) => p.ndex));
+  const entries = Object.entries(nationalDex).map(([key, v]) => ({ key, ...v }));
+
+  const overlay = el(`
+    <div class="modal-overlay" role="dialog" aria-modal="true" aria-label="${esc(t('doku.title'))}">
+      <div class="modal-panel">
+        <div class="modal-head">
+          <span class="doku-cond">${esc(condText(rowCat))}<span class="doku-cond-plus">＋</span>${esc(condText(colCat))}</span>
+          <button class="modal-close" data-act="close" aria-label="關閉">${uiIcon('close')}</button>
+        </div>
+        <div class="code-box">
+          <input type="text" inputmode="text" autocomplete="off" autocapitalize="off" spellcheck="false"
+                 placeholder="${esc(t('doku.nohint.placeholder'))}" aria-label="${esc(t('doku.nohint.placeholder'))}" data-nh-input />
+          <button class="btn btn--accent" data-act="nh-submit">${esc(t('doku.nohint.submit'))}</button>
+        </div>
+        <p class="feedback feedback--bad doku-pick-msg" data-nh-msg hidden></p>
+      </div>
+    </div>`);
+  document.body.appendChild(overlay);
+  document.body.classList.add('modal-open');
+  const input = overlay.querySelector('[data-nh-input]');
+  const msg = overlay.querySelector('[data-nh-msg]');
+
+  const close = () => {
+    document.body.classList.remove('modal-open');
+    document.removeEventListener('keydown', onKey, true);
+    overlay.remove();
+  };
+
+  const submit = () => {
+    const raw = input.value.trim();
+    if (!raw) return;
+    const norm = normalizeName(raw);
+    const match = entries.find((p) => normalizeName(p.nameZh) === norm || normalizeName(p.nameEn) === norm);
+    if (match) {
+      if (pit && match.key === pit) { msg.textContent = t('doku.trap.isPit', { name: match.nameZh }); msg.hidden = false; return; }
+      if (usedNdex.has(match.ndex)) { msg.textContent = t('doku.usedAlready', { name: match.nameZh }); msg.hidden = false; return; }
+      dokuState.picks[idx] = { key: match.key, ndex: match.ndex, name: match.nameZh, image: match.image, mega: !!match.mega, correct: cellSatisfied(match, rowCat, colCat) };
+    } else {
+      // 查無這隻：照規格在格子顯示使用者打的字（非立繪），視為未答對。
+      dokuState.picks[idx] = { key: null, ndex: null, name: raw, image: null, mega: false, correct: false, typed: true };
+    }
+    close();
+    onPicked();
+  };
+
+  function onKey(e) {
+    if (e.key === 'Escape') { e.preventDefault(); close(); return; }
+    if (e.isComposing || e.keyCode === 229) return; // 中文 IME 組字中的 Enter 不誤送
+    if (e.key === 'Enter') { e.preventDefault(); submit(); }
+  }
+  overlay.querySelector('[data-act="nh-submit"]').onclick = submit;
+  input.addEventListener('input', () => { msg.hidden = true; });
+  overlay.querySelector('[data-act="close"]').onclick = close;
+  overlay.addEventListener('mousedown', (e) => { if (e.target === overlay) close(); });
+  document.addEventListener('keydown', onKey, true);
+  setTimeout(() => input.focus(), 0);
+}
+
+// ── 數獨準備畫面：選玩法（一般練習／挖坑出題）＋作答方式（提示／無提示）──
+function viewDokuSetup() {
+  if (!dokuSetup) dokuSetup = { play: 'practice', hintMode: 'hint', seed: newSeed() };
+  const { play, hintMode } = dokuSetup;
+
+  const optBtn = (val, cur, label, note) => `
+    <button class="season-btn doku-opt" aria-pressed="${val === cur}" data-val="${val}">
+      <span class="doku-opt-title">${esc(label)}</span>
+      <span class="doku-opt-note">${esc(note)}</span>
+    </button>`;
+
+  const node = el(`
+    <section class="card">
+      <h2>${esc(t('doku.setup.title'))}</h2>
+      <p class="label">${esc(t('doku.setup.mode'))}</p>
+      <div class="season-pick doku-opt-pick" data-pick="play">
+        ${optBtn('practice', play, t('doku.mode.practice'), t('doku.mode.practice.note'))}
+        ${optBtn('trap', play, t('doku.mode.trap'), t('doku.mode.trap.note'))}
+      </div>
+      <p class="label">${esc(t('doku.setup.hint'))}</p>
+      <div class="season-pick doku-opt-pick" data-pick="hint">
+        ${optBtn('hint', hintMode, t('doku.hint.hint'), t('doku.hint.hint.note'))}
+        ${optBtn('nohint', hintMode, t('doku.hint.nohint'), t('doku.hint.nohint.note'))}
+      </div>
+      <button class="btn btn--primary" data-act="start">${esc(t('doku.start'))}</button>
+      <button class="btn btn--ghost" data-nav="home">${esc(t('common.back'))}</button>
+    </section>`);
+
+  node.querySelectorAll('[data-pick="play"] [data-val]').forEach((b) => {
+    b.onclick = () => { dokuSetup.play = b.dataset.val; viewDokuSetup(); };
+  });
+  node.querySelectorAll('[data-pick="hint"] [data-val]').forEach((b) => {
+    b.onclick = () => { dokuSetup.hintMode = b.dataset.val; viewDokuSetup(); };
+  });
+  node.querySelector('[data-act="start"]').onclick = () => {
+    dokuState = {
+      seed: newSeed(), hintMode: dokuSetup.hintMode,
+      play: dokuSetup.play === 'trap' ? 'trap-author' : 'practice',
+      pits: null, challenge: null,
+    };
+    go('#/doku');
+  };
+  setView(node);
+}
+
 // ── 路由 ────────────────────────────────────────────────────────
 function render() {
   const params = new URLSearchParams(location.search);
@@ -1394,7 +2088,7 @@ function render() {
 
   // 帶成績碼進站且尚未開始挑戰 → 顯示戰帖。消費掉 ?c= 避免站內導覽重複攔截。
   if (code && !session && hash !== '#/quiz' && hash !== '#/result') {
-    const decoded = decodeResult(code);
+    const decoded = decodeShare(code);
     history.replaceState(null, '', location.pathname + (hash || '#/'));
     if (decoded) return viewChallenge(decoded);
   }
@@ -1407,7 +2101,10 @@ function render() {
     case '#/chart': return viewChart();
     case '#/speedline': return viewSpeedChart();
     case '#/dex': return viewDex();
+    case '#/doku-setup': return viewDokuSetup();
     case '#/doku': return viewDoku();
+    case '#/master': return viewMaster();
+    case '#/who-builder': return viewWhoBuilder();
     default: return viewHome();
   }
 }
@@ -1417,14 +2114,23 @@ document.addEventListener('click', (e) => {
   const nav = e.target.closest('[data-nav]');
   if (!nav) return;
   const dest = nav.dataset.nav;
-  if (dest === 'home') { session = null; setupState = null; dokuState = null; go('#/'); }
+  if (dest === 'home') { session = null; setupState = null; dokuState = null; dokuSetup = null; masterState = null; builderState = null; go('#/'); }
   else go('#/' + dest);
 });
 
 window.addEventListener('hashchange', render);
 
 // ── 啟動：載入靜態資料後首次渲染 ───────────────────────────────
+// 量測 sticky 標頭高度 → 設成 CSS 變數，讓頁內 sticky 區塊（如速度線表搜尋列）剛好接在它下面。
+function setTopbarVar() {
+  const tb = document.querySelector('.topbar');
+  if (tb) document.documentElement.style.setProperty('--topbar-h', `${tb.offsetHeight}px`);
+}
+
 async function init() {
+  initTheme();
+  setTopbarVar();
+  window.addEventListener('resize', setTopbarVar);
   try {
     const [dexRes, seasonsRes, natRes] = await Promise.all([
       fetch('./src/data/pokedex.json'),

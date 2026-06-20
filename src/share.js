@@ -16,8 +16,8 @@ const VERSION = '2';
 const SEP = '~';
 const MODE_TO_CODE = { type: 't', speed: 's', who: 'w', doku: 'k' };
 const CODE_TO_MODE = { t: 'type', s: 'speed', w: 'who', k: 'doku' };
-const DIFF_TO_CODE = { all: 'a', veryeasy: 'v', easy: 'e', normal: 'n', medium: 'm', hard: 'h' };
-const CODE_TO_DIFF = { a: 'all', v: 'veryeasy', e: 'easy', n: 'normal', m: 'medium', h: 'hard' };
+const DIFF_TO_CODE = { all: 'a', veryeasy: 'v', easy: 'e', normal: 'n', medium: 'm', hard: 'h', random: 'r' };
+const CODE_TO_DIFF = { a: 'all', v: 'veryeasy', e: 'easy', n: 'normal', m: 'medium', h: 'hard', r: 'random' };
 // 計分旗標（大寫，與小寫難度碼區分）：N=正常計分（對/錯換算 100 分）、C=按字計分（我是誰）。
 // 都不勾＝只算對幾題，不附旗標。
 const FLAG_TO_MODE = { N: 'score100', C: 'charScore' };
@@ -53,6 +53,26 @@ export function encodeResult({ mode = 'type', season = '', seed, total, score, d
   // 計分旗標（大寫，與小寫難度碼區分）。
   if (useChar) parts.push('C');
   else if (score100) parts.push('N');
+  return b64urlEncode(parts.join(SEP));
+}
+
+// 挖坑碼：把「seed + 提示模式 + 出題人挖的 9 個坑（寶可夢 key）」編成短碼。
+//   k2 ~ hintFlag(h/n) ~ seed ~ key0,key1,...,key8
+//   朋友開碼後須在每格避開出題人挖的那隻、選別的合法解。
+export function encodeDokuTrap({ seed, pits, hintMode = 'hint' }) {
+  if (seed == null || seed === '') throw new Error('seed required');
+  if (!Array.isArray(pits) || pits.length !== 9 || pits.some((k) => !k)) throw new Error('need 9 pit keys');
+  const parts = ['k2', hintMode === 'nohint' ? 'n' : 'h', String(seed), pits.join(',')];
+  return b64urlEncode(parts.join(SEP));
+}
+
+// 自訂題庫碼（我是誰出題）：把「難度 + 計分 + seed + 自選的寶可夢清單」編成碼。
+//   wc ~ diffCode ~ scoreFlag(c/n/x) ~ seed ~ key0,key1,...
+export function encodeWhoCustom({ seed, keys, difficulty = 'easy', scoreMode = 'count' }) {
+  if (seed == null || seed === '') throw new Error('seed required');
+  if (!Array.isArray(keys) || !keys.length) throw new Error('need at least 1 key');
+  const scoreFlag = scoreMode === 'char' ? 'c' : scoreMode === 'normal' ? 'n' : 'x';
+  const parts = ['wc', DIFF_TO_CODE[difficulty] || 'e', scoreFlag, String(seed), keys.join(',')];
   return b64urlEncode(parts.join(SEP));
 }
 
@@ -93,6 +113,26 @@ export function decodeResult(code) {
     if (storedScore < 0 || storedScore > total) return null;
     if (score100) return { mode, season, seed, total, score: storedScore, difficulty, score100: true };
     return { mode, season, seed, total, score: storedScore, difficulty };
+  }
+
+  if (parts[0] === 'k2' && parts.length === 4) {
+    // 挖坑碼：k2 ~ hintFlag(h/n) ~ seed ~ key0,key1,...,key8
+    const [, hintFlag, seed, pitsStr] = parts;
+    if (!seed) return null;
+    const pits = pitsStr.split(',');
+    if (pits.length !== 9 || pits.some((k) => !k)) return null;
+    return { mode: 'doku-trap', seed, hintMode: hintFlag === 'n' ? 'nohint' : 'hint', pits };
+  }
+
+  if (parts[0] === 'wc' && parts.length === 5) {
+    // 自訂題庫碼：wc ~ diffCode ~ scoreFlag ~ seed ~ keys
+    const [, diffCode, scoreFlag, seed, keysStr] = parts;
+    const difficulty = CODE_TO_DIFF[diffCode];
+    if (!difficulty || !seed) return null;
+    const keys = keysStr.split(',').filter(Boolean);
+    if (!keys.length) return null;
+    const scoreMode = scoreFlag === 'c' ? 'char' : scoreFlag === 'n' ? 'normal' : 'count';
+    return { mode: 'who-custom', difficulty, scoreMode, seed, keys };
   }
 
   if (parts[0] === '1' && parts.length === 4) {

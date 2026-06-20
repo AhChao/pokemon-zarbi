@@ -13,7 +13,10 @@ export const MAX_QUESTION_COUNT = 20;
 //   easy   = 差距大（>=20），約佔可用配對 68%
 //   medium = 中間帶（6..19），約 22%
 //   hard   = 接近（1..5），約 9%
-export const SPEED_DIFFICULTIES = ['all', 'easy', 'medium', 'hard'];
+//   random = 每題隨機從 easy/medium/hard 抽一個桶（同 seed 仍可重現）。
+export const SPEED_DIFFICULTIES = ['all', 'easy', 'medium', 'hard', 'random'];
+// 隨機難度逐題抽桶的候選（不含 all，避免又退回不限差距）。
+const SPEED_RANDOM_BANDS = ['easy', 'medium', 'hard'];
 export const DEFAULT_SPEED_DIFFICULTY = 'easy';
 
 // 「我是誰」難度：只決定 Mega 是否進池（立繪是否黑影、提示由 UI 端依難度呈現）。
@@ -86,7 +89,8 @@ export function generateSpeedQuiz(seed, pool, count = DEFAULT_QUESTION_COUNT, di
   if (!Array.isArray(pool) || pool.length < 2) {
     throw new Error('speed quiz needs a pool of at least 2 pokemon');
   }
-  const band = DIFFICULTY_BANDS[difficulty] || DIFFICULTY_BANDS.all;
+  const isRandom = difficulty === 'random';
+  const fixedBand = DIFFICULTY_BANDS[difficulty] || DIFFICULTY_BANDS.all;
   const rng = makeRng(hashSeed(String(seed)));
   const rand = makeRandom(rng);
   const questions = [];
@@ -94,6 +98,8 @@ export function generateSpeedQuiz(seed, pool, count = DEFAULT_QUESTION_COUNT, di
   const maxGuard = count * 200 + 100;
   while (questions.length < count && guard < maxGuard) {
     guard++;
+    // 隨機難度：逐題抽一個桶（消耗 rng → 同 seed 仍完全可重現）。
+    const band = isRandom ? DIFFICULTY_BANDS[rand.pick(SPEED_RANDOM_BANDS)] : fixedBand;
     const a = rand.pick(pool);
     const b = rand.pick(pool);
     if (a.key === b.key) continue;
@@ -123,22 +129,70 @@ export function generateWhoQuiz(seed, pool, count = DEFAULT_QUESTION_COUNT, diff
   return { mode: 'who', seed: String(seed), difficulty, count: questions.length, questions };
 }
 
+// 自訂題庫（我是誰出題）：pool 已是作者精選的實際清單，依 seed 穩定洗牌即可；
+// 不再依難度濾 Mega（尊重作者的選擇），難度只影響提示/判定。
+export function generateWhoQuizFromKeys(seed, pool, difficulty = DEFAULT_WHO_DIFFICULTY) {
+  if (!Array.isArray(pool) || pool.length < 1) throw new Error('custom who needs at least 1 pokemon');
+  const rng = makeRng(hashSeed(String(seed)));
+  const rand = makeRandom(rng);
+  const picked = rand.shuffle(pool);
+  const questions = picked.map((p, i) => ({
+    id: i, mode: 'who', key: p.key,
+    nameZh: p.nameZh, nameEn: p.nameEn, image: p.image, mega: !!p.mega, dex: p.dex,
+  }));
+  return { mode: 'who', seed: String(seed), difficulty, count: questions.length, questions };
+}
+
+// 羅馬數字（U+2160–U+217B，含大小寫）→ 阿拉伯數字：讓「多邊獸Ⅱ」可以打「2」。
+const ROMAN_NUM = {
+  'Ⅰ': '1', 'Ⅱ': '2', 'Ⅲ': '3', 'Ⅳ': '4', 'Ⅴ': '5', 'Ⅵ': '6',
+  'Ⅶ': '7', 'Ⅷ': '8', 'Ⅸ': '9', 'Ⅹ': '10', 'Ⅺ': '11', 'Ⅻ': '12',
+  'ⅰ': '1', 'ⅱ': '2', 'ⅲ': '3', 'ⅳ': '4', 'ⅴ': '5', 'ⅵ': '6',
+  'ⅶ': '7', 'ⅷ': '8', 'ⅸ': '9', 'ⅹ': '10', 'ⅺ': '11', 'ⅻ': '12',
+};
+// 比對時略過的符號：中黑點、全/半形括號、英文點與撇號、頓號（不影響可辨識的名字主體）。
+// 例：卡璞・鳴鳴＝卡璞鳴鳴、帕底亞肯泰羅（鬥戰種）＝帕底亞肯泰羅鬥戰種、Farfetch’d＝farfetchd。
+const NAME_PUNCT = /[・（）()．.’'、]/g;
+
 // 名字正規化：中文名裡內含的英數（如 3D龍、噴火龍 Mega Y）容許全形/半形、
-// 大小寫、空白差異；其餘字元需一字不漏。
+// 大小寫、空白差異；羅馬數字可打阿拉伯數字、標點符號略過；其餘字元需一字不漏。
 export function normalizeName(s) {
   return String(s == null ? '' : s)
     // 全形 ASCII（U+FF01–FF5E）轉半形
     .replace(/[！-～]/g, (c) => String.fromCharCode(c.charCodeAt(0) - 0xFEE0))
     .replace(/　/g, ' ') // 全形空白
+    .replace(/[Ⅰ-ⅻ]/g, (c) => ROMAN_NUM[c] || c) // 羅馬數字 → 阿拉伯數字
     .toLowerCase()
+    .replace(NAME_PUNCT, '') // 略過中黑點／括號／點／撇號等符號
     .replace(/\s+/g, ''); // 空白不計入比對
 }
 
+// 地區形態中文前綴（依 key 後綴判定）：提示難度下打不打地區名都算對。
+const REGION_FORM_PREFIX = { '-alola': '阿羅拉', '-galar': '伽勒爾', '-hisui': '洗翠', '-paldea': '帕底亞' };
+// 會露出「第一個字」提示的難度；此時地區形態可省略地區名。
+const WHO_HINT_DIFFICULTIES = new Set(['veryeasy', 'easy']);
+
+// 取「去地區前綴」的本體名（阿羅拉九尾 → 九尾）；非地區形態回 null。
+export function whoBaseName(q) {
+  const n = q.nameZh || '', key = q.key || '';
+  for (const tag in REGION_FORM_PREFIX) {
+    const pre = REGION_FORM_PREFIX[tag];
+    if (key.includes(tag) && n.startsWith(pre)) return n.slice(pre.length);
+  }
+  return null;
+}
+
 // 我是誰計分：只比中文名（正規化後）。不收 Pokémon 英文名。
-export function whoAnswerCorrect(q, typed) {
+// 提示難度（veryeasy/easy）：地區形態打不打地區名都算對；其他難度需完整名。
+export function whoAnswerCorrect(q, typed, difficulty) {
   const t = normalizeName(typed);
   if (!t) return false;
-  return t === normalizeName(q.nameZh);
+  if (t === normalizeName(q.nameZh)) return true;
+  if (WHO_HINT_DIFFICULTIES.has(difficulty)) {
+    const base = whoBaseName(q);
+    if (base && t === normalizeName(base)) return true;
+  }
+  return false;
 }
 
 // Lv50 速度線換算：由速度種族值算四條投資線與常見補正（VGC 固定 50 級）。
@@ -183,7 +237,7 @@ export function scoreQuizChar(quiz, answers) {
 export function scoreQuiz(quiz, answers) {
   let correct = 0;
   quiz.questions.forEach((q, i) => {
-    if (q.mode === 'who') { if (whoAnswerCorrect(q, answers[i])) correct++; }
+    if (q.mode === 'who') { if (whoAnswerCorrect(q, answers[i], quiz.difficulty)) correct++; }
     else if (answers[i] === q.correctIndex) correct++;
   });
   return correct;

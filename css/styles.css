@@ -25,20 +25,20 @@
           "Microsoft JhengHei", sans-serif;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --c-bg: #16181c;
-    --c-surface: #21242a;
-    --c-text: #f2f3f5;
-    --c-muted: #9aa0a8;
-    --c-border: #343842;
-    --c-primary: #dda448;
-    --c-primary-ink: #1c1c1c;
-    --c-accent: #63768d;
-    --c-header: #0f1013;
-    --c-header-ink: #f2f3f5;
-    --shadow: 0 1px 3px rgba(0, 0, 0, .4), 0 6px 20px rgba(0, 0, 0, .35);
-  }
+/* 暗色主題：由 JS 解析（system 偏好 → 實際亮/暗）後在 <html data-theme="dark"> 套用。
+   整個 app 本就需要 JS，故不再依賴 @media，亮色＝預設、暗色＝此規則。 */
+:root[data-theme="dark"] {
+  --c-bg: #16181c;
+  --c-surface: #21242a;
+  --c-text: #f2f3f5;
+  --c-muted: #9aa0a8;
+  --c-border: #343842;
+  --c-primary: #dda448;
+  --c-primary-ink: #1c1c1c;
+  --c-accent: #63768d;
+  --c-header: #0f1013;
+  --c-header-ink: #f2f3f5;
+  --shadow: 0 1px 3px rgba(0, 0, 0, .4), 0 6px 20px rgba(0, 0, 0, .35);
 }
 
 * { box-sizing: border-box; }
@@ -66,11 +66,26 @@ body {
   position: sticky;
   top: 0;
   z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
   background: var(--c-header);
   color: var(--c-header-ink);
   padding: max(env(safe-area-inset-top), 0px) var(--gap) 0;
   box-shadow: var(--shadow);
 }
+.theme-toggle {
+  flex: 0 0 auto;
+  width: 38px; height: 38px;
+  display: inline-flex; align-items: center; justify-content: center;
+  border: 1px solid color-mix(in srgb, var(--c-header-ink) 28%, transparent);
+  border-radius: 999px;
+  background: transparent; color: var(--c-header-ink);
+  cursor: pointer;
+}
+.theme-toggle:active { transform: scale(.94); }
+.theme-toggle svg { width: 20px; height: 20px; display: block; }
 .brand {
   display: flex;
   align-items: center;
@@ -252,6 +267,12 @@ h2 { font-size: 1.2rem; margin: 0 0 12px; }
   color: var(--c-text);
 }
 .code-box .btn { width: auto; flex: 0 0 auto; }
+/* 原始代碼顯示：太長時左右滑動，不換行、不破壞版面（手機不顯 scrollbar）。 */
+[data-share-code] {
+  white-space: nowrap; overflow-x: auto; overflow-y: hidden;
+  -webkit-overflow-scrolling: touch; scrollbar-width: none;
+}
+[data-share-code]::-webkit-scrollbar { display: none; }
 .label { font-size: .85rem; color: var(--c-muted); margin: 14px 0 4px; }
 
 .banner {
@@ -315,6 +336,20 @@ h2 { font-size: 1.2rem; margin: 0 0 12px; }
 .chart-result small { display: block; font-size: .85rem; font-weight: 500; color: var(--c-muted); }
 
 .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; margin-top: 8px; }
+/* 速度線表：標題/賽季/搜尋列 freeze 在頂端（接在 sticky topbar 下），長表格在下方捲動不影響操作。 */
+.spd-head {
+  position: sticky;
+  top: var(--topbar-h, 56px);
+  z-index: 6;
+  background: var(--c-surface);
+  margin: -20px -20px 0;          /* 抵銷 .card padding，背景滿版蓋住底下捲過的表格列 */
+  padding: 14px 20px 10px;
+  border-radius: var(--radius) var(--radius) 0 0;
+  box-shadow: 0 6px 8px -6px rgba(0, 0, 0, .18);
+}
+.spd-head h2 { margin-top: 0; }
+.spd-head .spd-search { margin-bottom: 0; }
+.spd-head .spd-search__msg { margin-bottom: 0; }
 table.chart { border-collapse: collapse; font-size: .7rem; }
 table.chart th, table.chart td {
   width: 22px; height: 22px;
@@ -327,10 +362,8 @@ table.chart td.m05 { background: #f2c0c0; }
 table.chart td.m2 { background: #bfe3c0; }
 table.chart td.m1 { background: transparent; color: var(--c-muted); }
 
-@media (prefers-color-scheme: dark) {
-  table.chart td.m05 { background: #5a2f2f; }
-  table.chart td.m2 { background: #2f5a32; }
-}
+:root[data-theme="dark"] table.chart td.m05 { background: #5a2f2f; }
+:root[data-theme="dark"] table.chart td.m2 { background: #2f5a32; }
 
 /* ── 速度線表 ─────────────────────────────────────────────────── */
 table.chart.spd { font-size: .72rem; white-space: nowrap; }
@@ -590,6 +623,25 @@ table.chart.spd td.spd-mons {
   transition: filter .3s ease;
 }
 .who-stage.revealed .who-img { filter: none; }
+/* #7 電視動畫風格球框：灰白外框 + 四角精靈球 + 隨機底色，黑影置中。 */
+.who-frame {
+  position: relative;
+  width: 78%; max-width: 280px; margin: 14px auto 18px;
+  aspect-ratio: 1 / 1.04;
+  background: var(--frame-fill, #9ed8a6);
+  border: 7px solid #eef2f4;
+  border-radius: 8px;
+  box-shadow: 0 0 0 1px #b9c4cb, inset 0 0 0 1px #b9c4cb;
+  display: flex; align-items: center; justify-content: center;
+}
+.who-frame .who-stage { margin: 0; width: 100%; height: 100%; align-items: center; }
+.who-frame .who-img { width: 76%; max-width: none; }
+.who-corner { position: absolute; width: 30px; height: 30px; z-index: 2; }
+.who-corner .pokeball-svg { width: 100%; height: 100%; display: block; filter: drop-shadow(0 1px 1px rgba(0, 0, 0, .35)); }
+.who-corner--tl { top: -15px; left: -15px; }
+.who-corner--tr { top: -15px; right: -15px; }
+.who-corner--bl { bottom: -15px; left: -15px; }
+.who-corner--br { bottom: -15px; right: -15px; }
 .who-hint {
   text-align: center;
   color: var(--c-muted);
@@ -662,6 +714,103 @@ button.doku-cell:active { transform: scale(.98); }
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .doku-cell-name .mega-tag { font-size: .5rem; padding: 0 3px; }
+/* 無提示模式查無對應寶可夢時，格子顯示使用者打的字（可換行、無立繪）。 */
+.doku-cell-name--typed {
+  white-space: normal; font-size: .64rem; color: var(--c-muted); line-height: 1.2;
+  display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+}
+/* 挖坑出題：格子可點改填。 */
+.doku-cell--editable { box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--c-accent) 35%, transparent); }
+/* #3 揭露參考答案：獨立小條（不蓋掉使用者原本填的）。 */
+.doku-ref-ans {
+  flex: 0 0 auto; width: 100%; margin-top: 2px; padding-top: 2px;
+  display: flex; align-items: center; justify-content: center; gap: 2px;
+  border-top: 1px dashed var(--c-accent);
+}
+.doku-ref-label {
+  flex: 0 0 auto; font-size: .5rem; font-weight: 800; color: var(--c-accent);
+  border: 1px solid color-mix(in srgb, var(--c-accent) 50%, transparent);
+  border-radius: 3px; padding: 0 2px;
+}
+.doku-ref-img { flex: 0 0 auto; width: 16px; height: 16px; object-fit: contain; }
+.doku-ref-name {
+  flex: 0 1 auto; font-size: .58rem; font-weight: 700; color: var(--c-accent);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+/* 數獨準備畫面的玩法/作答方式選項（標題＋說明直向堆疊）。 */
+.doku-opt-pick { display: flex; flex-direction: column; gap: 8px; margin: 4px 0 14px; }
+.doku-opt {
+  display: flex; flex-direction: column; align-items: flex-start; gap: 2px;
+  height: auto; padding: 10px 12px; text-align: left; white-space: normal; border-radius: var(--radius-sm);
+}
+.doku-opt-title { font-weight: 800; }
+.doku-opt-note { font-size: .76rem; font-weight: 500; color: var(--c-muted); }
+.doku-opt[aria-pressed="true"] .doku-opt-note { color: inherit; opacity: .85; }
+/* 寶可夢大師模式入口（我是誰準備畫面）。 */
+.master-entry { margin: 6px 0 2px; padding-top: 10px; border-top: 1px dashed var(--c-border); display: flex; flex-direction: column; gap: 8px; }
+.master-entry .muted { margin: 0; font-size: .78rem; }
+/* 寶可夢大師完成頁：成就卡（截圖留念）。 */
+.master-done { text-align: center; }
+.master-congrats { font-size: 1.3rem; font-weight: 900; color: var(--c-primary); margin: 2px 0 12px; letter-spacing: .02em; }
+.master-hero { width: 58%; max-width: 220px; margin: 0 auto; }
+.master-badge {
+  display: inline-block; margin: 14px auto 4px; padding: 6px 18px;
+  border-radius: 999px; background: var(--c-primary); color: var(--c-primary-ink);
+  font-weight: 900; font-size: 1.05rem; box-shadow: var(--shadow);
+}
+.master-caught { font-weight: 700; margin: 8px 0 14px; }
+.master-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 8px 0; }
+.master-stat {
+  display: flex; flex-direction: column; gap: 2px; padding: 10px;
+  background: var(--c-bg); border: 1px solid var(--c-border); border-radius: var(--radius-sm);
+}
+.master-stat-val { font-size: 1.3rem; font-weight: 900; color: var(--c-text); line-height: 1.1; }
+.master-stat-label { font-size: .74rem; color: var(--c-muted); }
+.master-flawless { margin: 8px 0 0; font-weight: 700; color: var(--c-good); font-size: .9rem; }
+.master-mem-label { text-align: left; margin-top: 16px; }
+.master-mems { display: flex; flex-direction: column; gap: 8px; }
+.memory-card { text-align: left; padding: 8px 10px; background: var(--c-surface); border: 1px solid var(--c-border); border-radius: var(--radius-sm); }
+.memory-title {
+  display: inline-block; margin-bottom: 5px; padding: 0 6px;
+  font-size: .7rem; font-weight: 800; color: var(--c-accent);
+  border: 1px solid color-mix(in srgb, var(--c-accent) 45%, transparent); border-radius: 4px;
+}
+.mem-nemesis .memory-title { color: var(--c-bad); border-color: color-mix(in srgb, var(--c-bad) 45%, transparent); }
+.mem-nick .memory-title { color: var(--c-primary); border-color: color-mix(in srgb, var(--c-primary) 55%, transparent); }
+.memory-body { display: flex; align-items: center; gap: 10px; }
+.memory-img { flex: 0 0 auto; width: 46px; height: 46px; object-fit: contain; }
+.memory-line { margin: 0; font-size: .9rem; line-height: 1.35; }
+.memory-line strong { font-weight: 800; }
+.master-shot { margin: 16px 0 6px; font-size: .78rem; }
+/* #10 出題 builder：可收合區塊、選入位置、圖鑑格。 */
+.collapse-head {
+  width: 100%; display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 12px; margin: 10px 0 0; border: 1px solid var(--c-border); border-radius: var(--radius-sm);
+  background: var(--c-bg); color: var(--c-text); font-weight: 800; cursor: pointer;
+}
+.collapse-caret { color: var(--c-muted); }
+.collapse-body { padding: 8px 2px 2px; }
+.builder-selected { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0 6px; min-height: 8px; }
+.builder-chip {
+  display: inline-flex; align-items: center; gap: 4px; padding: 3px 6px 3px 3px;
+  border: 1px solid var(--c-border); border-radius: 999px; background: var(--c-surface); color: var(--c-text);
+  font-size: .78rem; font-weight: 700; cursor: pointer;
+}
+.builder-chip img { width: 24px; height: 24px; object-fit: contain; }
+.builder-chip-x { display: inline-flex; color: var(--c-muted); }
+.builder-chip-x .ui-icon { width: 13px; height: 13px; }
+.builder-dex {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(72px, 1fr)); gap: 6px;
+  max-height: 52vh; overflow-y: auto; padding: 2px; margin-top: 6px;
+}
+.builder-cell {
+  display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 4px 2px;
+  border: 2px solid var(--c-border); border-radius: 8px; background: var(--c-surface); color: var(--c-text);
+  cursor: pointer; overflow: hidden;
+}
+.builder-cell img { width: 100%; aspect-ratio: 1 / 1; object-fit: contain; }
+.builder-cell-name { font-size: .62rem; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+.builder-cell--on { border-color: var(--c-accent); background: color-mix(in srgb, var(--c-accent) 16%, var(--c-surface)); }
 .doku-score { text-align: center; font-weight: 800; margin: 8px 0 4px; }
 .doku-score--done { color: var(--c-good); font-size: 1.1rem; }
 .doku-share { margin-top: 8px; }

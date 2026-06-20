@@ -46,8 +46,11 @@ export function baseName(entry) {
   }
   return n;
 }
-function baseNameLen(entry) {
-  return Array.from(baseName(entry)).length;
+// 算字數時略過的符號（中黑點／全半形括號／點／撇號／頓號）：
+// 帕底亞肯泰羅（鬥戰種）算「肯泰羅鬥戰種」6 字、卡璞・鳴鳴算 4 字。
+const NAME_PUNCT = /[・（）()．.’'、]/g;
+export function baseNameLen(entry) {
+  return Array.from(baseName(entry).replace(NAME_PUNCT, '')).length;
 }
 
 // 類別清單：每項都能放在任一軸。test 接受帶 key 的寶可夢物件。
