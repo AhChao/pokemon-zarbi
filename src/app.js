@@ -138,6 +138,28 @@ function go(hash) {
   else location.hash = hash;
 }
 
+// 事件回報（無回報端時靜默略過）。
+function gaEvent(name, params) {
+  try { if (typeof window.gtag === 'function') window.gtag('event', name, params || {}); } catch { /* 略過 */ }
+}
+const SCREEN_TITLE = {
+  '/': '首頁', '/setup': '準備', '/quiz': '測驗中', '/result': '成績',
+  '/doku-setup': '數獨準備', '/doku': '數獨', '/master': '寶可夢大師', '/who-builder': '我是誰出題',
+  '/chart': '相剋表', '/speedline': '速度線表', '/dex': '圖鑑', '/history': '歷史',
+  '/challenge': '挑戰戰帖',
+};
+let gaLastPath = null;
+// 送虛擬 page_view。把路由放進 page_location 的「真實路徑」（GA4 會砍掉 #fragment、也不認 page_path），
+// 預設「網頁和畫面」報表才會逐畫面分開。forcePath 用於 hash 無法表達的畫面（如戰帖）。
+function gaPageView(forcePath) {
+  const path = forcePath || ((location.hash || '#/').replace(/^#/, '') || '/');
+  if (path === gaLastPath) return; // 同畫面重繪不重複送
+  gaLastPath = path;
+  const base = `${location.origin}${location.pathname}`.replace(/index\.html$/, '').replace(/\/$/, '');
+  const page_location = path === '/' ? `${base}/` : `${base}${path}`;
+  gaEvent('page_view', { page_title: SCREEN_TITLE[path] || path, page_location });
+}
+
 // ── 賽季 / 測驗組裝 ──────────────────────────────────────────────
 function seasonLabel(key) {
   return seasonsData.seasons[key]?.label || key;
@@ -339,6 +361,7 @@ function viewHome() {
   node.querySelectorAll('[data-pick]').forEach((b) => {
     b.onclick = () => {
       const mode = b.dataset.pick;
+      gaEvent('select_mode', { mode });
       // 數獨走自己的 setup（選玩法：一般練習／挖坑出題；作答方式：提示／無提示）。
       if (mode === 'doku') { dokuSetup = { play: 'practice', hintMode: 'hint', seed: newSeed() }; go('#/doku-setup'); return; }
       let season = '', difficulty = 'all';
@@ -535,6 +558,7 @@ function viewSetup() {
 
   const shareBtn = node.querySelector('[data-act="copy-share"]');
   shareBtn.onclick = async () => {
+    gaEvent('share_code', { kind: 'setup', mode });
     try {
       await navigator.clipboard.writeText(url);
     } catch {
@@ -564,6 +588,7 @@ function startQuiz({ mode = 'type', season = '', seed, difficulty = 'all', count
     return viewHome();
   }
   session = { quiz, answers: [], index: 0, locked: false, challenge, saved: false, meta: { mode, season, difficulty, count: total, scoreMode: sm } };
+  gaEvent('quiz_start', { mode, season, difficulty, count: total, score_mode: sm, is_challenge: !!challenge });
   go('#/quiz');
 }
 
@@ -886,6 +911,10 @@ function computeMasterFacts(ms) {
 function viewMasterDone() {
   const ms = masterState;
   const f = computeMasterFacts(ms);
+  if (!ms.completeTracked) {
+    ms.completeTracked = true;
+    gaEvent('master_complete', { pool: ms.poolKey, difficulty: ms.difficulty, total: f.total, mistakes: f.mistakes, best_streak: f.streak });
+  }
   const corners = ['tl', 'tr', 'bl', 'br'].map((c) => `<span class="who-corner who-corner--${c}">${pokeballSvg()}</span>`).join('');
   const heroFrame = `
     <div class="who-frame master-hero" style="--frame-fill:${frameFill(ms.poolKey, f.total)}">
@@ -1071,9 +1100,14 @@ function viewWhoBuilder() {
 
   const filterInput = node.querySelector('[data-filter]');
   filterInput.addEventListener('input', () => { bs.filter = filterInput.value; renderDex(); });
-  node.querySelector('[data-act="make"]').onclick = () => { if (!bs.selected.length) { needEl.hidden = false; return; } updateMake(); shareWrap.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); };
+  node.querySelector('[data-act="make"]').onclick = () => {
+    if (!bs.selected.length) { needEl.hidden = false; return; }
+    gaEvent('builder_create', { count: bs.selected.length, difficulty: bs.difficulty, score_mode: bs.scoreMode });
+    updateMake(); shareWrap.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  };
   const copyBtn = node.querySelector('[data-act="copy"]');
   copyBtn.onclick = async () => {
+    gaEvent('share_code', { kind: 'builder' });
     const input = node.querySelector('[data-share-url]');
     try { await navigator.clipboard.writeText(input.value); } catch { input.select(); document.execCommand('copy'); }
     copyBtn.textContent = t('result.copied');
@@ -1244,6 +1278,7 @@ function buildResultSection(quiz, answers, opts = {}) {
 
   const copyBtn = node.querySelector('[data-act="copy"]');
   copyBtn.onclick = async () => {
+    gaEvent('share_code', { kind: 'result' });
     const input = node.querySelector('.code-box input');
     try {
       await navigator.clipboard.writeText(shareUrl);
@@ -1270,6 +1305,10 @@ function viewResult() {
     addHistory({
       mode: meta.mode, season: meta.season, difficulty: meta.difficulty || 'all', seed: quiz.seed,
       total, scoreMode, score: charScore ? pct : correct, answers: answers.slice(), code, ts: Date.now(),
+    });
+    gaEvent('quiz_finish', {
+      mode: meta.mode, season: meta.season, difficulty: meta.difficulty || 'all',
+      score_mode: scoreMode, correct, total, percent: Math.round(pct), is_challenge: !!challenge,
     });
     session.saved = true;
   }
@@ -1304,7 +1343,7 @@ function viewChallenge(decoded) {
         <button class="btn btn--primary" data-act="accept">${esc(t('builder.challengeStart'))}</button>
         <button class="btn btn--ghost" data-nav="home">${esc(t('common.back'))}</button>
       </section>`);
-    node.querySelector('[data-act="accept"]').onclick = () => startCustomWho(decoded);
+    node.querySelector('[data-act="accept"]').onclick = () => { gaEvent('challenge_accept', { kind: 'who-custom' }); startCustomWho(decoded); };
     return setView(node);
   }
   // 挖坑挑戰：帶 seed 進同一盤，9 個坑要避開、每格選別的合法解。
@@ -1318,6 +1357,7 @@ function viewChallenge(decoded) {
         <button class="btn btn--ghost" data-nav="home">${esc(t('common.back'))}</button>
       </section>`);
     node.querySelector('[data-act="accept"]').onclick = () => {
+      gaEvent('challenge_accept', { kind: 'doku-trap' });
       dokuState = { seed: decoded.seed, hintMode: decoded.hintMode || 'hint', play: 'trap-solve', pits: decoded.pits, challenge: null };
       go('#/doku');
     };
@@ -1335,6 +1375,7 @@ function viewChallenge(decoded) {
         <button class="btn btn--ghost" data-nav="home">${esc(t('common.back'))}</button>
       </section>`);
     node.querySelector('[data-act="accept"]').onclick = () => {
+      gaEvent('challenge_accept', { kind: coplayD ? 'doku-coplay' : 'doku' });
       dokuState = { seed: decoded.seed, challenge: coplayD ? null : { score: decoded.score } };
       go('#/doku');
     };
@@ -1829,6 +1870,7 @@ function viewDoku() {
       revealBtn.hidden = false;       // 出題時隨機補滿可重複按（每次重抽不同的坑）
       revealBtn.textContent = t('doku.trap.fillReveal');
       if (allValid) {
+        if (!dokuState.trapTracked) { dokuState.trapTracked = true; gaEvent('trap_create', { hint_mode: hintMode }); }
         // 坑＝每格填的那隻；全填滿且皆有效才產生挖坑代碼。
         const code = encodeDokuTrap({ seed: pz.seed, pits: picks.map((p) => p.key), hintMode });
         shareWrap.querySelector('[data-share-label]').textContent = t('doku.trap.yourCode');
@@ -1841,6 +1883,7 @@ function viewDoku() {
     }
 
     if (isSolve) {
+      if (allFilled && !dokuState.solveTracked) { dokuState.solveTracked = true; gaEvent('trap_solve_finish', { ok }); }
       scoreEl.textContent = allFilled ? t('doku.trap.done', { ok }) : t('doku.trap.progress', { n: filled, ok });
       scoreEl.className = 'doku-score' + (allFilled ? ' doku-score--done' : '');
       revealBtn.hidden = true;       // 避坑挑戰不提供揭露（會破壞挑戰）
@@ -1851,6 +1894,7 @@ function viewDoku() {
     }
 
     // 一般練習
+    if (allFilled && !dokuState.tracked) { dokuState.tracked = true; gaEvent('doku_complete', { ok, hint_mode: hintMode }); }
     scoreEl.textContent = allFilled ? t('doku.done', { ok }) : t('doku.progress', { n: filled, ok });
     scoreEl.className = 'doku-score' + (allFilled ? ' doku-score--done' : '');
     revealBtn.hidden = dokuState.revealed || (allFilled && ok === 9);
@@ -1900,6 +1944,7 @@ function viewDoku() {
 
   const copyBtn = node.querySelector('[data-act="copy-doku"]');
   copyBtn.onclick = async () => {
+    gaEvent('share_code', { kind: dokuState.play === 'trap-author' ? 'doku-trap' : 'doku' });
     const input = node.querySelector('[data-share-url]');
     try { await navigator.clipboard.writeText(input.value); }
     catch { input.select(); document.execCommand('copy'); }
@@ -2143,8 +2188,10 @@ function render() {
   if (code && !session && hash !== '#/quiz' && hash !== '#/result') {
     const decoded = decodeShare(code);
     history.replaceState(null, '', location.pathname + (hash || '#/'));
-    if (decoded) return viewChallenge(decoded);
+    if (decoded) { gaPageView('/challenge'); gaEvent('challenge_view', { kind: decoded.mode }); return viewChallenge(decoded); }
   }
+
+  gaPageView();
 
   switch (hash) {
     case '#/setup': return viewSetup();
