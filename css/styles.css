@@ -115,6 +115,10 @@ body {
   padding: var(--gap);
   flex: 1;
 }
+/* 寬版頁面（如速度線表）：大螢幕時放寬到 1.5 倍，讓寬表格更好讀；手機維持原寬。 */
+@media (min-width: 900px) {
+  .app.app--wide { max-width: 960px; }
+}
 
 .card {
   background: var(--c-surface);
@@ -366,7 +370,8 @@ table.chart td.m1 { background: transparent; color: var(--c-muted); }
 :root[data-theme="dark"] table.chart td.m2 { background: #2f5a32; }
 
 /* ── 速度線表 ─────────────────────────────────────────────────── */
-table.chart.spd { font-size: .72rem; white-space: nowrap; }
+/* 表格比容器窄時（如每行 5 隻）置中；比容器寬時 auto 邊距歸 0、照常橫向捲動。 */
+table.chart.spd { font-size: .72rem; white-space: nowrap; margin-inline: auto; }
 table.chart.spd th, table.chart.spd td {
   width: auto; height: auto;
   min-width: 36px;
@@ -387,6 +392,20 @@ table.chart.spd td.spd-mons {
   vertical-align: middle;
   display: inline-block;
   margin-right: 2px;
+}
+/* 同速立繪：每行最多 N 隻（5/10 可選）後自動換行，寬度由 JS 依選擇設定。 */
+.spd-mons-wrap { display: flex; flex-wrap: wrap; gap: 3px 2px; }
+.spd-mons-wrap .spd-img { margin: 0; }
+/* 「每行最多」5/10 切換列。 */
+.spd-perrow { display: flex; align-items: center; gap: 6px; margin: 8px 0 2px; white-space: nowrap; }
+.spd-perrow-label { font-size: .82rem; color: var(--c-muted); }
+.spd-perrow .season-btn { padding: 4px 12px; }
+/* 搜尋符合提示（非錯誤，走中性色）。 */
+.spd-search__msg--info { color: var(--c-accent); }
+/* 同速多隻時，標出目前切到的那一隻立繪。 */
+.spd-img--hl {
+  outline: 2px solid var(--c-primary); outline-offset: -1px; border-radius: 6px;
+  background: color-mix(in srgb, var(--c-primary) 22%, transparent);
 }
 .spd-legend { margin-top: 10px; line-height: 1.5; }
 .spd-search { margin: 10px 0 2px; }

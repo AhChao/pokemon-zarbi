@@ -248,6 +248,13 @@ let dokuState = null;      // { seed, puzzle, picks:[9], hintMode, play, pits, c
 let masterState = null;    // 寶可夢大師模式（本機）的進行狀態
 let builderState = null;   // 我是誰出題 builder 的狀態
 
+// 速度線表「每行最多幾隻」偏好（5 或 10，預設 10），記在 localStorage。
+const SPD_PERROW_KEY = 'poke-quest.spdPerRow';
+function readSpdPerRow() {
+  try { return Number(localStorage.getItem(SPD_PERROW_KEY)) === 5 ? 5 : 10; } catch { return 10; }
+}
+let spdPerRow = readSpdPerRow();
+
 // 解碼任一種分享碼：一般成績碼 / 挖坑碼 / 自訂題庫碼都由 decodeResult 統一處理。
 function decodeShare(code) {
   return decodeResult(code);
@@ -1454,6 +1461,7 @@ function buildChartTable() {
 
 // ── 速度線表（種族值 → Lv50 實數值，依賽季）─────────────────────
 function viewSpeedChart() {
+  app.classList.add('app--wide'); // 大螢幕放寬版面，寬表格更好讀
   // 入口只在「誰比較快」的 setup；直接帶網址進來時補一個預設賽季狀態。
   if (!setupState || setupState.mode !== 'speed') {
     setupState = { mode: 'speed', season: defaultSeason(), difficulty: DEFAULT_SPEED_DIFFICULTY, seed: newSeed() };
@@ -1473,6 +1481,11 @@ function viewSpeedChart() {
             <button class="btn btn--accent" data-act="spd-go" aria-label="${esc(t('speedline.searchBtn'))}">${uiIcon('search')}</button>
           </div>
           <p class="feedback feedback--bad spd-search__msg" data-spd-msg hidden></p>
+          <div class="spd-perrow">
+            <span class="spd-perrow-label">${esc(t('speedline.perRow'))}</span>
+            <button class="season-btn" data-perrow="5" aria-pressed="${spdPerRow === 5}">${esc(t('speedline.perRowUnit', { n: 5 }))}</button>
+            <button class="season-btn" data-perrow="10" aria-pressed="${spdPerRow === 10}">${esc(t('speedline.perRowUnit', { n: 10 }))}</button>
+          </div>
         </div>
         <div class="table-wrap" data-table></div>
         <p class="muted spd-legend">${esc(t('speedline.legend'))}</p>
@@ -1488,26 +1501,63 @@ function viewSpeedChart() {
     seasonWrap.appendChild(b);
   });
 
-  node.querySelector('[data-table]').appendChild(buildSpeedTable(season));
+  node.querySelector('[data-table]').appendChild(buildSpeedTable(season, spdPerRow));
 
-  // 模糊搜尋：找到該寶可夢所在的速度列 → 捲過去並閃兩下。
+  node.querySelectorAll('[data-perrow]').forEach((b) => {
+    b.onclick = () => {
+      spdPerRow = Number(b.dataset.perrow) === 5 ? 5 : 10;
+      try { localStorage.setItem(SPD_PERROW_KEY, String(spdPerRow)); } catch { /* 存不了就只在本次有效 */ }
+      viewSpeedChart();
+    };
+  });
+
+  // 模糊搜尋：子序列比對抓出所有符合者，按搜尋逐一切下一個、到底循環回第一個。
   const pool = seasonPool(season);
   const input = node.querySelector('[data-spd-search]');
   const msg = node.querySelector('[data-spd-msg]');
+  let lastQ = '', matchIdx = -1;
   const doSearch = () => {
     const q = normalizeName(input.value);
     if (!q) return;
-    const hit = (test) => pool.find((p) => test(normalizeName(p.nameZh)) || test(normalizeName(p.nameEn)));
-    const match = hit((n) => n === q) || hit((n) => n.startsWith(q)) || hit((n) => n.includes(q));
-    if (!match) { msg.textContent = t('speedline.noMatch'); msg.hidden = false; return; }
-    msg.hidden = true;
-    const row = node.querySelector(`tr[data-spe="${match.speed}"]`);
+    const qa = Array.from(q);
+    // 子序列：查詢字依序出現即可、中間可跳字（「阿九尾」→ 阿羅拉九尾）。
+    const subseq = (n) => {
+      let i = 0;
+      for (const ch of Array.from(n)) { if (ch === qa[i] && ++i === qa.length) return true; }
+      return false;
+    };
+    // 所有符合者，依表格顯示順序（速度高→低、同速依中文名）排序。
+    const matches = pool
+      .filter((p) => subseq(normalizeName(p.nameZh)) || subseq(normalizeName(p.nameEn)))
+      .sort((a, b) => b.speed - a.speed || (a.nameZh < b.nameZh ? -1 : a.nameZh > b.nameZh ? 1 : 0));
+    if (!matches.length) {
+      msg.textContent = t('speedline.noMatch');
+      msg.classList.add('feedback--bad'); msg.classList.remove('spd-search__msg--info');
+      msg.hidden = false;
+      return;
+    }
+    // 同一查詢：往下一個切、到底循環；換查詢：回第一個。
+    if (q === lastQ) matchIdx = (matchIdx + 1) % matches.length;
+    else { lastQ = q; matchIdx = 0; }
+    const target = matches[matchIdx];
+
+    if (matches.length > 1) {
+      msg.textContent = t('speedline.matchNth', { i: matchIdx + 1, n: matches.length });
+      msg.classList.remove('feedback--bad'); msg.classList.add('spd-search__msg--info');
+      msg.hidden = false;
+    } else { msg.hidden = true; }
+
+    const row = node.querySelector(`tr[data-spe="${target.speed}"]`);
     if (!row) return;
     row.scrollIntoView({ behavior: 'smooth', block: 'center' });
     row.classList.remove('row-hl');
     void row.offsetWidth; // 強制 reflow，讓動畫可重複觸發
     row.classList.add('row-hl');
     row.addEventListener('animationend', () => row.classList.remove('row-hl'), { once: true });
+    // 同速多隻時，標出目前這一隻立繪。
+    node.querySelectorAll('.spd-img--hl').forEach((im) => im.classList.remove('spd-img--hl'));
+    const im = [...row.querySelectorAll('.spd-img')].find((x) => x.alt === target.nameZh);
+    if (im) im.classList.add('spd-img--hl');
   };
   node.querySelector('[data-act="spd-go"]').onclick = doSearch;
   input.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); doSearch(); } });
@@ -1518,8 +1568,10 @@ function viewSpeedChart() {
 }
 
 // 同速排一列；每欄為該種族值在 Lv50 的實數值換算。
-function buildSpeedTable(season) {
+function buildSpeedTable(season, perRow = 10) {
   const pool = seasonPool(season);
+  // 容器寬度＝恰好 perRow 隻立繪（32px + 2px gap），第 perRow+1 隻自動換行。
+  const wrapW = perRow * 32 + (perRow - 1) * 2 + 2;
   const bySpeed = new Map();
   for (const p of pool) {
     if (!bySpeed.has(p.speed)) bySpeed.set(p.speed, []);
@@ -1546,7 +1598,7 @@ function buildSpeedTable(season) {
       .sort((a, b) => (a.nameZh < b.nameZh ? -1 : a.nameZh > b.nameZh ? 1 : 0))
       .map((p) => `<img class="spd-img" src="${esc(p.image)}" alt="${esc(p.nameZh)}" title="${esc(p.nameZh)}" loading="lazy" />`)
       .join('');
-    rows += `<tr data-spe="${spe}"><th class="spd-base">${spe}</th><td class="spd-mons">${mons}</td>`;
+    rows += `<tr data-spe="${spe}"><th class="spd-base">${spe}</th><td class="spd-mons"><div class="spd-mons-wrap" style="width:${wrapW}px">${mons}</div></td>`;
     for (const [k] of cols) rows += `<td>${ln[k]}</td>`;
     rows += '</tr>';
   }
@@ -2082,6 +2134,7 @@ function viewDokuSetup() {
 
 // ── 路由 ────────────────────────────────────────────────────────
 function render() {
+  app.classList.remove('app--wide'); // 預設窄版；需要寬版的頁面（速度線表）自行加回
   const params = new URLSearchParams(location.search);
   const code = params.get('c');
   const hash = location.hash;
