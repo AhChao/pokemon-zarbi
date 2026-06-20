@@ -1,6 +1,7 @@
 // 瀏覽器端主程式：hash 路由 + 成績碼網址處理 + 各畫面渲染。
 import { TYPES, TYPE_META, multiplier, formatMultiplier } from './data/typechart.js';
 import { generateTypeQuiz, generateSpeedQuiz, generateWhoQuiz, whoAnswerCorrect, whoCharScore, scoreQuizChar, normalizeName, speedLines, scoreQuiz, newSeed, DEFAULT_QUESTION_COUNT, MIN_QUESTION_COUNT, MAX_QUESTION_COUNT, SPEED_DIFFICULTIES, DEFAULT_SPEED_DIFFICULTY, WHO_DIFFICULTIES, DEFAULT_WHO_DIFFICULTY } from './quiz.js';
+import { generateDoku, cellSatisfied, PICK_RESULT_LIMIT } from './doku.js';
 import { encodeResult, decodeResult } from './share.js';
 import { getHistory, addHistory } from './history.js';
 import { t, typeName } from './i18n.js';
@@ -54,6 +55,8 @@ const UI_ICONS = {
   who: '<path fill="currentColor" d="M12 2a6 6 0 0 1 6 6c0 2.6-1.7 4-3.1 5.1-1 .8-1.4 1.3-1.4 2.4v.5h-3v-.7c0-2.1.9-3.1 2.3-4.2C14 10.3 15 9.7 15 8a3 3 0 0 0-6 0H6a6 6 0 0 1 6-6Z"/><circle cx="12" cy="20.2" r="1.8" fill="currentColor"/>',
   search: '<g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="21" y2="21"/></g>',
   up: '<path fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" d="M5 15l7-7 7 7"/>',
+  grid: '<g fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/></g>',
+  close: '<path fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" d="M6 6l12 12M18 6L6 18"/>',
 };
 function uiIcon(name) {
   return `<svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true">${UI_ICONS[name]}</svg>`;
@@ -163,6 +166,7 @@ function difficultyLabel(difficulty) {
 }
 
 function quizLabel(mode, season, difficulty = 'all') {
+  if (mode === 'doku') return t('quiz.doku.title');
   if (mode === 'speed') {
     const diff = difficulty && difficulty !== 'all' ? ` · ${difficultyLabel(difficulty)}` : '';
     return `${t('quiz.speed.title')}（${seasonLabel(season)}${diff}）`;
@@ -178,6 +182,7 @@ function quizLabel(mode, season, difficulty = 'all') {
 let session = null;        // { quiz, answers, index, locked, challenge, saved, meta }
 let viewingHistory = null; // 目前點開查看的歷史紀錄
 let setupState = null;     // { mode, season, seed } — 準備畫面
+let dokuState = null;      // { seed, puzzle, picks:[9], challenge } — 數獨盤面
 
 // 相對時間文字。
 function relTime(ts) {
@@ -225,6 +230,14 @@ function viewHome() {
           </span>
           <span class="hist-chevron" aria-hidden="true">›</span>
         </button>
+        <button class="quiz-card" data-pick="doku">
+          <span class="quiz-card__emoji" aria-hidden="true">${uiIcon('grid')}</span>
+          <span class="quiz-card__text">
+            <span class="quiz-card__title">${esc(t('quiz.doku.title'))}</span>
+            <span class="quiz-card__desc">${esc(t('quiz.doku.desc'))}</span>
+          </span>
+          <span class="hist-chevron" aria-hidden="true">›</span>
+        </button>
       </div>
 
       <div class="card">
@@ -250,6 +263,8 @@ function viewHome() {
   node.querySelectorAll('[data-pick]').forEach((b) => {
     b.onclick = () => {
       const mode = b.dataset.pick;
+      // 數獨是獨立盤面、不走線性測驗的 setup（無賽季/難度/題數），直接開新盤。
+      if (mode === 'doku') { dokuState = { seed: newSeed(), challenge: null }; go('#/doku'); return; }
       let season = '', difficulty = 'all';
       if (mode === 'speed') { season = defaultSeason(); difficulty = DEFAULT_SPEED_DIFFICULTY; }
       else if (mode === 'who') { season = defaultWhoPool(); difficulty = DEFAULT_WHO_DIFFICULTY; }
@@ -799,6 +814,23 @@ function viewHistoryDetail() {
 
 // ── 挑戰邀請畫面（從成績碼連結 / 輸入代碼進來）─────────────────
 function viewChallenge(decoded) {
+  // 數獨：獨立盤面，不走線性測驗的 startQuiz；帶 seed 進盤、保留對手分數作完局比較。
+  if (decoded.mode === 'doku') {
+    const coplayD = decoded.score === 0;
+    const node = el(`
+      <section class="card">
+        <h2>${esc(coplayD ? t('doku.coplayTitle') : t('doku.challengeTitle'))}</h2>
+        <p class="score-sub" style="margin-bottom:8px">${esc(t('quiz.doku.title'))}</p>
+        <p class="lead">${esc(coplayD ? t('doku.coplayBody') : t('doku.challengeBody', { score: decoded.score }))}</p>
+        <button class="btn btn--primary" data-act="accept">${esc(coplayD ? t('doku.coplayStart') : t('doku.challengeStart'))}</button>
+        <button class="btn btn--ghost" data-nav="home">${esc(t('common.back'))}</button>
+      </section>`);
+    node.querySelector('[data-act="accept"]').onclick = () => {
+      dokuState = { seed: decoded.seed, challenge: coplayD ? null : { score: decoded.score } };
+      go('#/doku');
+    };
+    return setView(node);
+  }
   const coplay = decoded.score === 0;
   const title = coplay ? t('challenge.coplayTitle') : t('challenge.title');
   const body = coplay
@@ -1124,6 +1156,236 @@ function viewDex() {
   setView(node);
 }
 
+// ── 寶可夢數獨（PokeDoku-style 3×3 盤面）─────────────────────────
+// 軸標籤：屬性用 type-badge，其餘（地區/純單屬性/Mega/名字字數）用文字 pill。
+function dokuTag(cat) {
+  return cat.kind === 'type' ? badge(cat.value) : `<span class="doku-tag">${esc(cat.label)}</span>`;
+}
+// 搜尋彈窗標頭的條件文字（純文字，不放 badge）。
+function condText(cat) {
+  return cat.kind === 'type' ? typeName(cat.value) : cat.label;
+}
+
+function viewDoku() {
+  if (!dokuState || !dokuState.seed) dokuState = { seed: newSeed(), challenge: null };
+  // 同 seed → 同盤；換 seed 才重算並清空作答。
+  if (!dokuState.puzzle || dokuState.puzzle.seed !== String(dokuState.seed)) {
+    dokuState.puzzle = generateDoku(dokuState.seed, nationalDex);
+    dokuState.picks = Array(9).fill(null);
+  }
+  const pz = dokuState.puzzle;
+
+  const node = el(`
+    <section>
+      <div data-cmp hidden></div>
+      <div class="card">
+        <h2>${esc(t('doku.title'))}</h2>
+        <p class="muted">${esc(t('doku.intro'))}</p>
+        <div class="doku" data-board></div>
+        <p class="doku-score" data-score></p>
+        <div class="doku-share">
+          <p class="label">${esc(t('doku.yourCode'))}</p>
+          <div class="code-box">
+            <input type="text" readonly aria-label="分享連結" data-share-url />
+            <button class="btn btn--accent" data-act="copy-doku">${esc(t('result.copy'))}</button>
+          </div>
+          <p class="muted" data-share-code></p>
+        </div>
+        <button class="btn btn--ghost" data-act="reveal" hidden>${esc(t('doku.reveal'))}</button>
+        <button class="btn btn--primary" data-act="newpuzzle">${esc(t('doku.newPuzzle'))}</button>
+        <button class="btn btn--ghost" data-nav="home">${esc(t('common.back'))}</button>
+        <p class="doku-ref"><a href="https://pokedoku.com/" target="_blank" rel="noopener noreferrer">${esc(t('doku.ref'))}</a></p>
+      </div>
+    </section>`);
+
+  const board = node.querySelector('[data-board]');
+  const scoreEl = node.querySelector('[data-score]');
+  const revealBtn = node.querySelector('[data-act="reveal"]');
+  const cmpEl = node.querySelector('[data-cmp]');
+
+  const rebuild = () => { renderBoard(); updateStatus(); };
+
+  function buildDokuCell(idx) {
+    const pick = dokuState.picks[idx];
+    if (!pick) {
+      const cell = el(`<button class="doku-cell" data-cell="${idx}" aria-label="${esc(t('doku.cellEmpty'))}"></button>`);
+      cell.onclick = () => openDokuPicker(idx, rebuild);
+      return cell;
+    }
+    const tone = pick.reveal ? 'reveal' : pick.correct ? 'ok' : 'no';
+    const cell = el(`
+      <div class="doku-cell doku-cell--${tone}">
+        <img class="doku-thumb" alt="${esc(pick.name)}" />
+        <span class="doku-cell-name">${esc(pick.name)}${pick.mega ? ' <span class="mega-tag">MEGA</span>' : ''}</span>
+      </div>`);
+    const img = cell.querySelector('img');
+    img.src = pick.image;
+    img.onerror = () => { img.style.visibility = 'hidden'; };
+    return cell;
+  }
+
+  function renderBoard() {
+    board.innerHTML = '';
+    board.appendChild(el(`<div class="doku-corner">${uiIcon('grid')}</div>`));
+    pz.cols.forEach((c) => board.appendChild(el(`<div class="doku-axis doku-axis--col">${dokuTag(c)}</div>`)));
+    for (let r = 0; r < 3; r++) {
+      board.appendChild(el(`<div class="doku-axis doku-axis--row">${dokuTag(pz.rows[r])}</div>`));
+      for (let c = 0; c < 3; c++) board.appendChild(buildDokuCell(r * 3 + c));
+    }
+  }
+
+  function updateStatus() {
+    const picks = dokuState.picks;
+    const guessed = picks.filter((p) => p && !p.reveal).length;
+    const ok = picks.filter((p) => p && !p.reveal && p.correct).length;
+    const allFilled = picks.every(Boolean);
+    scoreEl.textContent = allFilled ? t('doku.done', { ok }) : t('doku.progress', { n: guessed, ok });
+    scoreEl.className = 'doku-score' + (allFilled ? ' doku-score--done' : '');
+    revealBtn.hidden = !picks.some((p) => !p);
+
+    const code = encodeResult({ mode: 'doku', season: '', seed: pz.seed, total: 9, score: ok, difficulty: 'all' });
+    node.querySelector('[data-share-url]').value = shareUrlFor(code);
+    node.querySelector('[data-share-code]').textContent = code;
+
+    if (allFilled && dokuState.challenge) {
+      const them = dokuState.challenge.score;
+      const msg = ok > them ? t('challenge.beat', { you: ok, them })
+        : ok === them ? t('challenge.tie', { you: ok })
+          : t('challenge.lose', { you: ok, them });
+      cmpEl.innerHTML = `<div class="banner"><p style="font-weight:800;font-size:1.2rem">${esc(msg)}</p></div>`;
+      cmpEl.hidden = false;
+    } else {
+      cmpEl.hidden = true;
+    }
+  }
+
+  revealBtn.onclick = () => {
+    dokuState.picks.forEach((p, i) => {
+      if (p) return;
+      const cell = pz.cells[i];
+      dokuState.picks[i] = { reveal: true, key: cell.canonicalKey, name: cell.canonicalName, image: cell.canonicalImage, mega: cell.canonicalMega, correct: false };
+    });
+    rebuild();
+  };
+  node.querySelector('[data-act="newpuzzle"]').onclick = () => { dokuState = { seed: newSeed(), challenge: null }; viewDoku(); };
+
+  const copyBtn = node.querySelector('[data-act="copy-doku"]');
+  copyBtn.onclick = async () => {
+    const input = node.querySelector('[data-share-url]');
+    try { await navigator.clipboard.writeText(input.value); }
+    catch { input.select(); document.execCommand('copy'); }
+    copyBtn.textContent = t('result.copied');
+    setTimeout(() => (copyBtn.textContent = t('result.copy')), 1500);
+  };
+
+  rebuild();
+  setView(node);
+}
+
+// 數獨格子搜尋彈窗：即時過濾全國圖鑑（中／英子字串）→ 每筆附小立繪 → 點選驗證填入。
+// 重用 normalizeName 比對、dex 立繪渲染；互動照 searchable-select 合約（自動聚焦／↑↓／Enter／Esc），
+// 並套 ime-safe 合約（中文組字中的 Enter 屬於 IME，不誤送）。
+function openDokuPicker(idx, onPicked) {
+  if (!dokuState || !dokuState.puzzle) return;
+  const pz = dokuState.puzzle;
+  const rowCat = pz.rows[Math.floor(idx / 3)], colCat = pz.cols[idx % 3];
+  const usedNdex = new Set(dokuState.picks.filter((p) => p && !p.reveal).map((p) => p.ndex));
+  const entries = Object.entries(nationalDex).map(([key, v]) => ({ key, ...v }));
+
+  const overlay = el(`
+    <div class="modal-overlay" role="dialog" aria-modal="true" aria-label="${esc(t('doku.title'))}">
+      <div class="modal-panel">
+        <div class="modal-head">
+          <span class="doku-cond">${esc(condText(rowCat))}<span class="doku-cond-plus">＋</span>${esc(condText(colCat))}</span>
+          <button class="modal-close" data-act="close" aria-label="關閉">${uiIcon('close')}</button>
+        </div>
+        <div class="code-box">
+          <input type="text" inputmode="text" autocomplete="off" autocapitalize="off" spellcheck="false"
+                 placeholder="${esc(t('doku.searchPlaceholder'))}" aria-label="${esc(t('doku.searchPlaceholder'))}" data-pick-search />
+        </div>
+        <p class="feedback feedback--bad doku-pick-msg" data-pick-msg hidden></p>
+        <div class="doku-results" data-results></div>
+      </div>
+    </div>`);
+  document.body.appendChild(overlay);
+  document.body.classList.add('modal-open');
+
+  const input = overlay.querySelector('[data-pick-search]');
+  const results = overlay.querySelector('[data-results]');
+  const msg = overlay.querySelector('[data-pick-msg]');
+  let shown = [], activeIdx = -1;
+
+  const close = () => {
+    document.body.classList.remove('modal-open');
+    document.removeEventListener('keydown', onKey, true);
+    overlay.remove();
+  };
+
+  const choose = (p) => {
+    if (usedNdex.has(p.ndex)) { msg.textContent = t('doku.usedAlready', { name: p.nameZh }); msg.hidden = false; return; }
+    dokuState.picks[idx] = {
+      key: p.key, ndex: p.ndex, name: p.nameZh, image: p.image, mega: !!p.mega,
+      correct: cellSatisfied(p, rowCat, colCat),
+    };
+    close();
+    onPicked();
+  };
+
+  const rankName = (p, q) => (normalizeName(p.nameZh).startsWith(q) ? 0 : normalizeName(p.nameEn).startsWith(q) ? 1 : 2);
+
+  const setActive = (i) => {
+    const rows = [...results.querySelectorAll('.doku-result')];
+    if (!rows.length) { activeIdx = -1; return; }
+    activeIdx = (i + rows.length) % rows.length;
+    rows.forEach((r, j) => r.classList.toggle('doku-result--active', j === activeIdx));
+    rows[activeIdx].scrollIntoView({ block: 'nearest' });
+  };
+
+  const renderResults = () => {
+    const q = normalizeName(input.value);
+    results.innerHTML = '';
+    shown = []; activeIdx = -1;
+    if (!q) { results.innerHTML = `<p class="muted doku-results-hint">${esc(t('doku.searchHint'))}</p>`; return; }
+    const matches = entries
+      .filter((p) => normalizeName(p.nameZh).includes(q) || normalizeName(p.nameEn).includes(q))
+      .sort((a, b) => rankName(a, q) - rankName(b, q) || (a.ndex || 0) - (b.ndex || 0) || (a.key < b.key ? -1 : 1))
+      .slice(0, PICK_RESULT_LIMIT);
+    if (!matches.length) { results.innerHTML = `<p class="muted doku-results-hint">${esc(t('doku.noResult'))}</p>`; return; }
+    matches.forEach((p) => {
+      const row = el(`
+        <button class="doku-result" type="button">
+          <img class="doku-result-img" alt="" loading="lazy" />
+          <span class="doku-result-name">${esc(p.nameZh)}${p.mega ? ' <span class="mega-tag">MEGA</span>' : ''}</span>
+          <span class="doku-result-en">${esc(p.nameEn)}</span>
+        </button>`);
+      const im = row.querySelector('img');
+      im.src = p.image; im.onerror = () => { im.style.visibility = 'hidden'; };
+      row.onclick = () => choose(p);
+      results.appendChild(row);
+      shown.push(p);
+    });
+  };
+
+  function onKey(e) {
+    if (e.key === 'Escape') { e.preventDefault(); close(); return; }
+    // 中文 IME 組字中：Enter/方向鍵屬於 IME（選字／送出候選），不要攔。
+    if (e.isComposing || e.keyCode === 229) return;
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      if (activeIdx >= 0 && shown[activeIdx]) choose(shown[activeIdx]);
+      else if (shown.length === 1) choose(shown[0]);
+    } else if (e.key === 'ArrowDown') { e.preventDefault(); setActive(activeIdx + 1); }
+    else if (e.key === 'ArrowUp') { e.preventDefault(); setActive(activeIdx - 1); }
+  }
+
+  input.addEventListener('input', () => { msg.hidden = true; renderResults(); });
+  document.addEventListener('keydown', onKey, true);
+  overlay.querySelector('[data-act="close"]').onclick = close;
+  overlay.addEventListener('mousedown', (e) => { if (e.target === overlay) close(); });
+  renderResults();
+  setTimeout(() => input.focus(), 0);
+}
+
 // ── 路由 ────────────────────────────────────────────────────────
 function render() {
   const params = new URLSearchParams(location.search);
@@ -1145,6 +1407,7 @@ function render() {
     case '#/chart': return viewChart();
     case '#/speedline': return viewSpeedChart();
     case '#/dex': return viewDex();
+    case '#/doku': return viewDoku();
     default: return viewHome();
   }
 }
@@ -1154,7 +1417,7 @@ document.addEventListener('click', (e) => {
   const nav = e.target.closest('[data-nav]');
   if (!nav) return;
   const dest = nav.dataset.nav;
-  if (dest === 'home') { session = null; setupState = null; go('#/'); }
+  if (dest === 'home') { session = null; setupState = null; dokuState = null; go('#/'); }
   else go('#/' + dest);
 });
 

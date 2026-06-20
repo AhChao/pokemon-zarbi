@@ -21,6 +21,14 @@ test('速度成績碼帶難度 round-trip', () => {
   }
 });
 
+test('數獨成績碼 round-trip（season 用 -、total 固定 9）', () => {
+  for (const score of [0, 4, 9]) {
+    const code = encodeResult({ mode: 'doku', season: '', seed: 'dseed12', total: 9, score });
+    assert.deepEqual(decodeResult(code),
+      { mode: 'doku', season: '', seed: 'dseed12', total: 9, score, difficulty: 'all' });
+  }
+});
+
 test('我是誰成績碼 round-trip（池鍵 + 難度一律附第 7 欄）', () => {
   for (const [season, difficulty] of [['g1', 'veryeasy'], ['g1', 'easy'], ['g9', 'normal'], ['m-b', 'hard']]) {
     const code = encodeResult({ mode: 'who', season, seed: 'wseed', total: 10, score: 6, difficulty });

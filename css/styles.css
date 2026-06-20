@@ -619,3 +619,93 @@ table.chart.spd td.spd-mons {
 }
 .row { display: flex; gap: 10px; }
 .row > * { flex: 1; }
+
+/* ── 寶可夢數獨（PokeDoku-style 盤面）─────────────────────────── */
+.doku {
+  display: grid;
+  grid-template-columns: 62px repeat(3, 1fr);
+  gap: 6px;
+  margin: 10px 0 4px;
+}
+.doku-corner {
+  display: flex; align-items: center; justify-content: center;
+  color: var(--c-muted);
+}
+.doku-corner .ui-icon { width: 26px; height: 26px; }
+.doku-axis {
+  display: flex; align-items: center; justify-content: center;
+  text-align: center; min-height: 44px; padding: 2px;
+}
+.doku-tag {
+  display: inline-block; padding: 4px 8px; border-radius: var(--radius-sm);
+  background: var(--c-bg); border: 1px solid var(--c-border);
+  font-weight: 800; font-size: .82rem; line-height: 1.2;
+}
+.doku-axis .type-badge {
+  font-size: .72rem; padding: 3px 7px; gap: 3px;
+}
+.doku-axis .type-badge .type-icon { width: 13px; height: 13px; }
+.doku-cell {
+  position: relative; aspect-ratio: 1 / 1; padding: 3px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  border: 2px solid var(--c-border); border-radius: 10px;
+  background: var(--c-surface); color: var(--c-text);
+  font: inherit; cursor: pointer; overflow: hidden;
+}
+button.doku-cell:active { transform: scale(.98); }
+.doku-cell--ok { border-color: var(--c-good); background: color-mix(in srgb, var(--c-good) 12%, var(--c-surface)); }
+.doku-cell--no { border-color: var(--c-bad); background: color-mix(in srgb, var(--c-bad) 12%, var(--c-surface)); }
+.doku-cell--reveal { border-color: var(--c-accent); border-style: dashed; }
+.doku-thumb { width: 100%; flex: 1 1 auto; min-height: 0; object-fit: contain; }
+.doku-cell-name {
+  flex: 0 0 auto; max-width: 100%; font-size: .68rem; font-weight: 700;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.doku-cell-name .mega-tag { font-size: .5rem; padding: 0 3px; }
+.doku-score { text-align: center; font-weight: 800; margin: 8px 0 4px; }
+.doku-score--done { color: var(--c-good); font-size: 1.1rem; }
+.doku-share { margin-top: 8px; }
+.doku-ref { text-align: center; margin: 14px 0 0; font-size: .76rem; }
+.doku-ref a { color: var(--c-muted); }
+
+/* ── 通用搜尋彈窗（數獨格子填入）────────────────────────────── */
+body.modal-open { overflow: hidden; }
+.modal-overlay {
+  position: fixed; inset: 0; z-index: 100;
+  display: flex; align-items: flex-end; justify-content: center;
+  background: rgba(0, 0, 0, .5); padding: 0;
+}
+.modal-panel {
+  width: 100%; max-width: var(--maxw); max-height: 86dvh;
+  display: flex; flex-direction: column;
+  background: var(--c-surface);
+  border-radius: var(--radius) var(--radius) 0 0;
+  box-shadow: var(--shadow); padding: 14px 16px calc(14px + env(safe-area-inset-bottom));
+}
+@media (min-width: 560px) {
+  .modal-overlay { align-items: center; padding: 16px; }
+  .modal-panel { border-radius: var(--radius); }
+}
+.modal-head { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.modal-close {
+  margin-left: auto; flex: 0 0 auto; width: 36px; height: 36px;
+  display: flex; align-items: center; justify-content: center;
+  border: 1px solid var(--c-border); border-radius: var(--radius-sm);
+  background: var(--c-bg); color: var(--c-text); cursor: pointer;
+}
+.modal-close .ui-icon { width: 18px; height: 18px; }
+.doku-cond { font-weight: 800; font-size: 1.05rem; }
+.doku-cond-plus { color: var(--c-muted); margin: 0 8px; font-weight: 700; }
+.doku-pick-msg { text-align: left; margin: 6px 0 0; }
+.doku-results { margin-top: 8px; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+.doku-results-hint { text-align: center; padding: 22px 0; }
+.doku-result {
+  display: flex; align-items: center; gap: 10px; width: 100%;
+  padding: 6px 8px; border: 0; border-bottom: 1px solid var(--c-border);
+  background: none; color: var(--c-text); font: inherit; text-align: left; cursor: pointer;
+}
+.doku-result:active, .doku-result--active { background: var(--c-bg); }
+.doku-result-img { width: 40px; height: 40px; flex: 0 0 auto; object-fit: contain; }
+.doku-result-name { font-weight: 700; }
+.doku-result-name .mega-tag { margin-left: 4px; }
+.doku-result-en { margin-left: auto; color: var(--c-muted); font-size: .8rem; }

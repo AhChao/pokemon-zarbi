@@ -2,7 +2,8 @@
 // 對方打開連結後，用同樣的類型/賽季/seed 還原同一份測驗來挑戰或一起測。
 //
 // v2 格式：2 ~ mode ~ season ~ seed ~ total ~ score [ ~ difficulty ] [ ~ flag ]
-//   mode:       t = 屬性相剋, s = 種族值速度, w = 我是誰
+//   mode:       t = 屬性相剋, s = 種族值速度, w = 我是誰, k = 寶可夢數獨
+//               數獨 season 用 '-'、total 固定 9、score＝九格答對數；seed 即可重現整盤。
 //   season:     速度測驗的賽季鍵（如 m-a / m-b）；我是誰的池鍵（all / g1..g9 / hisui / 賽季鍵）；屬性測驗用 '-'
 //   total:      題數（10~20）。
 //   score:      一般＝答對題數（0..total）；我是誰按字計分＝百分制 ×100 的整數（0..10000，保留兩位小數）。
@@ -13,8 +14,8 @@
 
 const VERSION = '2';
 const SEP = '~';
-const MODE_TO_CODE = { type: 't', speed: 's', who: 'w' };
-const CODE_TO_MODE = { t: 'type', s: 'speed', w: 'who' };
+const MODE_TO_CODE = { type: 't', speed: 's', who: 'w', doku: 'k' };
+const CODE_TO_MODE = { t: 'type', s: 'speed', w: 'who', k: 'doku' };
 const DIFF_TO_CODE = { all: 'a', veryeasy: 'v', easy: 'e', normal: 'n', medium: 'm', hard: 'h' };
 const CODE_TO_DIFF = { a: 'all', v: 'veryeasy', e: 'easy', n: 'normal', m: 'medium', h: 'hard' };
 // 計分旗標（大寫，與小寫難度碼區分）：N=正常計分（對/錯換算 100 分）、C=按字計分（我是誰）。
