@@ -58,6 +58,7 @@ const UI_ICONS = {
   up: '<path fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" d="M5 15l7-7 7 7"/>',
   grid: '<g fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/></g>',
   close: '<path fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" d="M6 6l12 12M18 6L6 18"/>',
+  info: '<circle cx="12" cy="12" r="9.2" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="7.6" r="1.3" fill="currentColor"/><path fill="currentColor" d="M11 10.6h2v6.4h-2z"/>',
 };
 function uiIcon(name) {
   return `<svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true">${UI_ICONS[name]}</svg>`;
@@ -1644,7 +1645,12 @@ function viewSpeedChart() {
           </div>
         </div>
         <div class="table-wrap" data-table></div>
-        <p class="muted spd-legend">${esc(t('speedline.legend'))}</p>
+        <div class="muted spd-legend">
+          <p class="spd-legend__line"><b>投資</b>：最速＝速度能力點數 32（滿）＋加速性格 ×1.1；準速＝點數 32、無性格修正；無振＝點數 0；減速＝點數 0＋減速性格 ×0.9。</p>
+          <p class="spd-legend__line"><b>道具・場地</b>：圍巾（講究圍巾）×1.5；順風 ×2。</p>
+          <p class="spd-legend__line"><b>《冠軍》與舊世代差異</b>：舊作的「努力值」（單項最多 252、合計 510、每 4 點 +1）與「個體值」，在《冠軍》改成「能力點數」——每隻固定 66 點、單項上限 32，直接加進 Lv50 實數值（每點 +1），個體值一律視為最大（31）。Lv50 下 32 點的效果剛好等於舊作 252 努力值、0 點等於 0 努力，故本表數字兩制相同。</p>
+          <p class="spd-legend__line"><b>日文詞源</b>：「最速」速度拉到最高；「準速」準＝次一階，滿投但不靠性格 ×1.1；「無振」振り＝分配點數，無振＝完全不投。</p>
+        </div>
         <button class="btn btn--ghost" data-nav="setup">${esc(t('common.back'))}</button>
       </div>
       <button class="spd-top" data-act="spd-top" aria-label="${esc(t('speedline.toTop'))}">${uiIcon('up')}</button>
@@ -1723,6 +1729,67 @@ function viewSpeedChart() {
   setView(node);
 }
 
+// ── 共用浮動提示（速度線表欄首說明）─────────────────────────────
+// 參考 ui collection 的 hover-tooltip：單一 bubble 掛在 <body>，避開表格 overflow 裁切；
+// 桌機（可 hover、精準指標）hover/focus 顯示並在欄首附 info icon；觸控裝置點擊切換、不顯 icon 省空間。
+const CAN_HOVER = typeof matchMedia === 'function'
+  ? matchMedia('(hover: hover) and (pointer: fine)').matches : true;
+let _tipEl = null, _tipArrow = null, _tipBody = null, _tipActive = null;
+function ensureTip() {
+  if (_tipEl) return;
+  _tipEl = document.createElement('div');
+  _tipEl.className = 'ui-tip';
+  _tipEl.id = 'ui-tip-shared';
+  _tipEl.setAttribute('role', 'tooltip');
+  _tipArrow = document.createElement('div'); _tipArrow.className = 'ui-tip__arrow';
+  _tipBody = document.createElement('div'); _tipBody.className = 'ui-tip__body';
+  _tipEl.append(_tipArrow, _tipBody);
+  document.body.appendChild(_tipEl);
+  // 捲動 / 點空白處收起（觸控模式靠它關閉）
+  window.addEventListener('scroll', hideTip, { passive: true, capture: true });
+  document.addEventListener('click', (e) => {
+    if (_tipActive && !e.target.closest('[data-coltip]')) hideTip();
+  });
+}
+function positionTip(rect) {
+  const tw = _tipEl.offsetWidth, th = _tipEl.offsetHeight;
+  const vw = window.innerWidth, vh = window.innerHeight, margin = 10, gap = 8;
+  let left = rect.left + rect.width / 2 - tw / 2;   // 置中於欄首
+  if (left + tw > vw - margin) left = vw - tw - margin;
+  if (left < margin) left = margin;
+  let top = rect.bottom + gap, above = false;
+  if (top + th > vh - margin) { top = rect.top - th - gap; above = true; } // 下方超出 → 翻到上方
+  _tipEl.classList.toggle('is-above', above);
+  _tipEl.style.left = `${Math.round(left)}px`;
+  _tipEl.style.top = `${Math.round(top)}px`;
+  const center = rect.left + rect.width / 2 - left;  // 箭頭仍指向欄首中心
+  _tipArrow.style.left = `${Math.round(Math.max(12, Math.min(center, tw - 12)))}px`;
+}
+function showTip(trigger, text) {
+  ensureTip();
+  _tipBody.textContent = text;
+  _tipEl.classList.add('is-visible');
+  _tipActive = trigger;
+  positionTip(trigger.getBoundingClientRect());
+}
+function hideTip() { if (_tipEl) _tipEl.classList.remove('is-visible'); _tipActive = null; }
+function attachColTip(thEl, text) {
+  if (!text) return;
+  thEl.setAttribute('aria-describedby', 'ui-tip-shared');
+  thEl.tabIndex = 0;
+  if (CAN_HOVER) {
+    thEl.addEventListener('mouseenter', () => showTip(thEl, text));
+    thEl.addEventListener('mouseleave', hideTip);
+    thEl.addEventListener('focus', () => showTip(thEl, text));
+    thEl.addEventListener('blur', hideTip);
+  } else {
+    thEl.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (_tipActive === thEl) hideTip(); else showTip(thEl, text);
+    });
+  }
+}
+
 // 同速排一列；每欄為該種族值在 Lv50 的實數值換算。
 function buildSpeedTable(season, perRow = 10) {
   const pool = seasonPool(season);
@@ -1735,16 +1802,30 @@ function buildSpeedTable(season, perRow = 10) {
   }
   const speeds = [...bySpeed.keys()].sort((a, b) => b - a);
 
+  // 每欄：[key, 標籤, 欄首說明]。說明在桌機 hover、手機點擊欄首時浮現。
+  // 定義採《冠軍》制度：能力點數（取代努力值，單項上限 32、直接加實數值），個體值固定最大。
   const cols = [
-    ['max', '最速'], ['neu', '準速'], ['noInv', '無振'], ['neg', '減速'],
-    ['scarfMax', '圍巾·最速'], ['scarfNeu', '圍巾·準速'],
-    ['twMax', '順風·最速'], ['twNeu', '順風·準速'], ['twNoInv', '順風·無振'],
+    ['max', '最速', '速度能力點數 32（滿）＋加速性格（×1.1）。「最速」＝速度衝到最高。'],
+    ['neu', '準速', '速度能力點數 32（滿）、性格無修正。「準速」＝差最速一階，沒吃性格的 ×1.1。'],
+    ['noInv', '無振', '速度能力點數 0、性格無修正。「無振」源自日文「振り（分配點數）」，無振＝完全不投速度。'],
+    ['neg', '減速', '速度能力點數 0＋減速性格（×0.9）。'],
+    ['scarfMax', '圍巾·最速', '最速再 ×1.5（講究圍巾）。'],
+    ['scarfNeu', '圍巾·準速', '準速再 ×1.5（講究圍巾）。'],
+    ['twMax', '順風·最速', '最速再 ×2（順風）。'],
+    ['twNeu', '順風·準速', '準速再 ×2（順風）。'],
+    ['twNoInv', '順風·無振', '無振再 ×2（順風）。'],
   ];
 
   // 種族值第一欄；立繪第二欄加寬（同速一整排不換行）；其後接各速度線。
-  let head = `<tr><th class="spd-base">種族</th><th class="spd-mons">寶可夢</th>`;
-  for (const [, label] of cols) head += `<th>${esc(label)}</th>`;
-  head += '</tr>';
+  // 欄首包成 .spd-th，桌機再附 info icon（觸控不顯、省空間）；說明文字存在 data-coltip。
+  const tipIcon = CAN_HOVER ? `<span class="spd-th__i">${uiIcon('info')}</span>` : '';
+  const thCell = (cls, label, tip) =>
+    `<th class="${cls}" data-coltip="${esc(tip)}"><span class="spd-th">${esc(label)}${tipIcon}</span></th>`;
+  let head = '<tr>'
+    + thCell('spd-base', '種族', '速度種族值，是換算各速度線的基準')
+    + thCell('spd-mons', '寶可夢', '擁有此速度種族值的寶可夢，同速排成一列')
+    + cols.map(([, label, tip]) => thCell('', label, tip)).join('')
+    + '</tr>';
 
   let rows = '';
   for (const spe of speeds) {
@@ -1760,6 +1841,7 @@ function buildSpeedTable(season, perRow = 10) {
   }
   const table = el(`<table class="chart spd">${head}${rows}</table>`);
   table.querySelectorAll('.spd-img').forEach((im) => { im.onerror = () => { im.style.visibility = 'hidden'; }; });
+  table.querySelectorAll('th[data-coltip]').forEach((th) => attachColTip(th, th.getAttribute('data-coltip')));
   return table;
 }
 

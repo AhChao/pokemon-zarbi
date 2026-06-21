@@ -151,7 +151,6 @@ const DICT = {
     'speedline.title': '速度線表（Lv50）',
     'speedline.openBtn': '查速度線表',
     'speedline.hint': '依賽季列出每個速度種族值在 50 級的實數值，同速排一列。可左右滑動看更多欄。',
-    'speedline.legend': '最速＝252努力＋加速性格、準速＝252努力無修正、無振＝0努力、減速＝0努力＋減速性格；圍巾 ×1.5、順風 ×2。',
     'speedline.perRow': '每行最多',
     'speedline.perRowUnit': '{n} 隻',
     'speedline.search': '搜尋寶可夢（中／英、可模糊）…',
