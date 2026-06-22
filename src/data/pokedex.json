@@ -85,28 +85,6 @@
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10057.png",
     "mega": true
   },
-  "absol-mega-z": {
-    "dex": 10307,
-    "ndex": 359,
-    "speed": 151,
-    "stats": {
-      "hp": 65,
-      "atk": 154,
-      "def": 60,
-      "spa": 75,
-      "spd": 60,
-      "spe": 151
-    },
-    "bst": 565,
-    "nameZh": "超級阿勃梭魯Z",
-    "nameEn": "Mega Absol Z",
-    "types": [
-      "dark",
-      "ghost"
-    ],
-    "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10307.png",
-    "mega": true
-  },
   "aegislash-shield": {
     "dex": 681,
     "ndex": 681,
@@ -2403,27 +2381,6 @@
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10058.png",
     "mega": true
   },
-  "garchomp-mega-z": {
-    "dex": 10309,
-    "ndex": 445,
-    "speed": 151,
-    "stats": {
-      "hp": 108,
-      "atk": 130,
-      "def": 85,
-      "spa": 141,
-      "spd": 85,
-      "spe": 151
-    },
-    "bst": 700,
-    "nameZh": "超級烈咬陸鯊Z",
-    "nameEn": "Mega Garchomp Z",
-    "types": [
-      "dragon"
-    ],
-    "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10309.png",
-    "mega": true
-  },
   "gardevoir": {
     "dex": 282,
     "ndex": 282,
@@ -3509,28 +3466,6 @@
       "steel"
     ],
     "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10059.png",
-    "mega": true
-  },
-  "lucario-mega-z": {
-    "dex": 10310,
-    "ndex": 448,
-    "speed": 151,
-    "stats": {
-      "hp": 70,
-      "atk": 100,
-      "def": 70,
-      "spa": 164,
-      "spd": 70,
-      "spe": 151
-    },
-    "bst": 625,
-    "nameZh": "超級路卡利歐Z",
-    "nameEn": "Mega Lucario Z",
-    "types": [
-      "fighting",
-      "steel"
-    ],
-    "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10310.png",
     "mega": true
   },
   "luxray": {

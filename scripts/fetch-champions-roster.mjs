@@ -19,6 +19,14 @@ const API = 'https://pokeapi.co/api/v2';
 const INDEX = 'https://www.serebii.net/pokedex-champions/';
 const CONCURRENCY = 8;
 
+// Legends Z-A 專屬的 Mega Z 形態：PokéAPI 有 variety、Serebii champions 頁也會渲染 /legendsz-a/ 立繪，
+// 但《冠軍》賽制未開放（2026-06 查證：Bulbapedia Champions 名單無任何 Z 形態；Game8 M-B 明文排除
+// Lucario Z / Garchomp Z；Absol Z 尚未實裝）。PokéAPI varieties 與 Serebii 圖鑑頁對「Champions 可用性」
+// 皆非可信來源，故在此硬擋，避免重跑時被無條件納回。
+const CHAMPIONS_BANNED = new Set([
+  'absol-mega-z', 'garchomp-mega-z', 'lucario-mega-z',
+]);
+
 // M-B 相對 M-A 的新增（Serebii「Newly Useable」+ v1.1.0 新 Mega）。M-A = 全部減這些。
 const MB_ADDED = new Set([
   'vileplume', 'qwilfish', 'sceptile', 'blaziken', 'swampert', 'mawile', 'metagross',
@@ -68,7 +76,7 @@ async function main() {
     const forms = [];
     for (const v of species.varieties) {
       const name = v.pokemon.name;
-      if (v.is_default || name.includes('-mega')) forms.push(name);
+      if ((v.is_default || name.includes('-mega')) && !CHAMPIONS_BANNED.has(name)) forms.push(name);
     }
     return forms;
   }, CONCURRENCY);
