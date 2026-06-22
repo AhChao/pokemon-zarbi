@@ -343,6 +343,95 @@ h2 { font-size: 1.2rem; margin: 0 0 12px; }
 }
 .chart-result small { display: block; font-size: .85rem; font-weight: 500; color: var(--c-muted); }
 
+/* ── 聯防小工具 ──────────────────────────────────────────────── */
+.setup-tools { display: flex; gap: 8px; margin-top: 14px; }
+.setup-tools .btn { flex: 1; margin: 0; }
+.ct-seg { display: flex; gap: 8px; margin: 12px 0; }
+.ct-picked-label { margin-bottom: 6px; }
+.ct-picked { display: flex; flex-wrap: wrap; gap: 6px; min-height: 34px; }
+.ct-empty { color: var(--c-muted); font-size: .9rem; align-self: center; }
+.ct-chip {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 5px 8px 5px 12px; border: none; border-radius: 999px;
+  color: #fff; font-weight: 700; font-size: .9rem; cursor: pointer;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, .25);
+}
+.ct-chip .type-icon { width: 1.2em; height: 1.2em; }
+.ct-chip .ui-icon { width: 15px; height: 15px; opacity: .85; }
+.ct-add-hint { margin: 12px 0 6px; }
+.ct-result { margin-top: 14px; }
+.ct-hint { color: var(--c-muted); text-align: center; margin: 6px 0; }
+.ct-combined { display: grid; gap: 8px; }
+.ct-explain { color: var(--c-muted); font-size: .85rem; margin: 0 0 4px; }
+.ct-bucket {
+  display: grid; grid-template-columns: 76px 1fr; gap: 10px; align-items: start;
+  border: 1px solid var(--c-border); border-radius: var(--radius-sm); padding: 8px 10px;
+}
+.ct-bucket__k { font-weight: 800; font-size: 1.1rem; line-height: 1.15; }
+.ct-bucket__k small { display: block; font-size: .72rem; font-weight: 600; color: var(--c-muted); }
+.ct-bucket__v { display: flex; flex-wrap: wrap; gap: 4px; }
+.ct-bucket__v .type-badge { font-size: .78rem; padding: 2px 8px; }
+.ct-bucket__v .type-icon { width: 1.1em; height: 1.1em; }
+/* 危險（會痛／打不動）：紅底框＋警示色，最顯眼。 */
+.ct-bucket--danger { border-color: var(--c-bad); background: color-mix(in srgb, var(--c-bad) 12%, transparent); }
+.ct-bucket--danger .ct-bucket__k { color: var(--c-bad); }
+.ct-bucket--safe { border-color: color-mix(in srgb, var(--c-good) 45%, var(--c-border)); }
+.ct-bucket--safe .ct-bucket__k { color: var(--c-good); }
+
+/* 我的隊伍 */
+.ct-body { margin-top: 4px; }
+.type-pick--sm { padding: 5px 3px; font-size: .72rem; gap: 2px; border-width: 1px; }
+.type-pick--sm .type-icon { width: 1.2em; height: 1.2em; }
+.type-pick--sm[aria-pressed="true"] { outline-width: 2px; }
+.ct-chooser {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(58px, 1fr)); gap: 4px;
+  margin: 4px 0 10px;
+}
+.ct-team { display: grid; gap: 12px; }
+.ct-teamtabs { display: flex; gap: 8px; }
+.ct-teamtab { display: inline-flex; align-items: center; justify-content: center; gap: 5px; }
+.ct-teamtab small { font-size: .72rem; font-weight: 700; opacity: .8; }
+.ct-teamtab[aria-pressed="true"] small { color: #fff; }
+.ct-mons { display: grid; gap: 8px; }
+.ct-mon { border: 1px solid var(--c-border); border-radius: var(--radius-sm); overflow: hidden; }
+.ct-mon.is-open { border-color: var(--c-accent); }
+.ct-mon.is-off { opacity: .5; }
+.ct-mon.is-off.is-open { opacity: 1; }
+.ct-mon__head { display: flex; align-items: stretch; }
+.ct-mon__eye {
+  flex: 0 0 auto; display: inline-flex; align-items: center; justify-content: center;
+  width: 42px; background: transparent; border: none; border-right: 1px solid var(--c-border);
+  color: var(--c-muted); cursor: pointer;
+}
+.ct-mon__eye[aria-pressed="true"] { color: var(--c-primary); }
+.ct-mon__eye .ui-icon { width: 20px; height: 20px; }
+.ct-mon__main {
+  flex: 1; display: flex; align-items: center; gap: 8px; padding: 9px 12px;
+  background: transparent; border: none; cursor: pointer; color: var(--c-text); text-align: left;
+}
+.ct-mon__no { font-weight: 800; color: var(--c-muted); flex: 0 0 auto; }
+.ct-mon__sum { flex: 1; display: flex; flex-wrap: wrap; align-items: center; gap: 5px; }
+.ct-mon__sum .type-badge { font-size: .78rem; padding: 2px 8px; }
+.ct-mon__atkn { font-size: .78rem; color: var(--c-muted); font-weight: 600; }
+.ct-mon__chev { flex: 0 0 auto; color: var(--c-muted); display: inline-flex; }
+.ct-mon__chev .ui-icon { width: 18px; height: 18px; }
+.ct-mon__body { padding: 4px 12px 12px; border-top: 1px solid var(--c-border); }
+.ct-mon__body .label { margin: 8px 0 2px; }
+.ct-mon__ana { display: grid; gap: 6px; margin-top: 6px; }
+.ct-mon__del { display: block; margin: 12px 0 2px; color: var(--c-bad); }
+.ct-addmon { margin: 0; }
+.ct-mini { font-size: .8rem; font-weight: 700; color: var(--c-muted); margin: 4px 0 0; }
+.ct-muted { font-weight: 500; }
+.ct-good-note { color: var(--c-good); font-weight: 600; }
+.ct-summary { border: 1px solid var(--c-border); border-radius: var(--radius-sm); padding: 10px 12px; display: grid; gap: 8px; }
+.ct-summary h3 { margin: 0; font-size: 1rem; }
+.ct-verdict { margin: 0; font-size: .88rem; font-weight: 600; }
+.ct-verdict.is-bad { color: var(--c-bad); }
+.ct-verdict.is-ok { color: var(--c-good); }
+.ct-verdict.is-warn { color: var(--c-accent); }
+.ct-bucket--warn { border-color: color-mix(in srgb, var(--c-accent) 55%, var(--c-border)); background: color-mix(in srgb, var(--c-accent) 9%, transparent); }
+.ct-bucket--warn .ct-bucket__k { color: var(--c-accent); }
+
 .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; margin-top: 8px; }
 /* 速度線表：標題/賽季/搜尋列 freeze 在頂端（接在 sticky topbar 下），長表格在下方捲動不影響操作。 */
 .spd-head {

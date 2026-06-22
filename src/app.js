@@ -1,5 +1,5 @@
 // 瀏覽器端主程式：hash 路由 + 成績碼網址處理 + 各畫面渲染。
-import { TYPES, TYPE_META, multiplier, formatMultiplier } from './data/typechart.js';
+import { TYPES, TYPE_META, multiplier, singleMultiplier, formatMultiplier } from './data/typechart.js';
 import { generateTypeQuiz, generateSpeedQuiz, generateWhoQuiz, generateWhoQuizFromKeys, whoAnswerCorrect, whoCharScore, scoreQuizChar, normalizeName, speedLines, scoreQuiz, newSeed, DEFAULT_QUESTION_COUNT, MIN_QUESTION_COUNT, MAX_QUESTION_COUNT, SPEED_DIFFICULTIES, DEFAULT_SPEED_DIFFICULTY, WHO_DIFFICULTIES, DEFAULT_WHO_DIFFICULTY } from './quiz.js';
 import { generateDoku, cellSatisfied, PICK_RESULT_LIMIT } from './doku.js';
 import { encodeResult, decodeResult, encodeDokuTrap, encodeWhoCustom } from './share.js';
@@ -59,6 +59,8 @@ const UI_ICONS = {
   grid: '<g fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/></g>',
   close: '<path fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" d="M6 6l12 12M18 6L6 18"/>',
   info: '<circle cx="12" cy="12" r="9.2" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="7.6" r="1.3" fill="currentColor"/><path fill="currentColor" d="M11 10.6h2v6.4h-2z"/>',
+  eye: '<g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></g>',
+  eyeOff: '<g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.6-7 10-7c1.7 0 3.2.5 4.5 1.2M22 12s-3.6 7-10 7c-1.7 0-3.2-.5-4.5-1.2"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/><line x1="3" y1="3" x2="21" y2="21"/></g>',
 };
 function uiIcon(name) {
   return `<svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true">${UI_ICONS[name]}</svg>`;
@@ -200,7 +202,7 @@ function gaEvent(name, params) {
 const SCREEN_TITLE = {
   '/': '首頁', '/setup': '準備', '/quiz': '測驗中', '/result': '成績',
   '/doku-setup': '數獨準備', '/doku': '數獨', '/master': '寶可夢大師', '/who-builder': '我是誰出題',
-  '/chart': '相剋表', '/speedline': '速度線表', '/dex': '圖鑑', '/history': '歷史',
+  '/chart': '相剋表', '/coverage': '聯防小工具', '/speedline': '速度線表', '/dex': '圖鑑', '/history': '歷史',
   '/challenge': '挑戰戰帖',
 };
 let gaLastPath = null;
@@ -531,7 +533,10 @@ function viewSetup() {
       </div>
 
       ${mode === 'type' ? `
-      <button class="btn btn--ghost" data-nav="chart" style="margin-top:14px">${esc(t('home.openChart'))}</button>` : ''}
+      <div class="setup-tools">
+        <button class="btn btn--ghost" data-nav="chart">${esc(t('home.openChart'))}</button>
+        <button class="btn btn--ghost" data-nav="coverage">${esc(t('chart.tool.openBtn'))}</button>
+      </div>` : ''}
       ${mode === 'speed' ? `
       <button class="btn btn--ghost" data-nav="speedline" style="margin-top:14px">${esc(t('speedline.openBtn'))}</button>` : ''}
       ${mode === 'who' ? `
@@ -1598,6 +1603,370 @@ function viewChart() {
   setView(node);
 }
 
+// ── 聯防小工具：攻擊方／防守方（屬性集合綜合）＋我的隊伍（逐隻分析）─
+let chartToolState = { mode: 'atk', picks: [], team: null };
+
+// 隊伍存放：A／B／C 三隊，每隊 ≤6 隻，每隻 { def:[≤2], atk:[≤4] }；存 localStorage。
+const TEAM_KEY = 'pq.coverageTeams.v1';
+function emptyTeams() { return { active: 'A', sets: { A: [], B: [], C: [] } }; }
+function loadTeams() {
+  try {
+    const o = JSON.parse(localStorage.getItem(TEAM_KEY) || 'null');
+    if (o && o.sets && ['A', 'B', 'C'].every((k) => Array.isArray(o.sets[k]))) {
+      // 清洗：每隻只留合法屬性、def≤2、atk≤4。
+      for (const k of ['A', 'B', 'C']) {
+        o.sets[k] = o.sets[k].slice(0, 6).map((m) => ({
+          def: (m.def || []).filter((x) => TYPES.includes(x)).slice(0, 2),
+          atk: (m.atk || []).filter((x) => TYPES.includes(x)).slice(0, 4),
+          hidden: !!m.hidden,
+        }));
+      }
+      if (!['A', 'B', 'C'].includes(o.active)) o.active = 'A';
+      return o;
+    }
+  } catch { /* 略過損毀資料 */ }
+  return emptyTeams();
+}
+function saveTeams(ts) { try { localStorage.setItem(TEAM_KEY, JSON.stringify(ts)); } catch { /* 略過（無痕/額滿） */ } }
+
+function viewCoverage() {
+  const node = el(`
+    <section>
+      <div class="card chart-tool"></div>
+      <button class="btn btn--ghost" data-nav="setup">${esc(t('common.back'))}</button>
+    </section>`);
+  node.querySelector('.chart-tool').replaceWith(buildChartTool());
+  setView(node);
+}
+
+function buildChartTool() {
+  const card = el(`
+    <div class="card chart-tool">
+      <h2>${esc(t('chart.tool.title'))}</h2>
+      <p class="muted">${esc(t('chart.tool.hint'))}</p>
+      <div class="ct-seg">
+        <button class="seg" data-mode="atk">${esc(t('chart.tool.asAtk'))}</button>
+        <button class="seg" data-mode="def">${esc(t('chart.tool.asDef'))}</button>
+        <button class="seg" data-mode="team">${esc(t('chart.tool.asTeam'))}</button>
+      </div>
+      <div class="ct-body"></div>
+    </div>`);
+  const segBtns = card.querySelectorAll('.seg');
+  const body = card.querySelector('.ct-body');
+  const syncSeg = () => segBtns.forEach((b) =>
+    b.setAttribute('aria-pressed', String(b.dataset.mode === chartToolState.mode)));
+  const renderMode = () => {
+    syncSeg();
+    body.innerHTML = '';
+    body.appendChild(chartToolState.mode === 'team' ? buildTeamTool() : buildSetTool());
+  };
+  segBtns.forEach((b) => { b.onclick = () => { chartToolState.mode = b.dataset.mode; renderMode(); }; });
+  renderMode();
+  return card;
+}
+
+// 攻擊方／防守方：選一組屬性，當成隊伍綜合（攻取 min＝最不痛一擊、防取 max＝最痛被打）。
+function buildSetTool() {
+  const wrap = el(`
+    <div class="ct-set">
+      <p class="label ct-picked-label"></p>
+      <div class="ct-picked"></div>
+      <p class="muted ct-add-hint">${esc(t('chart.tool.add'))}</p>
+      <div class="type-grid ct-grid"></div>
+      <div class="ct-result"></div>
+    </div>`);
+  const pickedLabel = wrap.querySelector('.ct-picked-label');
+  const pickedBox = wrap.querySelector('.ct-picked');
+  const grid = wrap.querySelector('.ct-grid');
+  const resultBox = wrap.querySelector('.ct-result');
+  const isAtk = () => chartToolState.mode === 'atk';
+
+  const syncGrid = () => grid.querySelectorAll('.type-pick').forEach((b, i) =>
+    b.setAttribute('aria-pressed', String(chartToolState.picks.includes(TYPES[i]))));
+
+  const togglePick = (tk) => {
+    chartToolState.picks = chartToolState.picks.includes(tk)
+      ? chartToolState.picks.filter((x) => x !== tk)
+      : [...chartToolState.picks, tk];
+    syncGrid();
+    renderPicked();
+    renderResult();
+  };
+
+  const renderPicked = () => {
+    pickedLabel.textContent = t('chart.tool.picked', { n: chartToolState.picks.length });
+    pickedBox.innerHTML = '';
+    if (!chartToolState.picks.length) {
+      pickedBox.appendChild(el(`<span class="ct-empty">${esc(t('chart.tool.empty'))}</span>`));
+      return;
+    }
+    chartToolState.picks.forEach((tk) => {
+      const m = TYPE_META[tk];
+      const chip = el(`<button class="ct-chip" style="background:${m.color}" aria-label="${esc(t('chart.tool.remove', { name: typeName(tk) }))}">${typeIcon(tk)}<span>${esc(typeName(tk))}</span>${uiIcon('close')}</button>`);
+      chip.onclick = () => togglePick(tk);
+      pickedBox.appendChild(chip);
+    });
+  };
+
+  // 把選的屬性當成一個隊伍綜合：對每個「對手屬性」聚合成單一倍率。
+  // 攻擊方取 min（最不痛的一擊打多少）、防守方取 max（最痛被打多少）；對我方不利的那桶 highlight。
+  const buildCombined = () => {
+    const atk = isAtk();
+    const aggOf = (other) => {
+      const vals = chartToolState.picks.map((p) =>
+        atk ? singleMultiplier(p, other) : singleMultiplier(other, p));
+      return atk ? Math.min(...vals) : Math.max(...vals);
+    };
+    // 每桶：倍率、危險與否、好（安全）與否、文案；依危險度排序（危險者在前）。
+    const buckets = atk
+      ? [
+          { v: 0,   danger: true,  key: 'chart.tool.cov.none' },
+          { v: 0.5, danger: true,  key: 'chart.tool.cov.weak' },
+          { v: 1,   key: 'chart.tool.cov.ok1' },
+          { v: 2,   good: true,    key: 'chart.tool.cov.good' },
+        ]
+      : [
+          { v: 2,   danger: true,  key: 'chart.tool.def.hurt' },
+          { v: 1,   key: 'chart.tool.def.plain' },
+          { v: 0.5, good: true,    key: 'chart.tool.def.resist' },
+          { v: 0,   good: true,    key: 'chart.tool.def.immune' },
+        ];
+    const wrap = el('<div class="ct-combined"></div>');
+    wrap.appendChild(el(`<p class="ct-explain">${esc(atk ? t('chart.tool.atkExplain') : t('chart.tool.defExplain'))}</p>`));
+    buckets.forEach((b) => {
+      const list = TYPES.filter((other) => aggOf(other) === b.v);
+      if (!list.length) return;
+      const cls = b.danger ? ' ct-bucket--danger' : b.good ? ' ct-bucket--safe' : '';
+      wrap.appendChild(el(`<div class="ct-bucket${cls}">
+        <span class="ct-bucket__k">${esc(formatMultiplier(b.v))}<small>${esc(t(b.key))}</small></span>
+        <span class="ct-bucket__v">${list.map((o) => badge(o)).join('')}</span>
+      </div>`));
+    });
+    return wrap;
+  };
+
+  const renderResult = () => {
+    resultBox.innerHTML = '';
+    if (!chartToolState.picks.length) {
+      resultBox.appendChild(el(`<p class="ct-hint">${esc(t('chart.tool.pickPrompt'))}</p>`));
+      return;
+    }
+    resultBox.appendChild(buildCombined());
+  };
+
+  TYPES.forEach((tk) => {
+    const m = TYPE_META[tk];
+    const b = el(`<button class="type-pick" style="background:${m.color}" aria-pressed="${chartToolState.picks.includes(tk)}">${typeIcon(tk)}${esc(typeName(tk))}</button>`);
+    b.onclick = () => togglePick(tk);
+    grid.appendChild(b);
+  });
+
+  renderPicked();
+  renderResult();
+  return wrap;
+}
+
+// 共用：屬性多選器（行內展開用），就地增刪 selected 陣列、達上限忽略新增。
+function buildTypeChooser(selected, max, onChange) {
+  const g = el('<div class="ct-chooser"></div>');
+  TYPES.forEach((tk) => {
+    const m = TYPE_META[tk];
+    const b = el(`<button class="type-pick type-pick--sm" style="background:${m.color}" aria-pressed="${selected.includes(tk)}">${typeIcon(tk)}${esc(typeName(tk))}</button>`);
+    b.onclick = () => {
+      const i = selected.indexOf(tk);
+      if (i >= 0) selected.splice(i, 1);
+      else if (selected.length < max) selected.push(tk);
+      else return; // 達上限
+      onChange();
+    };
+    g.appendChild(b);
+  });
+  return g;
+}
+
+// 一個倍率分桶列（共用 .ct-bucket 樣式）。types 為空則不產生。
+// headOverride 有值時用它當標頭（總評用「N 種」而非單一倍率）。
+function ctBucketRow(mult, labelKey, types, kind, headOverride) {
+  if (!types.length) return '';
+  const cls = kind === 'danger' ? ' ct-bucket--danger' : kind === 'safe' ? ' ct-bucket--safe' : kind === 'warn' ? ' ct-bucket--warn' : '';
+  const head = headOverride != null ? esc(headOverride) : esc(formatMultiplier(mult));
+  return `<div class="ct-bucket${cls}">
+    <span class="ct-bucket__k">${head}<small>${esc(t(labelKey))}</small></span>
+    <span class="ct-bucket__v">${types.map((o) => badge(o)).join('')}</span>
+  </div>`;
+}
+
+// 我的隊伍：A/B/C 三隊、逐隻防/攻分析、隊伍總評。
+function buildTeamTool() {
+  if (!chartToolState.team) chartToolState.team = loadTeams();
+  const ts = chartToolState.team;
+  const mons = () => ts.sets[ts.active];
+  let expanded = -1; // 目前展開的隻 index（-1＝全收合）
+
+  const wrap = el(`
+    <div class="ct-team">
+      <p class="ct-explain">${esc(t('chart.tool.team.explain'))}</p>
+      <div class="ct-teamtabs"></div>
+      <div class="ct-mons"></div>
+      <div class="ct-team-summary"></div>
+    </div>`);
+  const tabsBox = wrap.querySelector('.ct-teamtabs');
+  const monsBox = wrap.querySelector('.ct-mons');
+  const sumBox = wrap.querySelector('.ct-team-summary');
+
+  const persist = () => saveTeams(ts);
+  const refresh = () => { persist(); renderMons(); renderSummary(); syncTabs(); };
+  // 攻擊倍率含屬修（本系 STAB）：招式屬性與該隻自身屬性相同 → ×1.5（本系剋制可達 3×）。
+  const atkMult = (mon, mv, d) => singleMultiplier(mv, d) * (mon.def.includes(mv) ? 1.5 : 1);
+
+  ['A', 'B', 'C'].forEach((k) => {
+    const b = el(`<button class="seg ct-teamtab"><span>${k}</span><small></small></button>`);
+    b.onclick = () => { ts.active = k; expanded = -1; refresh(); };
+    tabsBox.appendChild(b);
+  });
+  const syncTabs = () => tabsBox.querySelectorAll('.ct-teamtab').forEach((b, i) => {
+    const k = ['A', 'B', 'C'][i];
+    b.setAttribute('aria-pressed', String(ts.active === k));
+    b.querySelector('small').textContent = ts.sets[k].length ? ts.sets[k].length : '';
+  });
+
+  // 單隻：被各攻擊屬性打的倍率（雙屬性取乘積）＋招式打不動哪些。
+  const buildMonAnalysis = (mon) => {
+    const box = el('<div class="ct-mon__ana"></div>');
+    // 防禦：對 18 個攻擊屬性的倍率
+    if (mon.def.length) {
+      const quad = [], weak = [], resist = [], qresist = [], immune = [];
+      TYPES.forEach((a) => {
+        const m = multiplier(a, mon.def);
+        if (m === 4) quad.push(a);
+        else if (m === 2) weak.push(a);
+        else if (m === 0) immune.push(a);
+        else if (m === 0.25) qresist.push(a);
+        else if (m === 0.5) resist.push(a);
+      });
+      box.insertAdjacentHTML('beforeend', `<p class="ct-mini">${esc(t('chart.tool.team.defFace'))}</p>`);
+      box.insertAdjacentHTML('beforeend',
+        ctBucketRow(4, 'chart.tool.team.monQuad', quad, 'danger') +
+        ctBucketRow(2, 'chart.tool.team.monHurt', weak, 'danger') +
+        ctBucketRow(0.5, 'chart.tool.team.monResist', resist, 'safe') +
+        ctBucketRow(0.25, 'chart.tool.team.monQResist', qresist, 'safe') +
+        ctBucketRow(0, 'chart.tool.team.monImmune', immune, 'safe'));
+    } else {
+      box.insertAdjacentHTML('beforeend', `<p class="ct-mini ct-muted">${esc(t('chart.tool.team.defEmpty'))}</p>`);
+    }
+    // 攻擊：每招倍率含屬修（本系 STAB ×1.5），每個防守屬性取最佳招式倍率。
+    // 本系剋制可達 3×（1.5×2）＝最痛；列出能 3× 的、打不動（被抵抗）、完全沒效。
+    if (mon.atk.length) {
+      const strong = [], resisted = [], noeffect = [];
+      TYPES.forEach((d) => {
+        const best = Math.max(...mon.atk.map((mv) => atkMult(mon, mv, d)));
+        if (best === 0) noeffect.push(d);
+        else if (best >= 3) strong.push(d);
+        else if (best < 1) resisted.push(d);
+      });
+      box.insertAdjacentHTML('beforeend', `<p class="ct-mini">${esc(t('chart.tool.team.atkFace'))}</p>`);
+      const rows = ctBucketRow(3, 'chart.tool.team.monStrong', strong, 'safe') +
+        ctBucketRow(0.5, 'chart.tool.team.monNoHit', resisted, 'danger') +
+        ctBucketRow(0, 'chart.tool.team.monNoEffect', noeffect, 'danger');
+      box.insertAdjacentHTML('beforeend', rows || `<p class="ct-mini ct-muted">${esc(t('chart.tool.team.atkPlain'))}</p>`);
+    } else {
+      box.insertAdjacentHTML('beforeend', `<p class="ct-mini ct-muted">${esc(t('chart.tool.team.atkEmpty'))}</p>`);
+    }
+    return box;
+  };
+
+  const buildMonRow = (mon, i) => {
+    const open = expanded === i;
+    const row = el(`<div class="ct-mon${open ? ' is-open' : ''}${mon.hidden ? ' is-off' : ''}"></div>`);
+    const defSum = mon.def.length
+      ? mon.def.map((tk) => `<span class="type-badge" style="background:${TYPE_META[tk].color}">${typeIcon(tk)}${esc(typeName(tk))}</span>`).join('')
+      : `<span class="ct-empty">${esc(t('chart.tool.team.noType'))}</span>`;
+    const head = el(`<div class="ct-mon__head"></div>`);
+    // 左側眼睛：張開＝納入總評，閉上＝暫時忽略這隻（不刪除）。
+    const eye = el(`<button class="ct-mon__eye" aria-pressed="${!mon.hidden}" aria-label="${esc(t(mon.hidden ? 'chart.tool.team.eyeOff' : 'chart.tool.team.eyeOn'))}">${uiIcon(mon.hidden ? 'eyeOff' : 'eye')}</button>`);
+    eye.onclick = () => { mon.hidden = !mon.hidden; refresh(); };
+    const main = el(`
+      <button class="ct-mon__main">
+        <span class="ct-mon__no">#${i + 1}</span>
+        <span class="ct-mon__sum">${defSum}<span class="ct-mon__atkn">${esc(t('chart.tool.team.atkN', { n: mon.atk.length }))}</span></span>
+        <span class="ct-mon__chev">${uiIcon(open ? 'up' : 'grid')}</span>
+      </button>`);
+    main.onclick = () => { expanded = open ? -1 : i; renderMons(); };
+    head.appendChild(eye);
+    head.appendChild(main);
+    row.appendChild(head);
+    if (open) {
+      const bodyEl = el('<div class="ct-mon__body"></div>');
+      bodyEl.insertAdjacentHTML('beforeend', `<p class="label">${esc(t('chart.tool.team.defLabel'))}</p>`);
+      bodyEl.appendChild(buildTypeChooser(mon.def, 2, refresh));
+      bodyEl.insertAdjacentHTML('beforeend', `<p class="label">${esc(t('chart.tool.team.atkLabel'))}</p>`);
+      bodyEl.appendChild(buildTypeChooser(mon.atk, 4, refresh));
+      bodyEl.appendChild(buildMonAnalysis(mon));
+      const del = el(`<button class="linklike ct-mon__del">${esc(t('chart.tool.team.removeMon'))}</button>`);
+      del.onclick = () => { mons().splice(i, 1); expanded = -1; refresh(); };
+      bodyEl.appendChild(del);
+      row.appendChild(bodyEl);
+    }
+    return row;
+  };
+
+  const renderMons = () => {
+    monsBox.innerHTML = '';
+    if (!mons().length) monsBox.insertAdjacentHTML('beforeend', `<p class="ct-hint">${esc(t('chart.tool.team.empty'))}</p>`);
+    mons().forEach((mon, i) => monsBox.appendChild(buildMonRow(mon, i)));
+    if (mons().length < 6) {
+      const add = el(`<button class="btn btn--ghost ct-addmon">${esc(t('chart.tool.team.addMon'))}</button>`);
+      add.onclick = () => { mons().push({ def: [], atk: [], hidden: false }); expanded = mons().length - 1; refresh(); };
+      monsBox.appendChild(add);
+    }
+  };
+
+  // 隊伍總評：只算「眼睛張開」的隻。點出聯防漏洞（被什麼打全隊沒人能抗）
+  // 與覆蓋（攻擊含屬修＝本系 3×）：全隊打不到 2 倍＝硬漏洞、打得到 2 倍但沒人 3 倍＝本系剋制不足。
+  const renderSummary = () => {
+    sumBox.innerHTML = '';
+    const team = mons().filter((m) => !m.hidden);
+    const withDef = team.filter((m) => m.def.length);
+    const withAtk = team.filter((m) => m.atk.length);
+    if (!withDef.length && !withAtk.length) return;
+
+    const card = el(`<div class="ct-summary"><h3>${esc(t('chart.tool.team.sumTitle'))}</h3></div>`);
+
+    // 聯防：每個攻擊屬性，全隊沒人抵抗（無 ≤½×）即為漏洞。
+    if (withDef.length) {
+      const noResist = TYPES.filter((a) => !withDef.some((m) => multiplier(a, m.def) <= 0.5));
+      const verdict = noResist.length
+        ? t('chart.tool.team.sumDefNote', { n: noResist.length })
+        : t('chart.tool.team.sumDefOk');
+      card.insertAdjacentHTML('beforeend', `<p class="ct-verdict${noResist.length ? ' is-bad' : ' is-ok'}">${esc(verdict)}</p>`);
+      card.insertAdjacentHTML('beforeend', ctBucketRow(null, 'chart.tool.team.sumNoResist', noResist, 'danger', t('chart.tool.team.nKinds', { n: noResist.length })));
+    }
+    // 覆蓋：每個防守屬性取全隊最佳招式倍率（含屬修）。<2＝硬漏洞、[2,3)＝沒人 3 倍。
+    if (withAtk.length) {
+      const bestOf = (d) => Math.max(0, ...withAtk.flatMap((m) => m.atk.map((mv) => atkMult(m, mv, d))));
+      const holes = TYPES.filter((d) => bestOf(d) < 2);
+      const soft = TYPES.filter((d) => { const b = bestOf(d); return b >= 2 && b < 3; });
+      if (holes.length) {
+        card.insertAdjacentHTML('beforeend', `<p class="ct-verdict is-bad">${esc(t('chart.tool.team.sumAtkNote', { n: holes.length }))}</p>`);
+        card.insertAdjacentHTML('beforeend', ctBucketRow(null, 'chart.tool.team.sumNoCover', holes, 'danger', t('chart.tool.team.nKinds', { n: holes.length })));
+      }
+      if (soft.length) {
+        card.insertAdjacentHTML('beforeend', `<p class="ct-verdict is-warn">${esc(t('chart.tool.team.sumSoftNote', { n: soft.length }))}</p>`);
+        card.insertAdjacentHTML('beforeend', ctBucketRow(null, 'chart.tool.team.sumNo3x', soft, 'warn', t('chart.tool.team.nKinds', { n: soft.length })));
+      }
+      if (!holes.length && !soft.length) {
+        card.insertAdjacentHTML('beforeend', `<p class="ct-verdict is-ok">${esc(t('chart.tool.team.sumAtkOk'))}</p>`);
+      }
+    }
+    sumBox.appendChild(card);
+  };
+
+  syncTabs();
+  renderMons();
+  renderSummary();
+  return wrap;
+}
+
 function buildChartTable() {
   const cls = (m) => m === 0 ? 'm0' : m === 0.5 ? 'm05' : m === 2 ? 'm2' : 'm1';
   let head = '<tr><th style="background:var(--c-muted)" title="攻↓ 防→">↘</th>';
@@ -2396,6 +2765,7 @@ function render() {
     case '#/result': return viewResult();
     case '#/history': return viewHistoryDetail();
     case '#/chart': return viewChart();
+    case '#/coverage': return viewCoverage();
     case '#/speedline': return viewSpeedChart();
     case '#/dex': return viewDex();
     case '#/doku-setup': return viewDokuSetup();
