@@ -1,0 +1,1982 @@
+{
+  "$comment": "build:usage 由 Champions Lab（championslab.xyz, MIT）資料產生；VGC 雙打 meta top-50；勿手改，跑 npm run build:usage 重產。",
+  "$source": "https://championslab.xyz",
+  "format": "vgc-doubles",
+  "generatedFrom": "champions-lab",
+  "list": [
+    {
+      "key": "incineroar",
+      "ndex": 727,
+      "nameZh": "熾焰咆哮虎",
+      "nameEn": "Incineroar",
+      "isMega": false,
+      "rank": 1,
+      "usagePct": 8,
+      "types": [
+        "fire",
+        "dark"
+      ],
+      "moveTypes": [
+        "normal",
+        "fire",
+        "dark"
+      ],
+      "moves": [
+        {
+          "nameEn": "Fake Out",
+          "type": "normal",
+          "nameZh": "擊掌奇襲"
+        },
+        {
+          "nameEn": "Flare Blitz",
+          "type": "fire",
+          "nameZh": "閃焰衝鋒"
+        },
+        {
+          "nameEn": "Throat Chop",
+          "type": "dark",
+          "nameZh": "地獄突刺"
+        },
+        {
+          "nameEn": "Darkest Lariat",
+          "type": "dark",
+          "nameZh": "ＤＤ金勾臂"
+        }
+      ]
+    },
+    {
+      "key": "garchomp",
+      "ndex": 445,
+      "nameZh": "烈咬陸鯊",
+      "nameEn": "Garchomp",
+      "isMega": false,
+      "rank": 2,
+      "usagePct": 6.47,
+      "types": [
+        "dragon",
+        "ground"
+      ],
+      "moveTypes": [
+        "ground",
+        "dragon",
+        "rock",
+        "fire",
+        "steel"
+      ],
+      "moves": [
+        {
+          "nameEn": "Earthquake",
+          "type": "ground",
+          "nameZh": "地震"
+        },
+        {
+          "nameEn": "Dragon Claw",
+          "type": "dragon",
+          "nameZh": "龍爪"
+        },
+        {
+          "nameEn": "Rock Slide",
+          "type": "rock",
+          "nameZh": "岩崩"
+        },
+        {
+          "nameEn": "Fire Fang",
+          "type": "fire",
+          "nameZh": "火焰牙"
+        },
+        {
+          "nameEn": "Iron Head",
+          "type": "steel",
+          "nameZh": "鐵頭"
+        }
+      ]
+    },
+    {
+      "key": "whimsicott",
+      "ndex": 547,
+      "nameZh": "風妖精",
+      "nameEn": "Whimsicott",
+      "isMega": false,
+      "rank": 3,
+      "usagePct": 3.91,
+      "types": [
+        "grass",
+        "fairy"
+      ],
+      "moveTypes": [
+        "fairy",
+        "grass",
+        "dark"
+      ],
+      "moves": [
+        {
+          "nameEn": "Moonblast",
+          "type": "fairy",
+          "nameZh": "月亮之力"
+        },
+        {
+          "nameEn": "Energy Ball",
+          "type": "grass",
+          "nameZh": "能量球"
+        },
+        {
+          "nameEn": "Beat Up",
+          "type": "dark",
+          "nameZh": "圍攻"
+        }
+      ]
+    },
+    {
+      "key": "kingambit",
+      "ndex": 983,
+      "nameZh": "仆刀將軍",
+      "nameEn": "Kingambit",
+      "isMega": false,
+      "rank": 4,
+      "usagePct": 3.18,
+      "types": [
+        "dark",
+        "steel"
+      ],
+      "moveTypes": [
+        "dark",
+        "steel",
+        "fighting"
+      ],
+      "moves": [
+        {
+          "nameEn": "Sucker Punch",
+          "type": "dark",
+          "nameZh": "突襲"
+        },
+        {
+          "nameEn": "Kowtow Cleave",
+          "type": "dark",
+          "nameZh": "仆刀"
+        },
+        {
+          "nameEn": "Iron Head",
+          "type": "steel",
+          "nameZh": "鐵頭"
+        },
+        {
+          "nameEn": "Low Kick",
+          "type": "fighting",
+          "nameZh": "踢倒"
+        }
+      ]
+    },
+    {
+      "key": "gyarados",
+      "ndex": 130,
+      "nameZh": "暴鯉龍",
+      "nameEn": "Gyarados",
+      "isMega": false,
+      "rank": 5,
+      "usagePct": 2.9,
+      "types": [
+        "water",
+        "flying"
+      ],
+      "moveTypes": [
+        "water",
+        "dark",
+        "ice",
+        "ground"
+      ],
+      "moves": [
+        {
+          "nameEn": "Waterfall",
+          "type": "water",
+          "nameZh": "攀瀑"
+        },
+        {
+          "nameEn": "Crunch",
+          "type": "dark",
+          "nameZh": "咬碎"
+        },
+        {
+          "nameEn": "Ice Fang",
+          "type": "ice",
+          "nameZh": "冰凍牙"
+        },
+        {
+          "nameEn": "Earthquake",
+          "type": "ground",
+          "nameZh": "地震"
+        }
+      ]
+    },
+    {
+      "key": "tyranitar-mega",
+      "ndex": 248,
+      "nameZh": "超級班基拉斯",
+      "nameEn": "Mega Tyranitar",
+      "isMega": true,
+      "rank": 6,
+      "usagePct": 2.9,
+      "types": [
+        "rock",
+        "dark"
+      ],
+      "moveTypes": [
+        "rock",
+        "dark",
+        "ice",
+        "fighting",
+        "ground",
+        "fire"
+      ],
+      "moves": [
+        {
+          "nameEn": "Rock Slide",
+          "type": "rock",
+          "nameZh": "岩崩"
+        },
+        {
+          "nameEn": "Crunch",
+          "type": "dark",
+          "nameZh": "咬碎"
+        },
+        {
+          "nameEn": "Ice Punch",
+          "type": "ice",
+          "nameZh": "冰凍拳"
+        },
+        {
+          "nameEn": "Low Kick",
+          "type": "fighting",
+          "nameZh": "踢倒"
+        },
+        {
+          "nameEn": "Earthquake",
+          "type": "ground",
+          "nameZh": "地震"
+        },
+        {
+          "nameEn": "Fire Punch",
+          "type": "fire",
+          "nameZh": "火焰拳"
+        }
+      ]
+    },
+    {
+      "key": "gardevoir-mega",
+      "ndex": 282,
+      "nameZh": "超級沙奈朵",
+      "nameEn": "Mega Gardevoir",
+      "isMega": true,
+      "rank": 7,
+      "usagePct": 2.87,
+      "types": [
+        "psychic",
+        "fairy"
+      ],
+      "moveTypes": [
+        "normal",
+        "psychic",
+        "fighting",
+        "fairy",
+        "ghost"
+      ],
+      "moves": [
+        {
+          "nameEn": "Hyper Voice",
+          "type": "normal",
+          "nameZh": "巨聲"
+        },
+        {
+          "nameEn": "Psyshock",
+          "type": "psychic",
+          "nameZh": "精神衝擊"
+        },
+        {
+          "nameEn": "Focus Blast",
+          "type": "fighting",
+          "nameZh": "真氣彈"
+        },
+        {
+          "nameEn": "Psychic",
+          "type": "psychic",
+          "nameZh": "精神強念"
+        },
+        {
+          "nameEn": "Moonblast",
+          "type": "fairy",
+          "nameZh": "月亮之力"
+        },
+        {
+          "nameEn": "Shadow Ball",
+          "type": "ghost",
+          "nameZh": "暗影球"
+        }
+      ]
+    },
+    {
+      "key": "dragapult",
+      "ndex": 887,
+      "nameZh": "多龍巴魯托",
+      "nameEn": "Dragapult",
+      "isMega": false,
+      "rank": 8,
+      "usagePct": 2.69,
+      "types": [
+        "dragon",
+        "ghost"
+      ],
+      "moveTypes": [
+        "dragon",
+        "ghost",
+        "dark",
+        "fire",
+        "electric"
+      ],
+      "moves": [
+        {
+          "nameEn": "Dragon Darts",
+          "type": "dragon",
+          "nameZh": "龍箭"
+        },
+        {
+          "nameEn": "Phantom Force",
+          "type": "ghost",
+          "nameZh": "潛靈奇襲"
+        },
+        {
+          "nameEn": "Sucker Punch",
+          "type": "dark",
+          "nameZh": "突襲"
+        },
+        {
+          "nameEn": "Draco Meteor",
+          "type": "dragon",
+          "nameZh": "流星群"
+        },
+        {
+          "nameEn": "Shadow Ball",
+          "type": "ghost",
+          "nameZh": "暗影球"
+        },
+        {
+          "nameEn": "Flamethrower",
+          "type": "fire",
+          "nameZh": "噴射火焰"
+        },
+        {
+          "nameEn": "Thunderbolt",
+          "type": "electric",
+          "nameZh": "十萬伏特"
+        }
+      ]
+    },
+    {
+      "key": "gyarados-mega",
+      "ndex": 130,
+      "nameZh": "超級暴鯉龍",
+      "nameEn": "Mega Gyarados",
+      "isMega": true,
+      "rank": 9,
+      "usagePct": 2.55,
+      "types": [
+        "water",
+        "dark"
+      ],
+      "moveTypes": [
+        "water",
+        "dark",
+        "ice",
+        "ground"
+      ],
+      "moves": [
+        {
+          "nameEn": "Waterfall",
+          "type": "water",
+          "nameZh": "攀瀑"
+        },
+        {
+          "nameEn": "Crunch",
+          "type": "dark",
+          "nameZh": "咬碎"
+        },
+        {
+          "nameEn": "Ice Fang",
+          "type": "ice",
+          "nameZh": "冰凍牙"
+        },
+        {
+          "nameEn": "Earthquake",
+          "type": "ground",
+          "nameZh": "地震"
+        }
+      ]
+    },
+    {
+      "key": "arcanine",
+      "ndex": 59,
+      "nameZh": "風速狗",
+      "nameEn": "Arcanine",
+      "isMega": false,
+      "rank": 10,
+      "usagePct": 2.28,
+      "types": [
+        "fire"
+      ],
+      "moveTypes": [
+        "fire",
+        "normal",
+        "fighting",
+        "dark",
+        "electric"
+      ],
+      "moves": [
+        {
+          "nameEn": "Flare Blitz",
+          "type": "fire",
+          "nameZh": "閃焰衝鋒"
+        },
+        {
+          "nameEn": "Extreme Speed",
+          "type": "normal",
+          "nameZh": "神速"
+        },
+        {
+          "nameEn": "Close Combat",
+          "type": "fighting",
+          "nameZh": "近身戰"
+        },
+        {
+          "nameEn": "Crunch",
+          "type": "dark",
+          "nameZh": "咬碎"
+        },
+        {
+          "nameEn": "Wild Charge",
+          "type": "electric",
+          "nameZh": "瘋狂伏特"
+        }
+      ]
+    },
+    {
+      "key": "hatterene",
+      "ndex": 858,
+      "nameZh": "布莉姆溫",
+      "nameEn": "Hatterene",
+      "isMega": false,
+      "rank": 11,
+      "usagePct": 2.04,
+      "types": [
+        "psychic",
+        "fairy"
+      ],
+      "moveTypes": [
+        "fairy",
+        "psychic",
+        "fire"
+      ],
+      "moves": [
+        {
+          "nameEn": "Dazzling Gleam",
+          "type": "fairy",
+          "nameZh": "魔法閃耀"
+        },
+        {
+          "nameEn": "Psychic",
+          "type": "psychic",
+          "nameZh": "精神強念"
+        },
+        {
+          "nameEn": "Mystical Fire",
+          "type": "fire",
+          "nameZh": "魔法火焰"
+        }
+      ]
+    },
+    {
+      "key": "archaludon",
+      "ndex": 1018,
+      "nameZh": "鋁鋼橋龍",
+      "nameEn": "Archaludon",
+      "isMega": false,
+      "rank": 12,
+      "usagePct": 1.92,
+      "types": [
+        "steel",
+        "dragon"
+      ],
+      "moveTypes": [
+        "electric",
+        "steel",
+        "dragon",
+        "dark",
+        "fighting"
+      ],
+      "moves": [
+        {
+          "nameEn": "Electro Shot",
+          "type": "electric",
+          "nameZh": "電光束"
+        },
+        {
+          "nameEn": "Flash Cannon",
+          "type": "steel",
+          "nameZh": "加農光炮"
+        },
+        {
+          "nameEn": "Draco Meteor",
+          "type": "dragon",
+          "nameZh": "流星群"
+        },
+        {
+          "nameEn": "Snarl",
+          "type": "dark",
+          "nameZh": "大聲咆哮"
+        },
+        {
+          "nameEn": "Body Press",
+          "type": "fighting",
+          "nameZh": "撲擊"
+        }
+      ]
+    },
+    {
+      "key": "krookodile",
+      "ndex": 553,
+      "nameZh": "流氓鱷",
+      "nameEn": "Krookodile",
+      "isMega": false,
+      "rank": 13,
+      "usagePct": 1.55,
+      "types": [
+        "ground",
+        "dark"
+      ],
+      "moveTypes": [
+        "ground",
+        "dark",
+        "rock",
+        "fighting"
+      ],
+      "moves": [
+        {
+          "nameEn": "Earthquake",
+          "type": "ground",
+          "nameZh": "地震"
+        },
+        {
+          "nameEn": "Crunch",
+          "type": "dark",
+          "nameZh": "咬碎"
+        },
+        {
+          "nameEn": "Rock Slide",
+          "type": "rock",
+          "nameZh": "岩崩"
+        },
+        {
+          "nameEn": "Close Combat",
+          "type": "fighting",
+          "nameZh": "近身戰"
+        }
+      ]
+    },
+    {
+      "key": "tauros",
+      "ndex": 128,
+      "nameZh": "肯泰羅",
+      "nameEn": "Tauros",
+      "isMega": false,
+      "rank": 14,
+      "usagePct": 1.54,
+      "types": [
+        "normal"
+      ],
+      "moveTypes": [
+        "normal",
+        "fighting",
+        "rock",
+        "steel",
+        "electric",
+        "ground"
+      ],
+      "moves": [
+        {
+          "nameEn": "Body Slam",
+          "type": "normal",
+          "nameZh": "泰山壓頂"
+        },
+        {
+          "nameEn": "Close Combat",
+          "type": "fighting",
+          "nameZh": "近身戰"
+        },
+        {
+          "nameEn": "Rock Slide",
+          "type": "rock",
+          "nameZh": "岩崩"
+        },
+        {
+          "nameEn": "Iron Head",
+          "type": "steel",
+          "nameZh": "鐵頭"
+        },
+        {
+          "nameEn": "Wild Charge",
+          "type": "electric",
+          "nameZh": "瘋狂伏特"
+        },
+        {
+          "nameEn": "Earthquake",
+          "type": "ground",
+          "nameZh": "地震"
+        }
+      ]
+    },
+    {
+      "key": "luxray",
+      "ndex": 405,
+      "nameZh": "倫琴貓",
+      "nameEn": "Luxray",
+      "isMega": false,
+      "rank": 15,
+      "usagePct": 1.5,
+      "types": [
+        "electric"
+      ],
+      "moveTypes": [],
+      "moves": []
+    },
+    {
+      "key": "excadrill",
+      "ndex": 530,
+      "nameZh": "龍頭地鼠",
+      "nameEn": "Excadrill",
+      "isMega": false,
+      "rank": 16,
+      "usagePct": 1.47,
+      "types": [
+        "ground",
+        "steel"
+      ],
+      "moveTypes": [
+        "steel",
+        "ground",
+        "rock"
+      ],
+      "moves": [
+        {
+          "nameEn": "Iron Head",
+          "type": "steel",
+          "nameZh": "鐵頭"
+        },
+        {
+          "nameEn": "High Horsepower",
+          "type": "ground",
+          "nameZh": "十萬馬力"
+        },
+        {
+          "nameEn": "Rock Slide",
+          "type": "rock",
+          "nameZh": "岩崩"
+        },
+        {
+          "nameEn": "Earthquake",
+          "type": "ground",
+          "nameZh": "地震"
+        }
+      ]
+    },
+    {
+      "key": "tauros-paldea-aqua-breed",
+      "ndex": 10252,
+      "nameZh": "帕底亞肯泰羅（流水種）",
+      "nameEn": "Paldean Tauros (Aqua Breed)",
+      "isMega": false,
+      "rank": 17,
+      "usagePct": 1.46,
+      "types": [
+        "fighting",
+        "water"
+      ],
+      "moveTypes": [],
+      "moves": []
+    },
+    {
+      "key": "tauros-paldea-blaze-breed",
+      "ndex": 10251,
+      "nameZh": "帕底亞肯泰羅（火炎種）",
+      "nameEn": "Paldean Tauros (Blaze Breed)",
+      "isMega": false,
+      "rank": 18,
+      "usagePct": 1.46,
+      "types": [
+        "fighting",
+        "fire"
+      ],
+      "moveTypes": [],
+      "moves": []
+    },
+    {
+      "key": "greninja",
+      "ndex": 658,
+      "nameZh": "甲賀忍蛙",
+      "nameEn": "Greninja",
+      "isMega": false,
+      "rank": 19,
+      "usagePct": 1.36,
+      "types": [
+        "water",
+        "dark"
+      ],
+      "moveTypes": [
+        "water",
+        "dark",
+        "ice",
+        "fighting",
+        "rock"
+      ],
+      "moves": [
+        {
+          "nameEn": "Hydro Pump",
+          "type": "water",
+          "nameZh": "水炮"
+        },
+        {
+          "nameEn": "Dark Pulse",
+          "type": "dark",
+          "nameZh": "惡之波動"
+        },
+        {
+          "nameEn": "Ice Beam",
+          "type": "ice",
+          "nameZh": "冰凍光束"
+        },
+        {
+          "nameEn": "Water Shuriken",
+          "type": "water",
+          "nameZh": "飛水手裡劍"
+        },
+        {
+          "nameEn": "Brick Break",
+          "type": "fighting",
+          "nameZh": "劈瓦"
+        },
+        {
+          "nameEn": "Rock Slide",
+          "type": "rock",
+          "nameZh": "岩崩"
+        },
+        {
+          "nameEn": "Low Kick",
+          "type": "fighting",
+          "nameZh": "踢倒"
+        },
+        {
+          "nameEn": "Waterfall",
+          "type": "water",
+          "nameZh": "攀瀑"
+        },
+        {
+          "nameEn": "Night Slash",
+          "type": "dark",
+          "nameZh": "暗襲要害"
+        }
+      ]
+    },
+    {
+      "key": "arcanine-hisui",
+      "ndex": 5059,
+      "nameZh": "洗翠風速狗",
+      "nameEn": "Hisuian Arcanine",
+      "isMega": false,
+      "rank": 20,
+      "usagePct": 1.24,
+      "types": [
+        "fire",
+        "rock"
+      ],
+      "moveTypes": [
+        "fire",
+        "rock",
+        "normal",
+        "fighting"
+      ],
+      "moves": [
+        {
+          "nameEn": "Flare Blitz",
+          "type": "fire",
+          "nameZh": "閃焰衝鋒"
+        },
+        {
+          "nameEn": "Head Smash",
+          "type": "rock",
+          "nameZh": "雙刃頭錘"
+        },
+        {
+          "nameEn": "Extreme Speed",
+          "type": "normal",
+          "nameZh": "神速"
+        },
+        {
+          "nameEn": "Close Combat",
+          "type": "fighting",
+          "nameZh": "近身戰"
+        },
+        {
+          "nameEn": "Rock Slide",
+          "type": "rock",
+          "nameZh": "岩崩"
+        }
+      ]
+    },
+    {
+      "key": "gengar-mega",
+      "ndex": 94,
+      "nameZh": "超級耿鬼",
+      "nameEn": "Mega Gengar",
+      "isMega": true,
+      "rank": 21,
+      "usagePct": 1.15,
+      "types": [
+        "ghost",
+        "poison"
+      ],
+      "moveTypes": [
+        "ghost",
+        "poison",
+        "fighting",
+        "fairy",
+        "ice"
+      ],
+      "moves": [
+        {
+          "nameEn": "Shadow Ball",
+          "type": "ghost",
+          "nameZh": "暗影球"
+        },
+        {
+          "nameEn": "Sludge Bomb",
+          "type": "poison",
+          "nameZh": "污泥炸彈"
+        },
+        {
+          "nameEn": "Focus Blast",
+          "type": "fighting",
+          "nameZh": "真氣彈"
+        },
+        {
+          "nameEn": "Dazzling Gleam",
+          "type": "fairy",
+          "nameZh": "魔法閃耀"
+        },
+        {
+          "nameEn": "Icy Wind",
+          "type": "ice",
+          "nameZh": "冰凍之風"
+        }
+      ]
+    },
+    {
+      "key": "venusaur",
+      "ndex": 3,
+      "nameZh": "妙蛙花",
+      "nameEn": "Venusaur",
+      "isMega": false,
+      "rank": 22,
+      "usagePct": 1.15,
+      "types": [
+        "grass",
+        "poison"
+      ],
+      "moveTypes": [
+        "grass",
+        "poison",
+        "ground",
+        "normal"
+      ],
+      "moves": [
+        {
+          "nameEn": "Leaf Storm",
+          "type": "grass",
+          "nameZh": "飛葉風暴"
+        },
+        {
+          "nameEn": "Sludge Bomb",
+          "type": "poison",
+          "nameZh": "污泥炸彈"
+        },
+        {
+          "nameEn": "Earth Power",
+          "type": "ground",
+          "nameZh": "大地之力"
+        },
+        {
+          "nameEn": "Giga Drain",
+          "type": "grass",
+          "nameZh": "終極吸取"
+        },
+        {
+          "nameEn": "Weather Ball",
+          "type": "normal",
+          "nameZh": "氣象球"
+        }
+      ]
+    },
+    {
+      "key": "aegislash-shield",
+      "ndex": 681,
+      "nameZh": "堅盾劍怪",
+      "nameEn": "Aegislash",
+      "isMega": false,
+      "rank": 23,
+      "usagePct": 1.13,
+      "types": [
+        "steel",
+        "ghost"
+      ],
+      "moveTypes": [
+        "ghost",
+        "steel",
+        "fighting"
+      ],
+      "moves": [
+        {
+          "nameEn": "Shadow Ball",
+          "type": "ghost",
+          "nameZh": "暗影球"
+        },
+        {
+          "nameEn": "Flash Cannon",
+          "type": "steel",
+          "nameZh": "加農光炮"
+        },
+        {
+          "nameEn": "Shadow Sneak",
+          "type": "ghost",
+          "nameZh": "影子偷襲"
+        },
+        {
+          "nameEn": "Shadow Claw",
+          "type": "ghost",
+          "nameZh": "暗影爪"
+        },
+        {
+          "nameEn": "Sacred Sword",
+          "type": "fighting",
+          "nameZh": "聖劍"
+        },
+        {
+          "nameEn": "Iron Head",
+          "type": "steel",
+          "nameZh": "鐵頭"
+        }
+      ]
+    },
+    {
+      "key": "forretress",
+      "ndex": 205,
+      "nameZh": "佛烈托斯",
+      "nameEn": "Forretress",
+      "isMega": false,
+      "rank": 24,
+      "usagePct": 1.09,
+      "types": [
+        "bug",
+        "steel"
+      ],
+      "moveTypes": [],
+      "moves": []
+    },
+    {
+      "key": "dragonite",
+      "ndex": 149,
+      "nameZh": "快龍",
+      "nameEn": "Dragonite",
+      "isMega": false,
+      "rank": 25,
+      "usagePct": 1,
+      "types": [
+        "dragon",
+        "flying"
+      ],
+      "moveTypes": [
+        "dragon",
+        "normal",
+        "ice",
+        "ground",
+        "fire"
+      ],
+      "moves": [
+        {
+          "nameEn": "Dragon Claw",
+          "type": "dragon",
+          "nameZh": "龍爪"
+        },
+        {
+          "nameEn": "Extreme Speed",
+          "type": "normal",
+          "nameZh": "神速"
+        },
+        {
+          "nameEn": "Ice Punch",
+          "type": "ice",
+          "nameZh": "冰凍拳"
+        },
+        {
+          "nameEn": "Earthquake",
+          "type": "ground",
+          "nameZh": "地震"
+        },
+        {
+          "nameEn": "Fire Punch",
+          "type": "fire",
+          "nameZh": "火焰拳"
+        }
+      ]
+    },
+    {
+      "key": "dragonite-mega",
+      "ndex": 149,
+      "nameZh": "超級快龍",
+      "nameEn": "Mega Dragonite",
+      "isMega": true,
+      "rank": 26,
+      "usagePct": 0.97,
+      "types": [
+        "dragon",
+        "flying"
+      ],
+      "moveTypes": [
+        "dragon",
+        "normal",
+        "ice",
+        "ground",
+        "fire"
+      ],
+      "moves": [
+        {
+          "nameEn": "Dragon Claw",
+          "type": "dragon",
+          "nameZh": "龍爪"
+        },
+        {
+          "nameEn": "Extreme Speed",
+          "type": "normal",
+          "nameZh": "神速"
+        },
+        {
+          "nameEn": "Ice Punch",
+          "type": "ice",
+          "nameZh": "冰凍拳"
+        },
+        {
+          "nameEn": "Earthquake",
+          "type": "ground",
+          "nameZh": "地震"
+        },
+        {
+          "nameEn": "Fire Punch",
+          "type": "fire",
+          "nameZh": "火焰拳"
+        }
+      ]
+    },
+    {
+      "key": "tauros-paldea-combat-breed",
+      "ndex": 10250,
+      "nameZh": "帕底亞肯泰羅（鬥戰種）",
+      "nameEn": "Paldean Tauros (Combat Breed)",
+      "isMega": false,
+      "rank": 27,
+      "usagePct": 0.96,
+      "types": [
+        "fighting"
+      ],
+      "moveTypes": [],
+      "moves": []
+    },
+    {
+      "key": "azumarill",
+      "ndex": 184,
+      "nameZh": "瑪力露麗",
+      "nameEn": "Azumarill",
+      "isMega": false,
+      "rank": 28,
+      "usagePct": 0.92,
+      "types": [
+        "water",
+        "fairy"
+      ],
+      "moveTypes": [
+        "water",
+        "fairy",
+        "fighting",
+        "dark"
+      ],
+      "moves": [
+        {
+          "nameEn": "Aqua Jet",
+          "type": "water",
+          "nameZh": "水流噴射"
+        },
+        {
+          "nameEn": "Play Rough",
+          "type": "fairy",
+          "nameZh": "嬉鬧"
+        },
+        {
+          "nameEn": "Liquidation",
+          "type": "water",
+          "nameZh": "水流裂破"
+        },
+        {
+          "nameEn": "Superpower",
+          "type": "fighting",
+          "nameZh": "蠻力"
+        },
+        {
+          "nameEn": "Knock Off",
+          "type": "dark",
+          "nameZh": "拍落"
+        }
+      ]
+    },
+    {
+      "key": "wyrdeer",
+      "ndex": 899,
+      "nameZh": "詭角鹿",
+      "nameEn": "Wyrdeer",
+      "isMega": false,
+      "rank": 29,
+      "usagePct": 0.89,
+      "types": [
+        "normal",
+        "psychic"
+      ],
+      "moveTypes": [],
+      "moves": []
+    },
+    {
+      "key": "scizor-mega",
+      "ndex": 212,
+      "nameZh": "超級巨鉗螳螂",
+      "nameEn": "Mega Scizor",
+      "isMega": true,
+      "rank": 30,
+      "usagePct": 0.88,
+      "types": [
+        "bug",
+        "steel"
+      ],
+      "moveTypes": [
+        "steel",
+        "bug",
+        "fighting",
+        "dark"
+      ],
+      "moves": [
+        {
+          "nameEn": "Bullet Punch",
+          "type": "steel",
+          "nameZh": "子彈拳"
+        },
+        {
+          "nameEn": "Bug Bite",
+          "type": "bug",
+          "nameZh": "蟲咬"
+        },
+        {
+          "nameEn": "U-turn",
+          "type": "bug",
+          "nameZh": "急速折返"
+        },
+        {
+          "nameEn": "Superpower",
+          "type": "fighting",
+          "nameZh": "蠻力"
+        },
+        {
+          "nameEn": "Knock Off",
+          "type": "dark",
+          "nameZh": "拍落"
+        }
+      ]
+    },
+    {
+      "key": "arbok",
+      "ndex": 24,
+      "nameZh": "阿柏怪",
+      "nameEn": "Arbok",
+      "isMega": false,
+      "rank": 31,
+      "usagePct": 0.88,
+      "types": [
+        "poison"
+      ],
+      "moveTypes": [],
+      "moves": []
+    },
+    {
+      "key": "slowbro",
+      "ndex": 80,
+      "nameZh": "呆殼獸",
+      "nameEn": "Slowbro",
+      "isMega": false,
+      "rank": 32,
+      "usagePct": 0.87,
+      "types": [
+        "water",
+        "psychic"
+      ],
+      "moveTypes": [
+        "water",
+        "psychic",
+        "ice",
+        "fire"
+      ],
+      "moves": [
+        {
+          "nameEn": "Scald",
+          "type": "water",
+          "nameZh": "熱水"
+        },
+        {
+          "nameEn": "Psychic",
+          "type": "psychic",
+          "nameZh": "精神強念"
+        },
+        {
+          "nameEn": "Ice Beam",
+          "type": "ice",
+          "nameZh": "冰凍光束"
+        },
+        {
+          "nameEn": "Flamethrower",
+          "type": "fire",
+          "nameZh": "噴射火焰"
+        },
+        {
+          "nameEn": "Psyshock",
+          "type": "psychic",
+          "nameZh": "精神衝擊"
+        }
+      ]
+    },
+    {
+      "key": "palafin-zero",
+      "ndex": 964,
+      "nameZh": "海豚俠",
+      "nameEn": "Palafin",
+      "isMega": false,
+      "rank": 33,
+      "usagePct": 0.83,
+      "types": [
+        "water"
+      ],
+      "moveTypes": [
+        "water",
+        "fighting",
+        "ice"
+      ],
+      "moves": [
+        {
+          "nameEn": "Jet Punch",
+          "type": "water",
+          "nameZh": "喷射拳"
+        },
+        {
+          "nameEn": "Wave Crash",
+          "type": "water",
+          "nameZh": "波动冲"
+        },
+        {
+          "nameEn": "Close Combat",
+          "type": "fighting",
+          "nameZh": "近身戰"
+        },
+        {
+          "nameEn": "Ice Punch",
+          "type": "ice",
+          "nameZh": "冰凍拳"
+        },
+        {
+          "nameEn": "Drain Punch",
+          "type": "fighting",
+          "nameZh": "吸取拳"
+        },
+        {
+          "nameEn": "Flip Turn",
+          "type": "water",
+          "nameZh": "快速折返"
+        }
+      ]
+    },
+    {
+      "key": "sneasler",
+      "ndex": 903,
+      "nameZh": "大狃拉",
+      "nameEn": "Sneasler",
+      "isMega": false,
+      "rank": 34,
+      "usagePct": 0.8,
+      "types": [
+        "fighting",
+        "poison"
+      ],
+      "moveTypes": [
+        "fighting",
+        "poison",
+        "normal"
+      ],
+      "moves": [
+        {
+          "nameEn": "Close Combat",
+          "type": "fighting",
+          "nameZh": "近身戰"
+        },
+        {
+          "nameEn": "Dire Claw",
+          "type": "poison",
+          "nameZh": "克命爪"
+        },
+        {
+          "nameEn": "Fake Out",
+          "type": "normal",
+          "nameZh": "擊掌奇襲"
+        }
+      ]
+    },
+    {
+      "key": "pelipper",
+      "ndex": 279,
+      "nameZh": "大嘴鷗",
+      "nameEn": "Pelipper",
+      "isMega": false,
+      "rank": 35,
+      "usagePct": 0.74,
+      "types": [
+        "water",
+        "flying"
+      ],
+      "moveTypes": [
+        "water",
+        "flying",
+        "normal",
+        "bug"
+      ],
+      "moves": [
+        {
+          "nameEn": "Surf",
+          "type": "water",
+          "nameZh": "衝浪"
+        },
+        {
+          "nameEn": "Hurricane",
+          "type": "flying",
+          "nameZh": "暴風"
+        },
+        {
+          "nameEn": "Weather Ball",
+          "type": "normal",
+          "nameZh": "氣象球"
+        },
+        {
+          "nameEn": "U-turn",
+          "type": "bug",
+          "nameZh": "急速折返"
+        }
+      ]
+    },
+    {
+      "key": "torkoal",
+      "ndex": 324,
+      "nameZh": "煤炭龜",
+      "nameEn": "Torkoal",
+      "isMega": false,
+      "rank": 36,
+      "usagePct": 0.74,
+      "types": [
+        "fire"
+      ],
+      "moveTypes": [
+        "fire",
+        "ground",
+        "grass"
+      ],
+      "moves": [
+        {
+          "nameEn": "Eruption",
+          "type": "fire",
+          "nameZh": "噴火"
+        },
+        {
+          "nameEn": "Heat Wave",
+          "type": "fire",
+          "nameZh": "熱風"
+        },
+        {
+          "nameEn": "Earth Power",
+          "type": "ground",
+          "nameZh": "大地之力"
+        },
+        {
+          "nameEn": "Solar Beam",
+          "type": "grass",
+          "nameZh": "日光束"
+        }
+      ]
+    },
+    {
+      "key": "politoed",
+      "ndex": 186,
+      "nameZh": "蚊香蛙皇",
+      "nameEn": "Politoed",
+      "isMega": false,
+      "rank": 37,
+      "usagePct": 0.68,
+      "types": [
+        "water"
+      ],
+      "moveTypes": [
+        "water",
+        "ice",
+        "fighting"
+      ],
+      "moves": [
+        {
+          "nameEn": "Surf",
+          "type": "water",
+          "nameZh": "衝浪"
+        },
+        {
+          "nameEn": "Icy Wind",
+          "type": "ice",
+          "nameZh": "冰凍之風"
+        },
+        {
+          "nameEn": "Hydro Pump",
+          "type": "water",
+          "nameZh": "水炮"
+        },
+        {
+          "nameEn": "Ice Beam",
+          "type": "ice",
+          "nameZh": "冰凍光束"
+        },
+        {
+          "nameEn": "Focus Blast",
+          "type": "fighting",
+          "nameZh": "真氣彈"
+        }
+      ]
+    },
+    {
+      "key": "scizor",
+      "ndex": 212,
+      "nameZh": "巨鉗螳螂",
+      "nameEn": "Scizor",
+      "isMega": false,
+      "rank": 38,
+      "usagePct": 0.65,
+      "types": [
+        "bug",
+        "steel"
+      ],
+      "moveTypes": [
+        "steel",
+        "bug",
+        "fighting",
+        "dark"
+      ],
+      "moves": [
+        {
+          "nameEn": "Bullet Punch",
+          "type": "steel",
+          "nameZh": "子彈拳"
+        },
+        {
+          "nameEn": "Bug Bite",
+          "type": "bug",
+          "nameZh": "蟲咬"
+        },
+        {
+          "nameEn": "U-turn",
+          "type": "bug",
+          "nameZh": "急速折返"
+        },
+        {
+          "nameEn": "Superpower",
+          "type": "fighting",
+          "nameZh": "蠻力"
+        },
+        {
+          "nameEn": "Knock Off",
+          "type": "dark",
+          "nameZh": "拍落"
+        }
+      ]
+    },
+    {
+      "key": "rhyperior",
+      "ndex": 464,
+      "nameZh": "超甲狂犀",
+      "nameEn": "Rhyperior",
+      "isMega": false,
+      "rank": 39,
+      "usagePct": 0.64,
+      "types": [
+        "ground",
+        "rock"
+      ],
+      "moveTypes": [
+        "ground",
+        "rock",
+        "ice",
+        "bug"
+      ],
+      "moves": [
+        {
+          "nameEn": "Earthquake",
+          "type": "ground",
+          "nameZh": "地震"
+        },
+        {
+          "nameEn": "Rock Slide",
+          "type": "rock",
+          "nameZh": "岩崩"
+        },
+        {
+          "nameEn": "Ice Punch",
+          "type": "ice",
+          "nameZh": "冰凍拳"
+        },
+        {
+          "nameEn": "Megahorn",
+          "type": "bug",
+          "nameZh": "超級角擊"
+        }
+      ]
+    },
+    {
+      "key": "kangaskhan-mega",
+      "ndex": 115,
+      "nameZh": "超級袋獸",
+      "nameEn": "Mega Kangaskhan",
+      "isMega": true,
+      "rank": 40,
+      "usagePct": 0.61,
+      "types": [
+        "normal"
+      ],
+      "moveTypes": [
+        "normal",
+        "dark",
+        "fighting",
+        "ice"
+      ],
+      "moves": [
+        {
+          "nameEn": "Body Slam",
+          "type": "normal",
+          "nameZh": "泰山壓頂"
+        },
+        {
+          "nameEn": "Sucker Punch",
+          "type": "dark",
+          "nameZh": "突襲"
+        },
+        {
+          "nameEn": "Drain Punch",
+          "type": "fighting",
+          "nameZh": "吸取拳"
+        },
+        {
+          "nameEn": "Fake Out",
+          "type": "normal",
+          "nameZh": "擊掌奇襲"
+        },
+        {
+          "nameEn": "Double-Edge",
+          "type": "normal",
+          "nameZh": "捨身衝撞"
+        },
+        {
+          "nameEn": "Icy Wind",
+          "type": "ice",
+          "nameZh": "冰凍之風"
+        }
+      ]
+    },
+    {
+      "key": "charizard",
+      "ndex": 6,
+      "nameZh": "噴火龍",
+      "nameEn": "Charizard",
+      "isMega": false,
+      "rank": 41,
+      "usagePct": 0.59,
+      "types": [
+        "fire",
+        "flying"
+      ],
+      "moveTypes": [
+        "fire",
+        "flying",
+        "grass",
+        "dragon",
+        "electric",
+        "fighting"
+      ],
+      "moves": [
+        {
+          "nameEn": "Heat Wave",
+          "type": "fire",
+          "nameZh": "熱風"
+        },
+        {
+          "nameEn": "Air Slash",
+          "type": "flying",
+          "nameZh": "空氣斬"
+        },
+        {
+          "nameEn": "Solar Beam",
+          "type": "grass",
+          "nameZh": "日光束"
+        },
+        {
+          "nameEn": "Overheat",
+          "type": "fire",
+          "nameZh": "過熱"
+        },
+        {
+          "nameEn": "Flare Blitz",
+          "type": "fire",
+          "nameZh": "閃焰衝鋒"
+        },
+        {
+          "nameEn": "Dragon Claw",
+          "type": "dragon",
+          "nameZh": "龍爪"
+        },
+        {
+          "nameEn": "Thunder Punch",
+          "type": "electric",
+          "nameZh": "雷電拳"
+        },
+        {
+          "nameEn": "Focus Blast",
+          "type": "fighting",
+          "nameZh": "真氣彈"
+        }
+      ]
+    },
+    {
+      "key": "hydreigon",
+      "ndex": 635,
+      "nameZh": "三首惡龍",
+      "nameEn": "Hydreigon",
+      "isMega": false,
+      "rank": 42,
+      "usagePct": 0.57,
+      "types": [
+        "dark",
+        "dragon"
+      ],
+      "moveTypes": [
+        "dragon",
+        "dark",
+        "fire",
+        "steel"
+      ],
+      "moves": [
+        {
+          "nameEn": "Draco Meteor",
+          "type": "dragon",
+          "nameZh": "流星群"
+        },
+        {
+          "nameEn": "Dark Pulse",
+          "type": "dark",
+          "nameZh": "惡之波動"
+        },
+        {
+          "nameEn": "Flamethrower",
+          "type": "fire",
+          "nameZh": "噴射火焰"
+        },
+        {
+          "nameEn": "Flash Cannon",
+          "type": "steel",
+          "nameZh": "加農光炮"
+        }
+      ]
+    },
+    {
+      "key": "skarmory",
+      "ndex": 227,
+      "nameZh": "盔甲鳥",
+      "nameEn": "Skarmory",
+      "isMega": false,
+      "rank": 43,
+      "usagePct": 0.54,
+      "types": [
+        "steel",
+        "flying"
+      ],
+      "moveTypes": [
+        "steel",
+        "flying",
+        "fighting"
+      ],
+      "moves": [
+        {
+          "nameEn": "Iron Head",
+          "type": "steel",
+          "nameZh": "鐵頭"
+        },
+        {
+          "nameEn": "Brave Bird",
+          "type": "flying",
+          "nameZh": "勇鳥猛攻"
+        },
+        {
+          "nameEn": "Drill Peck",
+          "type": "flying",
+          "nameZh": "啄鑽"
+        },
+        {
+          "nameEn": "Body Press",
+          "type": "fighting",
+          "nameZh": "撲擊"
+        }
+      ]
+    },
+    {
+      "key": "altaria",
+      "ndex": 334,
+      "nameZh": "七夕青鳥",
+      "nameEn": "Altaria",
+      "isMega": false,
+      "rank": 44,
+      "usagePct": 0.52,
+      "types": [
+        "dragon",
+        "flying"
+      ],
+      "moveTypes": [
+        "normal",
+        "fire",
+        "ground",
+        "flying"
+      ],
+      "moves": [
+        {
+          "nameEn": "Hyper Voice",
+          "type": "normal",
+          "nameZh": "巨聲"
+        },
+        {
+          "nameEn": "Fire Blast",
+          "type": "fire",
+          "nameZh": "大字爆炎"
+        },
+        {
+          "nameEn": "Body Slam",
+          "type": "normal",
+          "nameZh": "泰山壓頂"
+        },
+        {
+          "nameEn": "Earthquake",
+          "type": "ground",
+          "nameZh": "地震"
+        },
+        {
+          "nameEn": "Acrobatics",
+          "type": "flying",
+          "nameZh": "雜技"
+        }
+      ]
+    },
+    {
+      "key": "salazzle",
+      "ndex": 758,
+      "nameZh": "焰后蜥",
+      "nameEn": "Salazzle",
+      "isMega": false,
+      "rank": 45,
+      "usagePct": 0.51,
+      "types": [
+        "poison",
+        "fire"
+      ],
+      "moveTypes": [],
+      "moves": []
+    },
+    {
+      "key": "empoleon",
+      "ndex": 395,
+      "nameZh": "帝王拿波",
+      "nameEn": "Empoleon",
+      "isMega": false,
+      "rank": 46,
+      "usagePct": 0.51,
+      "types": [
+        "water",
+        "steel"
+      ],
+      "moveTypes": [
+        "water",
+        "steel",
+        "ice",
+        "grass"
+      ],
+      "moves": [
+        {
+          "nameEn": "Surf",
+          "type": "water",
+          "nameZh": "衝浪"
+        },
+        {
+          "nameEn": "Flash Cannon",
+          "type": "steel",
+          "nameZh": "加農光炮"
+        },
+        {
+          "nameEn": "Icy Wind",
+          "type": "ice",
+          "nameZh": "冰凍之風"
+        },
+        {
+          "nameEn": "Ice Beam",
+          "type": "ice",
+          "nameZh": "冰凍光束"
+        },
+        {
+          "nameEn": "Grass Knot",
+          "type": "grass",
+          "nameZh": "打草結"
+        },
+        {
+          "nameEn": "Hydro Pump",
+          "type": "water",
+          "nameZh": "水炮"
+        }
+      ]
+    },
+    {
+      "key": "drampa",
+      "ndex": 780,
+      "nameZh": "老翁龍",
+      "nameEn": "Drampa",
+      "isMega": false,
+      "rank": 47,
+      "usagePct": 0.5,
+      "types": [
+        "normal",
+        "dragon"
+      ],
+      "moveTypes": [
+        "dragon",
+        "normal",
+        "fire",
+        "electric",
+        "ice"
+      ],
+      "moves": [
+        {
+          "nameEn": "Draco Meteor",
+          "type": "dragon",
+          "nameZh": "流星群"
+        },
+        {
+          "nameEn": "Hyper Voice",
+          "type": "normal",
+          "nameZh": "巨聲"
+        },
+        {
+          "nameEn": "Flamethrower",
+          "type": "fire",
+          "nameZh": "噴射火焰"
+        },
+        {
+          "nameEn": "Thunderbolt",
+          "type": "electric",
+          "nameZh": "十萬伏特"
+        },
+        {
+          "nameEn": "Ice Beam",
+          "type": "ice",
+          "nameZh": "冰凍光束"
+        }
+      ]
+    },
+    {
+      "key": "corviknight",
+      "ndex": 823,
+      "nameZh": "鋼鎧鴉",
+      "nameEn": "Corviknight",
+      "isMega": false,
+      "rank": 48,
+      "usagePct": 0.46,
+      "types": [
+        "flying",
+        "steel"
+      ],
+      "moveTypes": [
+        "flying",
+        "steel",
+        "fighting",
+        "bug"
+      ],
+      "moves": [
+        {
+          "nameEn": "Brave Bird",
+          "type": "flying",
+          "nameZh": "勇鳥猛攻"
+        },
+        {
+          "nameEn": "Iron Head",
+          "type": "steel",
+          "nameZh": "鐵頭"
+        },
+        {
+          "nameEn": "Body Press",
+          "type": "fighting",
+          "nameZh": "撲擊"
+        },
+        {
+          "nameEn": "U-turn",
+          "type": "bug",
+          "nameZh": "急速折返"
+        }
+      ]
+    },
+    {
+      "key": "liepard",
+      "ndex": 510,
+      "nameZh": "酷豹",
+      "nameEn": "Liepard",
+      "isMega": false,
+      "rank": 49,
+      "usagePct": 0.43,
+      "types": [
+        "dark"
+      ],
+      "moveTypes": [],
+      "moves": []
+    },
+    {
+      "key": "simipour",
+      "ndex": 516,
+      "nameZh": "冷水猿",
+      "nameEn": "Simipour",
+      "isMega": false,
+      "rank": 50,
+      "usagePct": 0.42,
+      "types": [
+        "water"
+      ],
+      "moveTypes": [],
+      "moves": []
+    }
+  ]
+}

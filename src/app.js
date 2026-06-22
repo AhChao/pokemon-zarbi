@@ -13,6 +13,7 @@ const app = document.getElementById('app');
 let pokedex = {};            // Champions 賽季名單（速度測驗 / 我是誰冠軍賽季池）
 let seasonsData = { seasons: {} };
 let nationalDex = {};        // 全國圖鑑分世代（我是誰的世代/地區池，含未進化）
+let usageData = { list: [] }; // 當前 VGC 雙打 meta 使用率 top-50（聯防補洞建議，build:usage 產）
 
 // ── 小工具 ──────────────────────────────────────────────────────
 const el = (html) => {
@@ -1931,40 +1932,118 @@ function buildTeamTool() {
     if (!withDef.length && !withAtk.length) return;
 
     const card = el(`<div class="ct-summary"><h3>${esc(t('chart.tool.team.sumTitle'))}</h3></div>`);
+    let defHoles = [], offHoles = []; // 給 meta 補洞建議共用
 
     // 聯防：每個攻擊屬性，全隊沒人抵抗（無 ≤½×）即為漏洞。
     if (withDef.length) {
-      const noResist = TYPES.filter((a) => !withDef.some((m) => multiplier(a, m.def) <= 0.5));
-      const verdict = noResist.length
-        ? t('chart.tool.team.sumDefNote', { n: noResist.length })
+      defHoles = TYPES.filter((a) => !withDef.some((m) => multiplier(a, m.def) <= 0.5));
+      const verdict = defHoles.length
+        ? t('chart.tool.team.sumDefNote', { n: defHoles.length })
         : t('chart.tool.team.sumDefOk');
-      card.insertAdjacentHTML('beforeend', `<p class="ct-verdict${noResist.length ? ' is-bad' : ' is-ok'}">${esc(verdict)}</p>`);
-      card.insertAdjacentHTML('beforeend', ctBucketRow(null, 'chart.tool.team.sumNoResist', noResist, 'danger', t('chart.tool.team.nKinds', { n: noResist.length })));
+      card.insertAdjacentHTML('beforeend', `<p class="ct-verdict${defHoles.length ? ' is-bad' : ' is-ok'}">${esc(verdict)}</p>`);
+      card.insertAdjacentHTML('beforeend', ctBucketRow(null, 'chart.tool.team.sumNoResist', defHoles, 'danger', t('chart.tool.team.nKinds', { n: defHoles.length })));
+      // 集中弱點：同一攻擊屬性被 ≥3 隻打弱（≥2×）即為缺點——即使有人能抗，被一招壓制多隻仍危險。
+      const STACK_MIN = 3;
+      const stacked = TYPES
+        .map((a) => ({ a, n: withDef.filter((m) => multiplier(a, m.def) >= 2).length }))
+        .filter((x) => x.n >= STACK_MIN)
+        .sort((x, y) => y.n - x.n);
+      if (stacked.length) {
+        card.insertAdjacentHTML('beforeend', `<p class="ct-verdict is-bad">${esc(t('chart.tool.team.sumStackNote', { n: stacked.length }))}</p>`);
+        const items = stacked.map(({ a, n }) => `<span class="ct-stack">${badge(a)}<span class="ct-stack__n">×${n}</span></span>`).join('');
+        card.insertAdjacentHTML('beforeend', `<div class="ct-bucket ct-bucket--danger"><span class="ct-bucket__k">${esc(t('chart.tool.team.nKinds', { n: stacked.length }))}<small>${esc(t('chart.tool.team.sumStacked'))}</small></span><span class="ct-bucket__v">${items}</span></div>`);
+      }
     }
     // 覆蓋：每個防守屬性取全隊最佳招式倍率（含屬修）。<2＝硬漏洞、[2,3)＝沒人 3 倍。
     if (withAtk.length) {
       const bestOf = (d) => Math.max(0, ...withAtk.flatMap((m) => m.atk.map((mv) => atkMult(m, mv, d))));
-      const holes = TYPES.filter((d) => bestOf(d) < 2);
+      offHoles = TYPES.filter((d) => bestOf(d) < 2);
       const soft = TYPES.filter((d) => { const b = bestOf(d); return b >= 2 && b < 3; });
-      if (holes.length) {
-        card.insertAdjacentHTML('beforeend', `<p class="ct-verdict is-bad">${esc(t('chart.tool.team.sumAtkNote', { n: holes.length }))}</p>`);
-        card.insertAdjacentHTML('beforeend', ctBucketRow(null, 'chart.tool.team.sumNoCover', holes, 'danger', t('chart.tool.team.nKinds', { n: holes.length })));
+      if (offHoles.length) {
+        card.insertAdjacentHTML('beforeend', `<p class="ct-verdict is-bad">${esc(t('chart.tool.team.sumAtkNote', { n: offHoles.length }))}</p>`);
+        card.insertAdjacentHTML('beforeend', ctBucketRow(null, 'chart.tool.team.sumNoCover', offHoles, 'danger', t('chart.tool.team.nKinds', { n: offHoles.length })));
       }
       if (soft.length) {
         card.insertAdjacentHTML('beforeend', `<p class="ct-verdict is-warn">${esc(t('chart.tool.team.sumSoftNote', { n: soft.length }))}</p>`);
         card.insertAdjacentHTML('beforeend', ctBucketRow(null, 'chart.tool.team.sumNo3x', soft, 'warn', t('chart.tool.team.nKinds', { n: soft.length })));
       }
-      if (!holes.length && !soft.length) {
+      if (!offHoles.length && !soft.length) {
         card.insertAdjacentHTML('beforeend', `<p class="ct-verdict is-ok">${esc(t('chart.tool.team.sumAtkOk'))}</p>`);
       }
     }
     sumBox.appendChild(card);
+    const rec = buildUsageRecommender(defHoles, offHoles);
+    if (rec) sumBox.appendChild(rec);
   };
 
   syncTabs();
   renderMons();
   renderSummary();
   return wrap;
+}
+
+// 從 meta top-50（Champions Lab, VGC 雙打）挑最能補本隊攻守破洞的人，並點名補哪一招。
+// 防守補＝候選屬性抵抗（≤0.5×）某防守洞；攻擊補＝候選某招（含本系 STAB）打某攻擊洞 ≥2×。
+// 綜合分 = 防守補數 + 攻擊補數，兩邊都補再 ×1.5（優先度更高）。取 top 5。
+function buildUsageRecommender(defHoles, offHoles) {
+  const list = usageData && usageData.list;
+  if (!list || !list.length) return null;
+  if (!defHoles.length && !offHoles.length) return null;
+
+  const scored = [];
+  for (const c of list) {
+    const types = c.types || [];
+    const defFix = defHoles.filter((a) => multiplier(a, types) <= 0.5);
+    const offFix = [];
+    for (const d of offHoles) {
+      let best = null;
+      for (const mv of c.moves || []) {
+        const mult = singleMultiplier(mv.type, d) * (types.includes(mv.type) ? 1.5 : 1);
+        if (mult >= 2 && (!best || mult > best.mult)) best = { hole: d, move: mv, mult };
+      }
+      if (best) offFix.push(best);
+    }
+    if (!defFix.length && !offFix.length) continue;
+    const dual = defFix.length > 0 && offFix.length > 0;
+    const score = (defFix.length + offFix.length) * (dual ? 1.5 : 1);
+    scored.push({ c, defFix, offFix, score, dual });
+  }
+  if (!scored.length) return null;
+  scored.sort((a, b) => b.score - a.score || (b.c.usagePct || 0) - (a.c.usagePct || 0));
+
+  const card = el(`<div class="ct-summary ct-rec">
+    <h3>${esc(t('chart.tool.team.recTitle'))}</h3>
+    <p class="ct-rec__sub">${esc(t('chart.tool.team.recSub'))}</p>
+  </div>`);
+  scored.slice(0, 5).forEach((s, i) => {
+    const c = s.c;
+    const img = (pokedex[c.key] && pokedex[c.key].image) || '';
+    const dualTag = s.dual ? `<span class="ct-rec__dual">${esc(t('chart.tool.team.recDual'))}</span>` : '';
+    const row = el(`<div class="ct-rec__row">
+      <div class="ct-rec__head">
+        <span class="ct-rec__rank">#${i + 1}</span>
+        ${img ? `<img class="ct-rec__art" src="${esc(img)}" alt="${esc(c.nameZh)}" loading="lazy" />` : ''}
+        <span class="ct-rec__name">${esc(c.nameZh)}</span>
+        <span class="ct-rec__use">${esc(t('chart.tool.team.recUse', { p: (c.usagePct ?? 0).toFixed(1) }))}</span>
+        ${dualTag}
+      </div>
+    </div>`);
+  const body = el('<div class="ct-rec__body"></div>');
+    if (s.defFix.length) {
+      body.insertAdjacentHTML('beforeend',
+        `<div class="ct-rec__line"><span class="ct-rec__k ct-rec__k--def">${esc(t('chart.tool.team.recDef'))}</span><span class="ct-rec__v">${s.defFix.map((a) => badge(a)).join('')}</span></div>`);
+    }
+    if (s.offFix.length) {
+      const items = s.offFix.map((f) =>
+        `<span class="ct-rec__atk">${badge(f.hole)}<span class="ct-rec__via">${esc(t('chart.tool.team.recVia'))}</span><span class="ct-rec__move" style="background:${TYPE_META[f.move.type].color}">${typeIcon(f.move.type)}${esc(f.move.nameZh || f.move.nameEn)}</span></span>`).join('');
+      body.insertAdjacentHTML('beforeend',
+        `<div class="ct-rec__line"><span class="ct-rec__k ct-rec__k--atk">${esc(t('chart.tool.team.recAtk'))}</span><span class="ct-rec__v">${items}</span></div>`);
+    }
+    row.appendChild(body);
+    card.appendChild(row);
+  });
+  card.insertAdjacentHTML('beforeend', `<p class="ct-rec__src">${esc(t('chart.tool.team.recSrc'))}</p>`);
+  return card;
 }
 
 function buildChartTable() {
@@ -2810,6 +2889,10 @@ async function init() {
   } catch (e) {
     console.error('資料載入失敗', e);
   }
+  // 使用率資料為次要功能（聯防補洞建議）；載入失敗不影響核心，靜默退化。
+  try {
+    usageData = await (await fetch('./src/data/usage.json')).json();
+  } catch { /* 無 usage.json → 聯防不顯示補洞建議 */ }
   render();
 }
 init();

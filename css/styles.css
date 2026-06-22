@@ -431,6 +431,32 @@ h2 { font-size: 1.2rem; margin: 0 0 12px; }
 .ct-verdict.is-warn { color: var(--c-accent); }
 .ct-bucket--warn { border-color: color-mix(in srgb, var(--c-accent) 55%, var(--c-border)); background: color-mix(in srgb, var(--c-accent) 9%, transparent); }
 .ct-bucket--warn .ct-bucket__k { color: var(--c-accent); }
+/* 集中弱點：屬性 badge 後接「×幾隻」 */
+.ct-stack { display: inline-flex; align-items: center; gap: 3px; }
+.ct-stack__n { font-size: .76rem; font-weight: 700; color: var(--c-bad); }
+
+/* meta 補洞建議：候選清單，每張卡含立繪 + 補防守/補攻擊明細 */
+.ct-rec { margin-top: 10px; background: color-mix(in srgb, var(--c-accent) 6%, transparent); border-color: color-mix(in srgb, var(--c-accent) 35%, var(--c-border)); }
+.ct-rec__sub { margin: 0; font-size: .8rem; color: var(--c-muted); }
+.ct-rec__src { margin: 0; font-size: .72rem; color: var(--c-muted); }
+.ct-rec__row { border: 1px solid var(--c-border); border-radius: var(--radius-sm); padding: 8px 10px; display: grid; gap: 6px; background: var(--c-card, transparent); }
+.ct-rec__head { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.ct-rec__rank { font-weight: 700; color: var(--c-accent); font-size: .82rem; min-width: 1.6em; }
+.ct-rec__art { width: 36px; height: 36px; object-fit: contain; flex: 0 0 auto; }
+.ct-rec__name { font-weight: 700; font-size: .95rem; }
+.ct-rec__use { font-size: .76rem; color: var(--c-muted); }
+.ct-rec__dual { margin-left: auto; font-size: .72rem; font-weight: 700; color: var(--c-accent); border: 1px solid color-mix(in srgb, var(--c-accent) 55%, var(--c-border)); border-radius: 999px; padding: 1px 8px; }
+.ct-rec__body { display: grid; gap: 5px; }
+.ct-rec__line { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.ct-rec__k { font-size: .76rem; font-weight: 700; flex: 0 0 auto; }
+.ct-rec__k--def { color: var(--c-good); }
+.ct-rec__k--atk { color: var(--c-bad); }
+.ct-rec__v { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.ct-rec__v .type-badge { font-size: .76rem; padding: 2px 8px; }
+.ct-rec__atk { display: inline-flex; align-items: center; gap: 4px; }
+.ct-rec__via { font-size: .74rem; color: var(--c-muted); }
+.ct-rec__move { display: inline-flex; align-items: center; gap: 3px; font-size: .74rem; color: #fff; border-radius: 999px; padding: 2px 8px; }
+.ct-rec__move svg { width: 12px; height: 12px; }
 
 .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; margin-top: 8px; }
 /* 速度線表：標題/賽季/搜尋列 freeze 在頂端（接在 sticky topbar 下），長表格在下方捲動不影響操作。 */

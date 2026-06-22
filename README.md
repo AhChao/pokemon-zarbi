@@ -28,6 +28,6 @@
 
 ## 致謝
 
-寶可夢資料與立繪來自 [PokéAPI](https://pokeapi.co/)（立繪取自 PokeAPI/sprites，以 CC0 散布，圖像版權仍屬 The Pokémon Company）。屬性圖示來自 [duiker101/pokemon-type-svg-icons](https://github.com/duiker101/pokemon-type-svg-icons)，原始設計出自 [Dribbble「Pokedex iOS app」](https://dribbble.com/shots/4862612)。本專案程式碼與原創素材採 [MIT 授權](./LICENSE)。
+寶可夢資料與立繪來自 [PokéAPI](https://pokeapi.co/)（立繪取自 PokeAPI/sprites，以 CC0 散布，圖像版權仍屬 The Pokémon Company）。屬性圖示來自 [duiker101/pokemon-type-svg-icons](https://github.com/duiker101/pokemon-type-svg-icons)，原始設計出自 [Dribbble「Pokedex iOS app」](https://dribbble.com/shots/4862612)。聯防補洞建議的 meta 使用率資料來自 [Champions Lab](https://championslab.xyz)（MIT）。本專案程式碼與原創素材採 [MIT 授權](./LICENSE)。
 
 > 想在本機跑或了解實作，請見 `<a href="./DEVELOPMENT.md">`DEVELOPMENT.md `</a>`。

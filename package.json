@@ -6,9 +6,10 @@
   "private": true,
   "scripts": {
     "test": "node --test",
+    "dev": "python3 -m http.server 4173",
     "build:dex": "node scripts/build-pokedex.mjs",
     "build:national": "node scripts/build-national-dex.mjs",
-    "dev": "python3 -m http.server 4173"
+    "build:usage": "node scripts/build-usage.mjs"
   },
   "license": "MIT"
 }
