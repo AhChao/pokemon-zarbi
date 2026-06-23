@@ -617,6 +617,21 @@ table.chart.spd td.spd-mons {
   background: var(--c-card); color: var(--c-text);
 }
 
+/* 圖鑑名字搜尋：放在屬性列之下，邊打邊模糊過濾 */
+.dex-search {
+  display: flex; align-items: center; gap: 8px;
+  margin: 8px 0 4px; padding: 0 12px;
+  border: 1px solid var(--c-border); border-radius: var(--radius-sm);
+  background: var(--c-bg);
+}
+.dex-search__icon { display: inline-flex; color: var(--c-muted); flex: 0 0 auto; }
+.dex-search__icon .ui-icon { width: 18px; height: 18px; vertical-align: 0; }
+.dex-search input {
+  flex: 1; min-width: 0; font: inherit; font-size: .85rem;
+  padding: 11px 0; border: 0; background: transparent; color: var(--c-text);
+}
+.dex-search input:focus { outline: none; }
+
 .dex-grid {
   display: grid; gap: 8px; margin-top: 6px;
   grid-template-columns: repeat(auto-fill, minmax(64px, 1fr));

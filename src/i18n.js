@@ -55,6 +55,7 @@ const DICT = {
     'who.submit': '確認',
     'dex.title': '圖鑑',
     'dex.openBtn': '圖鑑',
+    'dex.search': '搜尋寶可夢（中／英、可模糊）…',
     'dex.group.gen': '世代 / 地區',
     'dex.group.season': '賽制',
     'dex.type.all': '全部',
