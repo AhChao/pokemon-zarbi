@@ -1,5 +1,6 @@
 // 聯防小工具：屬性/隊伍綜合評估與 meta 補洞建議。
-import { TYPES, TYPE_META, formatMultiplier, multiplier, singleMultiplier } from '../data/typechart.js';
+import { TYPES, TYPE_META, formatMultiplier, multiplier } from '../data/typechart.js';
+import { monDefenseBuckets, monOffenseBuckets } from '../coverage.js';
 import { t, typeName } from '../i18n.js';
 import { DATA } from '../state.js';
 import { badge, el, esc, setView, typeIcon, uiIcon } from '../ui.js';
@@ -114,8 +115,6 @@ export function buildTeamTool() {
 
   const persist = () => saveTeams(ts);
   const refresh = () => { persist(); renderMons(); renderSummary(); syncTabs(); };
-  // 攻擊倍率含屬修（本系 STAB）：招式屬性與該隻自身屬性相同 → ×1.5（本系剋制可達 3×）。
-  const atkMult = (mon, mv, d) => singleMultiplier(mv, d) * (mon.def.includes(mv) ? 1.5 : 1);
 
   ['A', 'B', 'C'].forEach((k) => {
     const b = el(`<button class="seg ct-teamtab"><span>${k}</span><small></small></button>`);
@@ -133,15 +132,7 @@ export function buildTeamTool() {
     const box = el('<div class="ct-mon__ana"></div>');
     // 防禦：對 18 個攻擊屬性的倍率
     if (mon.def.length) {
-      const quad = [], weak = [], resist = [], qresist = [], immune = [];
-      TYPES.forEach((a) => {
-        const m = multiplier(a, mon.def);
-        if (m === 4) quad.push(a);
-        else if (m === 2) weak.push(a);
-        else if (m === 0) immune.push(a);
-        else if (m === 0.25) qresist.push(a);
-        else if (m === 0.5) resist.push(a);
-      });
+      const { quad, weak, resist, qresist, immune } = monDefenseBuckets(mon.def);
       box.insertAdjacentHTML('beforeend', `<p class="ct-mini">${esc(t('chart.tool.team.defFace'))}</p>`);
       box.insertAdjacentHTML('beforeend',
         ctBucketRow(4, 'chart.tool.team.monQuad', quad, 'danger') +
@@ -155,13 +146,7 @@ export function buildTeamTool() {
     // 攻擊：每招倍率含屬修（本系 STAB ×1.5），每個防守屬性取最佳招式倍率。
     // 本系剋制可達 3×（1.5×2）＝最痛；列出能 3× 的、打不動（被抵抗）、完全沒效。
     if (mon.atk.length) {
-      const strong = [], resisted = [], noeffect = [];
-      TYPES.forEach((d) => {
-        const best = Math.max(...mon.atk.map((mv) => atkMult(mon, mv, d)));
-        if (best === 0) noeffect.push(d);
-        else if (best >= 3) strong.push(d);
-        else if (best < 1) resisted.push(d);
-      });
+      const { strong, resisted, noeffect } = monOffenseBuckets(mon.atk, mon.def);
       box.insertAdjacentHTML('beforeend', `<p class="ct-mini">${esc(t('chart.tool.team.atkFace'))}</p>`);
       const rows = ctBucketRow(3, 'chart.tool.team.monStrong', strong, 'safe') +
         ctBucketRow(0.5, 'chart.tool.team.monNoHit', resisted, 'danger') +
