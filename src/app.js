@@ -201,7 +201,8 @@ function gaEvent(name, params) {
   try { if (typeof window.gtag === 'function') window.gtag('event', name, params || {}); } catch { /* 略過 */ }
 }
 const SCREEN_TITLE = {
-  '/': '首頁', '/setup': '準備', '/quiz': '測驗中', '/result': '成績',
+  '/': '分流首頁', '/q': '快問快答首頁', '/tools': '寶冠軍工具箱',
+  '/setup': '準備', '/quiz': '測驗中', '/result': '成績',
   '/doku-setup': '數獨準備', '/doku': '數獨', '/master': '寶可夢大師', '/who-builder': '我是誰出題',
   '/chart': '相剋表', '/coverage': '聯防小工具', '/speedline': '速度線表', '/dex': '圖鑑', '/history': '歷史',
   '/challenge': '挑戰戰帖',
@@ -1552,7 +1553,7 @@ function viewChart() {
           </div>
         </div>
         <div class="chart-result"></div>
-        <button class="btn btn--ghost" data-nav="home">${esc(t('common.back'))}</button>
+        <button class="btn btn--ghost" data-nav="back">${esc(t('common.back'))}</button>
       </div>
 
       <div class="card">
@@ -1634,7 +1635,7 @@ function viewCoverage() {
   const node = el(`
     <section>
       <div class="card chart-tool"></div>
-      <button class="btn btn--ghost" data-nav="setup">${esc(t('common.back'))}</button>
+      <button class="btn btn--ghost" data-nav="back">${esc(t('common.back'))}</button>
     </section>`);
   node.querySelector('.chart-tool').replaceWith(buildChartTool());
   setView(node);
@@ -2099,7 +2100,7 @@ function viewSpeedChart() {
           <p class="spd-legend__line"><b>《冠軍》與舊世代差異</b>：舊作的「努力值」（單項最多 252、合計 510、每 4 點 +1）與「個體值」，在《冠軍》改成「能力點數」——每隻固定 66 點、單項上限 32，直接加進 Lv50 實數值（每點 +1），個體值一律視為最大（31）。Lv50 下 32 點的效果剛好等於舊作 252 努力值、0 點等於 0 努力，故本表數字兩制相同。</p>
           <p class="spd-legend__line"><b>日文詞源</b>：「最速」速度拉到最高；「準速」準＝次一階，滿投但不靠性格 ×1.1；「無振」振り＝分配點數，無振＝完全不投。</p>
         </div>
-        <button class="btn btn--ghost" data-nav="setup">${esc(t('common.back'))}</button>
+        <button class="btn btn--ghost" data-nav="back">${esc(t('common.back'))}</button>
       </div>
       <button class="spd-top" data-act="spd-top" aria-label="${esc(t('speedline.toTop'))}">${uiIcon('up')}</button>
     </section>`);
@@ -2823,7 +2824,90 @@ function viewDokuSetup() {
 }
 
 // ── 路由 ────────────────────────────────────────────────────────
+// ── 分流外殼：母頁（Zarbi）/ 快問快答 / 寶冠軍工具箱 ───────────────
+// 純加法的最外層分流：母頁兩個入口、工具箱集中既有工具頁的入口（不重做工具本身）。
+// 三個 section 各有首頁；左上品牌名與返回行為依當前 section 決定。
+// 接縫提示：此區塊（常數 + sectionOf + paintBrand + viewMother/viewTools）日後可整段抽成 nav.js。
+const ROUTE_QUIZ_HOME = '#/q';
+const ROUTE_TOOLS_HOME = '#/tools';
+const TOOL_ROUTES = new Set(['#/chart', '#/coverage', '#/speedline', '#/dex']);
+const SECTION_HOME = { mother: '#/', quiz: ROUTE_QUIZ_HOME, tools: ROUTE_TOOLS_HOME };
+const BRAND_NAME = { mother: 'Zarbi', quiz: '寶可夢快問快答', tools: '寶冠軍工具箱' };
+
+function sectionOf(hash) {
+  if (!hash || hash === '#/') return 'mother';
+  if (hash === ROUTE_TOOLS_HOME || TOOL_ROUTES.has(hash)) return 'tools';
+  return 'quiz'; // setup/quiz/result/history/doku*/master/who-builder/#/q
+}
+
+// 工具頁返回「來源」：點進工具前記下當下的 hash（從 setup 進＝回 setup，從工具箱進＝回工具箱）。
+let toolReferrer = ROUTE_TOOLS_HOME;
+
+// 依當前 section 更新左上品牌名（母頁 Zarbi、快問快答內頁、工具箱內頁各自名）。
+function paintBrand() {
+  const nameEl = document.querySelector('.brand__name');
+  if (nameEl) nameEl.textContent = BRAND_NAME[sectionOf(location.hash)];
+}
+
+// Zarbi（未知圖騰 Unown）品牌標誌：沿用 topbar 同款，改用 currentColor 跟主題。
+// maskId 需唯一，避免與 topbar 既有 <mask id="brand-eye"> 撞 id 導致遮罩失效。
+function unownLogo(maskId = 'unown-mother') {
+  return `<svg viewBox="0 0 400 400" aria-hidden="true"><defs><mask id="${maskId}"><rect width="400" height="400" fill="#fff"/><circle cx="200" cy="160" r="50" fill="#000"/></mask></defs><g stroke="currentColor" stroke-width="32" stroke-linecap="round" stroke-linejoin="round" fill="none"><path d="M 50,170 A 150,150 0 0,0 350,170"/><line x1="130" y1="230" x2="105" y2="255"/><line x1="200" y1="240" x2="200" y2="320"/><line x1="270" y1="230" x2="295" y2="255"/><line x1="200" y1="70" x2="200" y2="50"/></g><circle cx="200" cy="160" r="80" fill="currentColor" mask="url(#${maskId})"/><path d="M 175,135 C 175,110 225,110 225,135 C 225,155 200,160 200,175" stroke="currentColor" stroke-width="12" stroke-linecap="round" fill="none"/><circle cx="200" cy="195" r="7" fill="currentColor"/></svg>`;
+}
+
+// 母頁：最外層分流，左工具箱、右快問快答。
+function viewMother() {
+  const node = el(`
+    <section class="mother">
+      <div class="mother-brand">
+        <span class="mother-logo">${unownLogo()}</span>
+        <h1>Zarbi</h1>
+      </div>
+      <p class="lead">選一個入口開始。</p>
+      <div class="mother-grid">
+        <button class="mother-card" data-nav="tools">
+          <span class="mother-card__icon">${uiIcon('search')}</span>
+          <span class="mother-card__title">寶冠軍工具箱</span>
+          <span class="mother-card__desc">相剋表、聯防小工具、速度線表、圖鑑</span>
+        </button>
+        <button class="mother-card" data-nav="q">
+          <span class="mother-card__icon">${uiIcon('who')}</span>
+          <span class="mother-card__title">寶可夢快問快答</span>
+          <span class="mother-card__desc">屬性相剋、速度、我是誰、數獨等隨機測驗</span>
+        </button>
+      </div>
+    </section>`);
+  setView(node);
+}
+
+// 寶冠軍工具箱：集中入口，連到既有工具頁（複製入口即可，不動工具本身）。
+function viewTools() {
+  const tools = [
+    { nav: 'chart', icon: 'shield', title: t('chart.title'), desc: '查任意攻防屬性的傷害倍率，附完整相剋表' },
+    { nav: 'coverage', icon: 'swords', title: t('chart.tool.title'), desc: '把屬性或隊伍當整體，評估攻守覆蓋與漏洞' },
+    { nav: 'speedline', icon: 'bolt', title: t('speedline.title'), desc: '依賽季列出各速度種族值在 50 級的實數值' },
+    { nav: 'dex', icon: 'search', title: t('dex.title'), desc: '依世代／賽制瀏覽寶可夢立繪與名字' },
+  ];
+  const node = el(`
+    <section class="card">
+      <h1>寶冠軍工具箱</h1>
+      <p class="lead">查表與分析小工具，不計分、隨時用。</p>
+      ${tools.map((x) => `
+        <button class="quiz-card" data-nav="${x.nav}">
+          <span class="quiz-card__emoji" aria-hidden="true">${uiIcon(x.icon)}</span>
+          <span class="quiz-card__text">
+            <span class="quiz-card__title">${esc(x.title)}</span>
+            <span class="quiz-card__desc">${esc(x.desc)}</span>
+          </span>
+          <span class="hist-chevron" aria-hidden="true">›</span>
+        </button>`).join('')}
+      <button class="btn btn--ghost" data-nav="home">${esc(t('common.back'))}</button>
+    </section>`);
+  setView(node);
+}
+
 function render() {
+  paintBrand(); // 任何畫面（含 ?c= 戰帖早返回）都先校正左上品牌名
   app.classList.remove('app--wide'); // 預設窄版；需要寬版的頁面（速度線表）自行加回
   const params = new URLSearchParams(location.search);
   const code = params.get('c');
@@ -2839,6 +2923,8 @@ function render() {
   gaPageView();
 
   switch (hash) {
+    case '#/q': return viewHome();
+    case '#/tools': return viewTools();
     case '#/setup': return viewSetup();
     case '#/quiz': return viewQuiz();
     case '#/result': return viewResult();
@@ -2851,7 +2937,7 @@ function render() {
     case '#/doku': return viewDoku();
     case '#/master': return viewMaster();
     case '#/who-builder': return viewWhoBuilder();
-    default: return viewHome();
+    default: return viewMother();
   }
 }
 
@@ -2860,8 +2946,19 @@ document.addEventListener('click', (e) => {
   const nav = e.target.closest('[data-nav]');
   if (!nav) return;
   const dest = nav.dataset.nav;
-  if (dest === 'home') { session = null; setupState = null; dokuState = null; dokuSetup = null; masterState = null; builderState = null; go('#/'); }
-  else go('#/' + dest);
+  if (dest === 'home') {
+    // 回當前 section 首頁；已在 section 首頁則再上一層回母頁。重設進行中狀態。
+    session = null; setupState = null; dokuState = null; dokuSetup = null; masterState = null; builderState = null;
+    const home = SECTION_HOME[sectionOf(location.hash)];
+    go(location.hash === home ? '#/' : home);
+  } else if (dest === 'back') {
+    // 工具頁返回來源（不重設狀態，保留 setup 等進行中內容）。
+    go(toolReferrer || ROUTE_TOOLS_HOME);
+  } else {
+    const target = '#/' + dest;
+    if (TOOL_ROUTES.has(target)) toolReferrer = location.hash || '#/'; // 記下從哪進工具，供「返回」回到來源
+    go(target);
+  }
 });
 
 window.addEventListener('hashchange', render);
