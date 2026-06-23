@@ -1275,7 +1275,7 @@ function viewChart() {
 }
 
 // ── 聯防小工具：攻擊方／防守方（屬性集合綜合）＋我的隊伍（逐隻分析）─
-let chartToolState = { mode: 'atk', picks: [], team: null };
+let chartToolState = { mode: 'team', picks: [], team: null };
 
 // 隊伍存放：A／B／C 三隊，每隊 ≤6 隻，每隻 { def:[≤2], atk:[≤4] }；存 localStorage。
 const TEAM_KEY = 'pq.coverageTeams.v1';
@@ -1311,28 +1311,15 @@ function viewCoverage() {
 }
 
 function buildChartTool() {
+  // 「當攻擊方／當防守方」兩個屬性組模式暫時藏起來（buildSetTool 等邏輯保留，未來要恢復只需把
+  // 三段式切換器與 renderMode 放回來）；目前只留「我的隊伍」。
+  chartToolState.mode = 'team';
   const card = el(`
     <div class="card chart-tool">
       <h2>${esc(t('chart.tool.title'))}</h2>
-      <p class="muted">${esc(t('chart.tool.hint'))}</p>
-      <div class="ct-seg">
-        <button class="seg" data-mode="atk">${esc(t('chart.tool.asAtk'))}</button>
-        <button class="seg" data-mode="def">${esc(t('chart.tool.asDef'))}</button>
-        <button class="seg" data-mode="team">${esc(t('chart.tool.asTeam'))}</button>
-      </div>
       <div class="ct-body"></div>
     </div>`);
-  const segBtns = card.querySelectorAll('.seg');
-  const body = card.querySelector('.ct-body');
-  const syncSeg = () => segBtns.forEach((b) =>
-    b.setAttribute('aria-pressed', String(b.dataset.mode === chartToolState.mode)));
-  const renderMode = () => {
-    syncSeg();
-    body.innerHTML = '';
-    body.appendChild(chartToolState.mode === 'team' ? buildTeamTool() : buildSetTool());
-  };
-  segBtns.forEach((b) => { b.onclick = () => { chartToolState.mode = b.dataset.mode; renderMode(); }; });
-  renderMode();
+  card.querySelector('.ct-body').appendChild(buildTeamTool());
   return card;
 }
 
