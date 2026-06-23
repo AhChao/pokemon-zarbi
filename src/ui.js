@@ -70,7 +70,8 @@ export function badge(typeKey, big = false) {
 }
 
 // 主畫面容器（#app）。在 module 載入時取得；index.html 的 module script 在 body 末端，元素已存在。
-export const appEl = document.getElementById('app');
+// guard typeof document：讓本模組（含 esc 等純 helper）能被 node 測試環境 import 而不炸。
+export const appEl = typeof document !== 'undefined' ? document.getElementById('app') : null;
 
 export function setView(node) {
   appEl.innerHTML = '';

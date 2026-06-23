@@ -71,6 +71,8 @@ export function go(hash) {
   if (location.hash === hash) _renderer();
   else location.hash = hash;
 }
+// 原地重繪當前畫面（hash 不變、需要重建整頁時用，例如測驗換到下一題、大師模式破關畫面）。
+export function rerender() { _renderer(); }
 
 // ── GA 事件 / 虛擬 page_view ──────────────────────────────────────
 // 事件回報（無回報端時靜默略過）。
