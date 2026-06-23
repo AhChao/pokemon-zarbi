@@ -4,16 +4,13 @@ import { generateTypeQuiz, generateSpeedQuiz, generateWhoQuiz, generateWhoQuizFr
 import { generateDoku, cellSatisfied, PICK_RESULT_LIMIT } from './doku.js';
 import { encodeResult, decodeResult, encodeDokuTrap, encodeWhoCustom } from './share.js';
 import { scoreModesFor, charPct, pctOf, fmtPct } from './score.js';
+import { state, DATA, SPD_PERROW_KEY } from './state.js';
 import { getHistory, addHistory } from './history.js';
 import { masterAvailable, getMaster, saveMaster, resetMaster, pushWrong } from './master.js';
 import { t, typeName } from './i18n.js';
 import { el, esc, clamp, typeIcon, uiIcon, pokeballSvg, unownLogo, frameFill, badge, appEl, setView, keepInputVisible, loadWhoImage, prefetchImages } from './ui.js';
 
-// ── 資料（離線產生的靜態檔，啟動時載入一次）──────────────────────
-let pokedex = {};            // Champions 賽季名單（速度測驗 / 我是誰冠軍賽季池）
-let seasonsData = { seasons: {} };
-let nationalDex = {};        // 全國圖鑑分世代（我是誰的世代/地區池，含未進化）
-let usageData = { list: [] }; // 當前 VGC 雙打 meta 使用率 top-50（聯防補洞建議，build:usage 產）
+// 共享狀態與離線資料移到 state.js（state / DATA holder）。
 
 // 分享連結（帶成績碼）：給朋友開同一份題目。
 const shareUrlFor = (code) => `${location.origin}${location.pathname}?c=${code}`;
@@ -89,10 +86,10 @@ function gaPageView(forcePath) {
 
 // ── 賽季 / 測驗組裝 ──────────────────────────────────────────────
 function seasonLabel(key) {
-  return seasonsData.seasons[key]?.label || key;
+  return DATA.seasonsData.seasons[key]?.label || key;
 }
 function seasonKeys() {
-  return Object.keys(seasonsData.seasons);
+  return Object.keys(DATA.seasonsData.seasons);
 }
 function defaultSeason() {
   const keys = seasonKeys();
@@ -100,10 +97,10 @@ function defaultSeason() {
 }
 // 由賽季組出已排序的寶可夢池（穩定排序 → 速度測驗可決定性重現）。
 function seasonPool(key) {
-  const members = seasonsData.seasons[key]?.members || [];
+  const members = DATA.seasonsData.seasons[key]?.members || [];
   return members
-    .filter((k) => pokedex[k])
-    .map((k) => ({ key: k, ...pokedex[k] }))
+    .filter((k) => DATA.pokedex[k])
+    .map((k) => ({ key: k, ...DATA.pokedex[k] }))
     .sort((a, b) => (a.key < b.key ? -1 : a.key > b.key ? 1 : 0));
 }
 
@@ -136,7 +133,7 @@ function genKeyOf(key, entry) {
 
 // 我是誰的可選範圍：全部混合 + 全國圖鑑各世代 + 洗翠地區 + 冠軍最新賽季。
 function whoPoolKeys() {
-  const hasNonMega = (poolKey) => Object.keys(nationalDex).some((k) => !nationalDex[k].mega && genKeyOf(k, nationalDex[k]) === poolKey);
+  const hasNonMega = (poolKey) => Object.keys(DATA.nationalDex).some((k) => !DATA.nationalDex[k].mega && genKeyOf(k, DATA.nationalDex[k]) === poolKey);
   const gens = GENERATIONS.map((g) => g.key).filter(hasNonMega);
   const hisui = hasNonMega('hisui') ? ['hisui'] : [];
   return ['all', ...gens, ...hisui, defaultSeason()];
@@ -145,14 +142,14 @@ function defaultWhoPool() {
   return whoPoolKeys()[0] || defaultSeason();
 }
 // 由池鍵組出穩定排序的寶可夢池：
-//   賽季鍵（冠軍最新賽季）→ Champions 名單 pokedex；'all' / 世代 / 地區鍵 → 全國圖鑑 nationalDex。
+//   賽季鍵（冠軍最新賽季）→ Champions 名單 DATA.pokedex；'all' / 世代 / 地區鍵 → 全國圖鑑 DATA.nationalDex。
 function whoPool(poolKey) {
-  if (seasonsData.seasons[poolKey]) return seasonPool(poolKey);
+  if (DATA.seasonsData.seasons[poolKey]) return seasonPool(poolKey);
   const keys = poolKey === 'all'
-    ? Object.keys(nationalDex)
-    : Object.keys(nationalDex).filter((k) => genKeyOf(k, nationalDex[k]) === poolKey);
+    ? Object.keys(DATA.nationalDex)
+    : Object.keys(DATA.nationalDex).filter((k) => genKeyOf(k, DATA.nationalDex[k]) === poolKey);
   return keys
-    .map((k) => ({ key: k, ...nationalDex[k] }))
+    .map((k) => ({ key: k, ...DATA.nationalDex[k] }))
     .sort((a, b) => (a.key < b.key ? -1 : a.key > b.key ? 1 : 0));
 }
 function poolLabel(poolKey) {
@@ -188,21 +185,7 @@ function quizLabel(mode, season, difficulty = 'all') {
   return t('quiz.type.title');
 }
 
-// ── 狀態 ─────────────────────────────────────────────────────────
-let session = null;        // { quiz, answers, index, locked, challenge, saved, meta }
-let viewingHistory = null; // 目前點開查看的歷史紀錄
-let setupState = null;     // { mode, season, seed } — 準備畫面
-let dokuSetup = null;      // { play, hintMode, seed } — 數獨準備畫面
-let dokuState = null;      // { seed, puzzle, picks:[9], hintMode, play, pits, challenge } — 數獨盤面
-let masterState = null;    // 寶可夢大師模式（本機）的進行狀態
-let builderState = null;   // 我是誰出題 builder 的狀態
 
-// 速度線表「每行最多幾隻」偏好（5 或 10，預設 10），記在 localStorage。
-const SPD_PERROW_KEY = 'poke-quest.spdPerRow';
-function readSpdPerRow() {
-  try { return Number(localStorage.getItem(SPD_PERROW_KEY)) === 5 ? 5 : 10; } catch { return 10; }
-}
-let spdPerRow = readSpdPerRow();
 
 // 解碼任一種分享碼：一般成績碼 / 挖坑碼 / 自訂題庫碼都由 decodeResult 統一處理。
 function decodeShare(code) {
@@ -290,11 +273,11 @@ function viewHome() {
       const mode = b.dataset.pick;
       gaEvent('select_mode', { mode });
       // 數獨走自己的 setup（選玩法：一般練習／挖坑出題；作答方式：提示／無提示）。
-      if (mode === 'doku') { dokuSetup = { play: 'practice', hintMode: 'hint', seed: newSeed() }; go('#/doku-setup'); return; }
+      if (mode === 'doku') { state.dokuSetup = { play: 'practice', hintMode: 'hint', seed: newSeed() }; go('#/doku-setup'); return; }
       let season = '', difficulty = 'all';
       if (mode === 'speed') { season = defaultSeason(); difficulty = DEFAULT_SPEED_DIFFICULTY; }
       else if (mode === 'who') { season = defaultWhoPool(); difficulty = DEFAULT_WHO_DIFFICULTY; }
-      setupState = { mode, season, difficulty, seed: newSeed() };
+      state.setupState = { mode, season, difficulty, seed: newSeed() };
       go('#/setup');
     };
   });
@@ -338,7 +321,7 @@ function viewHome() {
           </span>
           <span class="hist-chevron" aria-hidden="true">›</span>
         </button>`);
-      item.onclick = () => { viewingHistory = rec; go('#/history'); };
+      item.onclick = () => { state.viewingHistory = rec; go('#/history'); };
       histWrap.appendChild(item);
     });
   }
@@ -348,24 +331,24 @@ function viewHome() {
 
 // ── 準備畫面：選賽季 + 顯示本局題目碼（開局前就能分享一起測）──────
 function viewSetup() {
-  if (!setupState) return viewHome();
-  const { mode } = setupState;
+  if (!state.setupState) return viewHome();
+  const { mode } = state.setupState;
   if (mode === 'speed') {
-    if (!setupState.season) setupState.season = defaultSeason();
-    if (!setupState.difficulty) setupState.difficulty = DEFAULT_SPEED_DIFFICULTY;
+    if (!state.setupState.season) state.setupState.season = defaultSeason();
+    if (!state.setupState.difficulty) state.setupState.difficulty = DEFAULT_SPEED_DIFFICULTY;
   } else if (mode === 'who') {
-    if (!setupState.season) setupState.season = defaultWhoPool();
-    if (!setupState.difficulty) setupState.difficulty = DEFAULT_WHO_DIFFICULTY;
+    if (!state.setupState.season) state.setupState.season = defaultWhoPool();
+    if (!state.setupState.difficulty) state.setupState.difficulty = DEFAULT_WHO_DIFFICULTY;
   }
-  if (setupState.count == null) setupState.count = DEFAULT_QUESTION_COUNT;
-  if (setupState.scoreMode == null) setupState.scoreMode = 'count';
-  if (mode !== 'who' && setupState.scoreMode === 'char') setupState.scoreMode = 'count';
-  const season = mode === 'type' ? '' : setupState.season;
-  const difficulty = mode === 'type' ? 'all' : setupState.difficulty;
-  const seed = setupState.seed;
+  if (state.setupState.count == null) state.setupState.count = DEFAULT_QUESTION_COUNT;
+  if (state.setupState.scoreMode == null) state.setupState.scoreMode = 'count';
+  if (mode !== 'who' && state.setupState.scoreMode === 'char') state.setupState.scoreMode = 'count';
+  const season = mode === 'type' ? '' : state.setupState.season;
+  const difficulty = mode === 'type' ? 'all' : state.setupState.difficulty;
+  const seed = state.setupState.seed;
   // 題數（10–20）與計分方式套用所有模式；按字計分（char）僅我是誰可選。
-  const count = setupState.count;
-  const scoreMode = setupState.scoreMode;
+  const count = state.setupState.count;
+  const scoreMode = state.setupState.scoreMode;
   const charScore = mode === 'who' && scoreMode === 'char';
   const score100 = scoreMode === 'normal';
 
@@ -428,7 +411,7 @@ function viewSetup() {
     const pickWrap = node.querySelector('.season-pick');
     seasonKeys().forEach((key) => {
       const b = el(`<button class="season-btn" aria-pressed="${season === key}">${esc(seasonLabel(key))}</button>`);
-      b.onclick = () => { setupState.season = key; viewSetup(); };
+      b.onclick = () => { state.setupState.season = key; viewSetup(); };
       pickWrap.appendChild(b);
     });
 
@@ -436,7 +419,7 @@ function viewSetup() {
     // UI 只給三檔（'all' 為相容舊碼的內部值，不對外呈現）。
     SPEED_DIFFICULTIES.filter((d) => d !== 'all').forEach((d) => {
       const b = el(`<button class="season-btn" aria-pressed="${difficulty === d}">${esc(difficultyLabel(d))}</button>`);
-      b.onclick = () => { setupState.difficulty = d; viewSetup(); };
+      b.onclick = () => { state.setupState.difficulty = d; viewSetup(); };
       diffWrap.appendChild(b);
     });
   }
@@ -445,14 +428,14 @@ function viewSetup() {
     const poolWrap = node.querySelector('.pool-pick');
     whoPoolKeys().forEach((pk) => {
       const b = el(`<button class="season-btn" aria-pressed="${season === pk}">${esc(poolLabel(pk))}</button>`);
-      b.onclick = () => { setupState.season = pk; viewSetup(); };
+      b.onclick = () => { state.setupState.season = pk; viewSetup(); };
       poolWrap.appendChild(b);
     });
 
     const diffWrap = node.querySelector('.difficulty-pick');
     WHO_DIFFICULTIES.forEach((d) => {
       const b = el(`<button class="season-btn" aria-pressed="${difficulty === d}">${esc(difficultyLabel(d))}</button>`);
-      b.onclick = () => { setupState.difficulty = d; viewSetup(); };
+      b.onclick = () => { state.setupState.difficulty = d; viewSetup(); };
       diffWrap.appendChild(b);
     });
 
@@ -463,8 +446,8 @@ function viewSetup() {
         <p class="muted">${esc(t('master.btnNote'))}</p>
         <button class="btn btn--ghost" data-act="builder">${esc(t('builder.btn'))}</button>
       </div>`);
-    masterWrap.querySelector('[data-act="master"]').onclick = () => startMaster(setupState.season, setupState.difficulty);
-    masterWrap.querySelector('[data-act="builder"]').onclick = () => { builderState = null; go('#/who-builder'); };
+    masterWrap.querySelector('[data-act="master"]').onclick = () => startMaster(state.setupState.season, state.setupState.difficulty);
+    masterWrap.querySelector('[data-act="builder"]').onclick = () => { state.builderState = null; go('#/who-builder'); };
     const rerollP = node.querySelector('[data-act="reroll"]')?.closest('p');
     if (rerollP) rerollP.after(masterWrap);
     else node.querySelector('[data-act="start"]').before(masterWrap);
@@ -473,14 +456,14 @@ function viewSetup() {
   const smWrap = node.querySelector('[data-scoremodes]');
   if (smWrap) scoreModesFor(mode).forEach((sm) => {
     const b = el(`<button class="season-btn" aria-pressed="${scoreMode === sm}">${esc(t(`score.${sm}`))}</button>`);
-    b.onclick = () => { setupState.scoreMode = sm; viewSetup(); };
+    b.onclick = () => { state.setupState.scoreMode = sm; viewSetup(); };
     smWrap.appendChild(b);
   });
 
   node.querySelectorAll('[data-count-step]').forEach((b) => {
     b.onclick = () => {
-      const next = clamp(setupState.count + Number(b.dataset.countStep), MIN_QUESTION_COUNT, MAX_QUESTION_COUNT);
-      if (next !== setupState.count) { setupState.count = next; viewSetup(); }
+      const next = clamp(state.setupState.count + Number(b.dataset.countStep), MIN_QUESTION_COUNT, MAX_QUESTION_COUNT);
+      if (next !== state.setupState.count) { state.setupState.count = next; viewSetup(); }
     };
   });
 
@@ -500,7 +483,7 @@ function viewSetup() {
     setTimeout(() => (shareBtn.textContent = t('home.copyShare')), 1500);
   };
 
-  node.querySelector('[data-act="reroll"]').onclick = () => { setupState.seed = newSeed(); viewSetup(); };
+  node.querySelector('[data-act="reroll"]').onclick = () => { state.setupState.seed = newSeed(); viewSetup(); };
 
   setView(node);
 }
@@ -517,7 +500,7 @@ function startQuiz({ mode = 'type', season = '', seed, difficulty = 'all', count
     console.error(e);
     return viewHome();
   }
-  session = { quiz, answers: [], index: 0, locked: false, challenge, saved: false, meta: { mode, season, difficulty, count: total, scoreMode: sm } };
+  state.session = { quiz, answers: [], index: 0, locked: false, challenge, saved: false, meta: { mode, season, difficulty, count: total, scoreMode: sm } };
   // 一開局就背景預載全部題目立繪（我是誰黑影、速度題兩隻），之後換題免等。
   if (mode === 'who') prefetchImages(quiz.questions.map((q) => q.image));
   else if (mode === 'speed') prefetchImages(quiz.questions.flatMap((q) => q.options.map((o) => o.image)));
@@ -540,8 +523,8 @@ function pokeOption(p, i) {
 }
 
 function viewQuiz() {
-  if (!session) return viewHome();
-  const { quiz, index } = session;
+  if (!state.session) return viewHome();
+  const { quiz, index } = state.session;
   const q = quiz.questions[index];
   const pct = Math.round((index / quiz.count) * 100);
 
@@ -549,7 +532,7 @@ function viewQuiz() {
     <section class="card">
       <div class="quiz__meta">
         <span>${esc(t('quiz.progress', { n: index + 1, total: quiz.count }))}</span>
-        <span>${session.challenge ? uiIcon('swords') : ''}</span>
+        <span>${state.session.challenge ? uiIcon('swords') : ''}</span>
       </div>
       <div class="progress"><div class="progress__bar" style="width:${pct}%"></div></div>
       <div data-qbody></div>
@@ -562,7 +545,7 @@ function viewQuiz() {
   const optWrap = node.querySelector('.options');
 
   if (q.mode === 'who') {
-    const hint = whoHint(q, session.meta.difficulty);
+    const hint = whoHint(q, state.session.meta.difficulty);
     body.innerHTML = `
       <div class="who-frame" style="--frame-fill:${frameFill(quiz.seed, index)}">
         <span class="who-corner who-corner--tl">${pokeballSvg()}</span>
@@ -570,7 +553,7 @@ function viewQuiz() {
         <span class="who-corner who-corner--bl">${pokeballSvg()}</span>
         <span class="who-corner who-corner--br">${pokeballSvg()}</span>
         <span class="who-spinner" aria-hidden="true"></span>
-        <div class="who-stage${session.meta.difficulty === 'veryeasy' ? ' revealed' : ''}"><img class="who-img" alt="" /></div>
+        <div class="who-stage${state.session.meta.difficulty === 'veryeasy' ? ' revealed' : ''}"><img class="who-img" alt="" /></div>
       </div>
       ${hint ? `<p class="who-hint">${hint}</p>` : ''}
       <div class="code-box who-input">
@@ -610,7 +593,7 @@ function viewQuiz() {
   }
 
   setView(node);
-  if (q.mode === 'who') loadWhoImage(node, q, whoHint(q, session.meta.difficulty), { focus: true });
+  if (q.mode === 'who') loadWhoImage(node, q, whoHint(q, state.session.meta.difficulty), { focus: true });
 }
 
 // 地區形態的中文前綴：提示時整段直接顯示（露「阿」這種前綴第一個字沒意義）。
@@ -640,30 +623,30 @@ function whoHint(q, difficulty) {
 
 // 我是誰：原地換到下一題（不重建整頁、不捲到頂），避免換題時的大跳動與鍵盤抖動。
 function repaintWho(node) {
-  const { quiz, index } = session;
+  const { quiz, index } = state.session;
   const q = quiz.questions[index];
   const body = node.querySelector('[data-qbody]');
   node.querySelector('.quiz__meta span').textContent = t('quiz.progress', { n: index + 1, total: quiz.count });
   node.querySelector('.progress__bar').style.width = `${Math.round((index / quiz.count) * 100)}%`;
   const frame = body.querySelector('.who-frame');
   if (frame) frame.style.setProperty('--frame-fill', frameFill(quiz.seed, index));
-  body.querySelector('.who-stage')?.classList.toggle('revealed', session.meta.difficulty === 'veryeasy');
+  body.querySelector('.who-stage')?.classList.toggle('revealed', state.session.meta.difficulty === 'veryeasy');
   body.querySelector('.who-answer')?.remove();
   body.querySelector('[data-who-input]').value = '';
   const submitBtn = body.querySelector('[data-act="who-submit"]');
   if (submitBtn) submitBtn.disabled = false;
   const fb = node.querySelector('.feedback'); fb.textContent = ''; fb.className = 'feedback';
   const next = node.querySelector('[data-act="next"]'); next.hidden = true; next.onclick = null;
-  loadWhoImage(node, q, whoHint(q, session.meta.difficulty), { focus: true }); // 等新立繪載好才解鎖、聚焦
+  loadWhoImage(node, q, whoHint(q, state.session.meta.difficulty), { focus: true }); // 等新立繪載好才解鎖、聚焦
 }
 
 // 我是誰作答：比對輸入、揭曉黑影與正解名、鎖定輸入。
 function answerWho(typed, node) {
-  if (session.locked) return;
-  session.locked = true;
-  const q = session.quiz.questions[session.index];
-  session.answers[session.index] = typed;
-  const right = whoAnswerCorrect(q, typed, session.meta.difficulty);
+  if (state.session.locked) return;
+  state.session.locked = true;
+  const q = state.session.quiz.questions[state.session.index];
+  state.session.answers[state.session.index] = typed;
+  const right = whoAnswerCorrect(q, typed, state.session.meta.difficulty);
 
   node.querySelector('.who-stage')?.classList.add('revealed');
   node.querySelectorAll('.who-input input, .who-input button').forEach((e) => { e.disabled = true; });
@@ -675,14 +658,14 @@ function answerWho(typed, node) {
   fb.textContent = right ? t('who.correct', { name: q.nameZh }) : t('who.wrong', { name: q.nameZh });
   fb.classList.add(right ? 'feedback--good' : 'feedback--bad');
 
-  const last = session.index === session.quiz.count - 1;
+  const last = state.session.index === state.session.quiz.count - 1;
   const next = node.querySelector('[data-act="next"]');
   next.textContent = last ? t('quiz.finish') : t('quiz.next');
   next.hidden = false;
   next.onclick = () => {
     if (last) { go('#/result'); return; }
-    session.index++;
-    session.locked = false;
+    state.session.index++;
+    state.session.locked = false;
     repaintWho(node); // 原地換題，不走 render() → 不捲到頂、不重建 DOM
   };
   next.focus();
@@ -713,7 +696,7 @@ function startMaster(poolKey, difficulty) {
   // 尚未答對者洗牌成佇列（本機隨機即可）。
   const queue = all.filter((p) => !doneSet.has(p.key)).map((p) => p.key);
   for (let i = queue.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [queue[i], queue[j]] = [queue[j], queue[i]]; }
-  masterState = {
+  state.masterState = {
     poolKey, difficulty, byKey, rec, available, queue,
     total: all.length, doneCount: rec.done.length, current: null, locked: false,
   };
@@ -722,19 +705,19 @@ function startMaster(poolKey, difficulty) {
 }
 
 function nextMaster() {
-  if (!masterState) return;
-  masterState.locked = false;
-  const key = masterState.queue.shift();
-  if (!key) { masterState.current = null; return; }
-  const p = masterState.byKey.get(key);
-  masterState.current = { key: p.key, mode: 'who', nameZh: p.nameZh, nameEn: p.nameEn, image: p.image, mega: !!p.mega, dex: p.dex };
+  if (!state.masterState) return;
+  state.masterState.locked = false;
+  const key = state.masterState.queue.shift();
+  if (!key) { state.masterState.current = null; return; }
+  const p = state.masterState.byKey.get(key);
+  state.masterState.current = { key: p.key, mode: 'who', nameZh: p.nameZh, nameEn: p.nameEn, image: p.image, mega: !!p.mega, dex: p.dex };
   // 背景預載接下來幾隻的立繪（池可能很大 → 用滑動視窗，不一次全抓）。
-  prefetchImages([p.image, ...masterState.queue.slice(0, 10).map((k) => masterState.byKey.get(k)?.image)].filter(Boolean));
+  prefetchImages([p.image, ...state.masterState.queue.slice(0, 10).map((k) => state.masterState.byKey.get(k)?.image)].filter(Boolean));
 }
 
 function viewMaster() {
-  if (!masterState) return viewHome();
-  const ms = masterState;
+  if (!state.masterState) return viewHome();
+  const ms = state.masterState;
   if (!ms.current) return viewMasterDone();
   const q = ms.current;
   const hint = whoHint(q, ms.difficulty);
@@ -779,7 +762,7 @@ function viewMaster() {
 
 // 寶可夢大師：原地換到下一隻（同我是誰，不重建整頁、不捲到頂）。
 function repaintMaster(node) {
-  const ms = masterState;
+  const ms = state.masterState;
   const q = ms.current;
   const body = node.querySelector('[data-qbody]');
   const metaSpans = node.querySelectorAll('.quiz__meta span');
@@ -799,7 +782,7 @@ function repaintMaster(node) {
 }
 
 function answerMaster(typed, node) {
-  const ms = masterState;
+  const ms = state.masterState;
   if (ms.locked) return;
   ms.locked = true;
   const q = ms.current;
@@ -832,7 +815,7 @@ function answerMaster(typed, node) {
   const next = node.querySelector('[data-act="next"]');
   next.textContent = (right && ms.queue.length === 0) ? t('quiz.finish') : t('quiz.next');
   next.hidden = false;
-  next.onclick = () => { nextMaster(); if (!masterState.current) render(); else repaintMaster(node); };
+  next.onclick = () => { nextMaster(); if (!state.masterState.current) render(); else repaintMaster(node); };
   next.focus();
 }
 
@@ -883,7 +866,7 @@ function computeMasterFacts(ms) {
 }
 
 function viewMasterDone() {
-  const ms = masterState;
+  const ms = state.masterState;
   const f = computeMasterFacts(ms);
   if (!ms.completeTracked) {
     ms.completeTracked = true;
@@ -949,15 +932,15 @@ const WHO_CUSTOM_MIN = 5;
 const WHO_CUSTOM_MAX = 20;
 // 出題瀏覽用的圖鑑：全國圖鑑非 Mega（剪影題以本體為主），依圖鑑編號排序。
 function builderDexEntries() {
-  return Object.entries(nationalDex)
+  return Object.entries(DATA.nationalDex)
     .filter(([, v]) => !v.mega)
     .map(([key, v]) => ({ key, ...v }))
     .sort((a, b) => (a.ndex || 0) - (b.ndex || 0) || (a.key < b.key ? -1 : 1));
 }
 
 function viewWhoBuilder() {
-  if (!builderState) builderState = { selected: [], difficulty: DEFAULT_WHO_DIFFICULTY, scoreMode: 'count', filter: '', dexOpen: true, setOpen: true };
-  const bs = builderState;
+  if (!state.builderState) state.builderState = { selected: [], difficulty: DEFAULT_WHO_DIFFICULTY, scoreMode: 'count', filter: '', dexOpen: true, setOpen: true };
+  const bs = state.builderState;
   const allEntries = builderDexEntries();
   const byKey = new Map(allEntries.map((e) => [e.key, e]));
 
@@ -1112,21 +1095,21 @@ function viewWhoBuilder() {
 
 // 自訂題庫挑戰：用代碼帶的清單組一份我是誰直接開始。
 function startCustomWho(decoded) {
-  const pool = decoded.keys.map((k) => (nationalDex[k] ? { key: k, ...nationalDex[k] } : null)).filter(Boolean);
+  const pool = decoded.keys.map((k) => (DATA.nationalDex[k] ? { key: k, ...DATA.nationalDex[k] } : null)).filter(Boolean);
   if (!pool.length) return viewHome();
   let quiz;
   try { quiz = generateWhoQuizFromKeys(decoded.seed, pool, decoded.difficulty); }
   catch (e) { console.error(e); return viewHome(); }
-  session = { quiz, answers: [], index: 0, locked: false, challenge: null, saved: false, meta: { mode: 'who', season: '', difficulty: decoded.difficulty, count: quiz.count, scoreMode: decoded.scoreMode } };
+  state.session = { quiz, answers: [], index: 0, locked: false, challenge: null, saved: false, meta: { mode: 'who', season: '', difficulty: decoded.difficulty, count: quiz.count, scoreMode: decoded.scoreMode } };
   prefetchImages(quiz.questions.map((q) => q.image)); // 背景預載自訂題庫立繪
   go('#/quiz');
 }
 
 function answer(choice, node) {
-  if (session.locked) return;
-  session.locked = true;
-  const q = session.quiz.questions[session.index];
-  session.answers[session.index] = choice;
+  if (state.session.locked) return;
+  state.session.locked = true;
+  const q = state.session.quiz.questions[state.session.index];
+  state.session.answers[state.session.index] = choice;
 
   node.querySelectorAll('.option').forEach((b, i) => {
     b.disabled = true;
@@ -1145,14 +1128,14 @@ function answer(choice, node) {
   }
   fb.classList.add(right ? 'feedback--good' : 'feedback--bad');
 
-  const last = session.index === session.quiz.count - 1;
+  const last = state.session.index === state.session.quiz.count - 1;
   const next = node.querySelector('[data-act="next"]');
   next.textContent = last ? t('quiz.finish') : t('quiz.next');
   next.hidden = false;
   next.onclick = () => {
     if (last) { go('#/result'); return; }
-    session.index++;
-    session.locked = false;
+    state.session.index++;
+    state.session.locked = false;
     render();
   };
   next.focus();
@@ -1288,11 +1271,11 @@ function buildResultSection(quiz, answers, opts = {}) {
 
 // ── 結果畫面（剛完成的測驗）────────────────────────────────────
 function viewResult() {
-  if (!session || session.answers.length < session.quiz.count) return viewHome();
-  const { quiz, answers, challenge, meta } = session;
+  if (!state.session || state.session.answers.length < state.session.quiz.count) return viewHome();
+  const { quiz, answers, challenge, meta } = state.session;
   const { node, pct, correct, total, scoreMode, charScore, code } = buildResultSection(quiz, answers, { challenge, meta });
 
-  if (!session.saved) {
+  if (!state.session.saved) {
     addHistory({
       mode: meta.mode, season: meta.season, difficulty: meta.difficulty || 'all', seed: quiz.seed,
       total, scoreMode, score: charScore ? pct : correct, answers: answers.slice(), code, ts: Date.now(),
@@ -1301,7 +1284,7 @@ function viewResult() {
       mode: meta.mode, season: meta.season, difficulty: meta.difficulty || 'all',
       score_mode: scoreMode, correct, total, percent: Math.round(pct), is_challenge: !!challenge,
     });
-    session.saved = true;
+    state.session.saved = true;
   }
 
   setView(node);
@@ -1309,7 +1292,7 @@ function viewResult() {
 
 // ── 歷史詳情畫面 ───────────────────────────────────────────────
 function viewHistoryDetail() {
-  const rec = viewingHistory;
+  const rec = state.viewingHistory;
   if (!rec) return viewHome();
   const meta = { mode: rec.mode || 'type', season: rec.season || '', difficulty: rec.difficulty || 'all', scoreMode: rec.scoreMode || 'count' };
   let quiz;
@@ -1349,7 +1332,7 @@ function viewChallenge(decoded) {
       </section>`);
     node.querySelector('[data-act="accept"]').onclick = () => {
       gaEvent('challenge_accept', { kind: 'doku-trap' });
-      dokuState = { seed: decoded.seed, hintMode: decoded.hintMode || 'hint', play: 'trap-solve', pits: decoded.pits, challenge: null };
+      state.dokuState = { seed: decoded.seed, hintMode: decoded.hintMode || 'hint', play: 'trap-solve', pits: decoded.pits, challenge: null };
       go('#/doku');
     };
     return setView(node);
@@ -1367,7 +1350,7 @@ function viewChallenge(decoded) {
       </section>`);
     node.querySelector('[data-act="accept"]').onclick = () => {
       gaEvent('challenge_accept', { kind: coplayD ? 'doku-coplay' : 'doku' });
-      dokuState = { seed: decoded.seed, challenge: coplayD ? null : { score: decoded.score } };
+      state.dokuState = { seed: decoded.seed, challenge: coplayD ? null : { score: decoded.score } };
       go('#/doku');
     };
     return setView(node);
@@ -1403,7 +1386,6 @@ function viewChallenge(decoded) {
 }
 
 // ── 相剋查詢畫面 ───────────────────────────────────────────────
-let chartState = { atk: 'fire', def: ['grass'] };
 
 function viewChart() {
   const node = el(`
@@ -1436,33 +1418,33 @@ function viewChart() {
   const resultBox = node.querySelector('.chart-result');
 
   const renderResult = () => {
-    const m = multiplier(chartState.atk, chartState.def);
-    const atkN = typeName(chartState.atk);
-    const defN = chartState.def.map(typeName).join(' / ');
+    const m = multiplier(state.chartState.atk, state.chartState.def);
+    const atkN = typeName(state.chartState.atk);
+    const defN = state.chartState.def.map(typeName).join(' / ');
     resultBox.innerHTML = `${esc(formatMultiplier(m))}<small>${esc(atkN)} → ${esc(defN)}</small>`;
   };
 
   TYPES.forEach((tk) => {
     const m = TYPE_META[tk];
-    const a = el(`<button class="type-pick" style="background:${m.color}" aria-pressed="${chartState.atk === tk}">${typeIcon(tk)}${esc(typeName(tk))}</button>`);
+    const a = el(`<button class="type-pick" style="background:${m.color}" aria-pressed="${state.chartState.atk === tk}">${typeIcon(tk)}${esc(typeName(tk))}</button>`);
     a.onclick = () => {
-      chartState.atk = tk;
+      state.chartState.atk = tk;
       atkGrid.querySelectorAll('.type-pick').forEach((b, i) =>
         b.setAttribute('aria-pressed', String(TYPES[i] === tk)));
       renderResult();
     };
     atkGrid.appendChild(a);
 
-    const d = el(`<button class="type-pick" style="background:${m.color}" aria-pressed="${chartState.def.includes(tk)}">${typeIcon(tk)}${esc(typeName(tk))}</button>`);
+    const d = el(`<button class="type-pick" style="background:${m.color}" aria-pressed="${state.chartState.def.includes(tk)}">${typeIcon(tk)}${esc(typeName(tk))}</button>`);
     d.onclick = () => {
-      const has = chartState.def.includes(tk);
+      const has = state.chartState.def.includes(tk);
       if (has) {
-        if (chartState.def.length > 1) chartState.def = chartState.def.filter((x) => x !== tk);
+        if (state.chartState.def.length > 1) state.chartState.def = state.chartState.def.filter((x) => x !== tk);
       } else {
-        chartState.def = [...chartState.def, tk].slice(-2);
+        state.chartState.def = [...state.chartState.def, tk].slice(-2);
       }
       defGrid.querySelectorAll('.type-pick').forEach((b, i) =>
-        b.setAttribute('aria-pressed', String(chartState.def.includes(TYPES[i]))));
+        b.setAttribute('aria-pressed', String(state.chartState.def.includes(TYPES[i]))));
       renderResult();
     };
     defGrid.appendChild(d);
@@ -1855,7 +1837,7 @@ function buildTeamTool() {
 // 防守補＝候選屬性抵抗（≤0.5×）某防守洞；攻擊補＝候選某招（含本系 STAB）打某攻擊洞 ≥2×。
 // 綜合分 = 防守補數 + 攻擊補數，兩邊都補再 ×1.5（優先度更高）。取 top 5。
 function buildUsageRecommender(defHoles, offHoles) {
-  const list = usageData && usageData.list;
+  const list = DATA.usageData && DATA.usageData.list;
   if (!list || !list.length) return null;
   if (!defHoles.length && !offHoles.length) return null;
 
@@ -1886,7 +1868,7 @@ function buildUsageRecommender(defHoles, offHoles) {
   </div>`);
   scored.slice(0, 5).forEach((s, i) => {
     const c = s.c;
-    const img = (pokedex[c.key] && pokedex[c.key].image) || '';
+    const img = (DATA.pokedex[c.key] && DATA.pokedex[c.key].image) || '';
     const dualTag = s.dual ? `<span class="ct-rec__dual">${esc(t('chart.tool.team.recDual'))}</span>` : '';
     const row = el(`<div class="ct-rec__row">
       <div class="ct-rec__head">
@@ -1937,10 +1919,10 @@ function buildChartTable() {
 function viewSpeedChart() {
   appEl.classList.add('app--wide'); // 大螢幕放寬版面，寬表格更好讀
   // 入口只在「誰比較快」的 setup；直接帶網址進來時補一個預設賽季狀態。
-  if (!setupState || setupState.mode !== 'speed') {
-    setupState = { mode: 'speed', season: defaultSeason(), difficulty: DEFAULT_SPEED_DIFFICULTY, seed: newSeed() };
+  if (!state.setupState || state.setupState.mode !== 'speed') {
+    state.setupState = { mode: 'speed', season: defaultSeason(), difficulty: DEFAULT_SPEED_DIFFICULTY, seed: newSeed() };
   }
-  const season = setupState.season;
+  const season = state.setupState.season;
 
   const node = el(`
     <section>
@@ -1957,8 +1939,8 @@ function viewSpeedChart() {
           <p class="feedback feedback--bad spd-search__msg" data-spd-msg hidden></p>
           <div class="spd-perrow">
             <span class="spd-perrow-label">${esc(t('speedline.perRow'))}</span>
-            <button class="season-btn" data-perrow="5" aria-pressed="${spdPerRow === 5}">${esc(t('speedline.perRowUnit', { n: 5 }))}</button>
-            <button class="season-btn" data-perrow="10" aria-pressed="${spdPerRow === 10}">${esc(t('speedline.perRowUnit', { n: 10 }))}</button>
+            <button class="season-btn" data-perrow="5" aria-pressed="${state.spdPerRow === 5}">${esc(t('speedline.perRowUnit', { n: 5 }))}</button>
+            <button class="season-btn" data-perrow="10" aria-pressed="${state.spdPerRow === 10}">${esc(t('speedline.perRowUnit', { n: 10 }))}</button>
           </div>
         </div>
         <div class="table-wrap" data-table></div>
@@ -1976,16 +1958,16 @@ function viewSpeedChart() {
   const seasonWrap = node.querySelector('[data-seasons]');
   seasonKeys().forEach((key) => {
     const b = el(`<button class="season-btn" aria-pressed="${season === key}">${esc(seasonLabel(key))}</button>`);
-    b.onclick = () => { setupState.season = key; viewSpeedChart(); };
+    b.onclick = () => { state.setupState.season = key; viewSpeedChart(); };
     seasonWrap.appendChild(b);
   });
 
-  node.querySelector('[data-table]').appendChild(buildSpeedTable(season, spdPerRow));
+  node.querySelector('[data-table]').appendChild(buildSpeedTable(season, state.spdPerRow));
 
   node.querySelectorAll('[data-perrow]').forEach((b) => {
     b.onclick = () => {
-      spdPerRow = Number(b.dataset.perrow) === 5 ? 5 : 10;
-      try { localStorage.setItem(SPD_PERROW_KEY, String(spdPerRow)); } catch { /* 存不了就只在本次有效 */ }
+      state.spdPerRow = Number(b.dataset.perrow) === 5 ? 5 : 10;
+      try { localStorage.setItem(SPD_PERROW_KEY, String(state.spdPerRow)); } catch { /* 存不了就只在本次有效 */ }
       viewSpeedChart();
     };
   });
@@ -2163,18 +2145,17 @@ function buildSpeedTable(season, perRow = 10) {
 }
 
 // ── 圖鑑（題庫預覽：縮圖牆 + 類別/屬性過濾）─────────────────────
-let dexState = { group: 'gen', poolKey: 'g1', type: '', q: '' };
 function dexCategories() {
-  return dexState.group === 'gen' ? [...GENERATIONS.map((g) => g.key), 'hisui'] : seasonKeys();
+  return state.dexState.group === 'gen' ? [...GENERATIONS.map((g) => g.key), 'hisui'] : seasonKeys();
 }
 function dexCatLabel(key) {
-  return dexState.group === 'gen' ? poolLabel(key) : seasonLabel(key);
+  return state.dexState.group === 'gen' ? poolLabel(key) : seasonLabel(key);
 }
 
 function viewDex() {
-  if (!dexCategories().includes(dexState.poolKey)) dexState.poolKey = dexCategories()[0];
-  // 世代/地區 → nationalDex；賽制 → 賽季名單。兩者皆走 whoPool。依圖鑑編號排序。
-  const pool = whoPool(dexState.poolKey)
+  if (!dexCategories().includes(state.dexState.poolKey)) state.dexState.poolKey = dexCategories()[0];
+  // 世代/地區 → DATA.nationalDex；賽制 → 賽季名單。兩者皆走 whoPool。依圖鑑編號排序。
+  const pool = whoPool(state.dexState.poolKey)
     .slice()
     .sort((a, b) => (a.ndex || a.dex || 0) - (b.ndex || b.dex || 0) || (a.key < b.key ? -1 : 1));
 
@@ -2183,8 +2164,8 @@ function viewDex() {
       <div class="card">
         <h2>${esc(t('dex.title'))}</h2>
         <div class="dex-groups">
-          <button class="seg" data-group="gen" aria-pressed="${dexState.group === 'gen'}">${esc(t('dex.group.gen'))}</button>
-          <button class="seg" data-group="season" aria-pressed="${dexState.group === 'season'}">${esc(t('dex.group.season'))}</button>
+          <button class="seg" data-group="gen" aria-pressed="${state.dexState.group === 'gen'}">${esc(t('dex.group.gen'))}</button>
+          <button class="seg" data-group="season" aria-pressed="${state.dexState.group === 'season'}">${esc(t('dex.group.season'))}</button>
         </div>
         <div class="tab-scroll" data-cats></div>
         <div class="dex-types" data-types></div>
@@ -2202,19 +2183,19 @@ function viewDex() {
 
   node.querySelectorAll('[data-group]').forEach((b) => {
     b.onclick = () => {
-      if (dexState.group === b.dataset.group) return;
-      dexState.group = b.dataset.group;
-      dexState.poolKey = dexCategories()[0];
-      dexState.type = '';
-      dexState.q = '';
+      if (state.dexState.group === b.dataset.group) return;
+      state.dexState.group = b.dataset.group;
+      state.dexState.poolKey = dexCategories()[0];
+      state.dexState.type = '';
+      state.dexState.q = '';
       viewDex();
     };
   });
 
   const catWrap = node.querySelector('[data-cats]');
   dexCategories().forEach((key) => {
-    const b = el(`<button class="season-btn" aria-pressed="${dexState.poolKey === key}">${esc(dexCatLabel(key))}</button>`);
-    b.onclick = () => { dexState.poolKey = key; dexState.type = ''; dexState.q = ''; viewDex(); };
+    const b = el(`<button class="season-btn" aria-pressed="${state.dexState.poolKey === key}">${esc(dexCatLabel(key))}</button>`);
+    b.onclick = () => { state.dexState.poolKey = key; state.dexState.type = ''; state.dexState.q = ''; viewDex(); };
     catWrap.appendChild(b);
   });
 
@@ -2257,8 +2238,8 @@ function viewDex() {
   const cells = [...grid.querySelectorAll('.dex-cell')];
   const chips = [...typeWrap.querySelectorAll('.dex-type-chip')];
   const applyFilters = () => {
-    const tk = dexState.type;
-    const qa = Array.from(normalizeName(dexState.q || ''));
+    const tk = state.dexState.type;
+    const qa = Array.from(normalizeName(state.dexState.q || ''));
     const subseq = (n) => {
       let i = 0;
       for (const ch of Array.from(n)) { if (ch === qa[i] && ++i === qa.length) return true; }
@@ -2275,11 +2256,11 @@ function viewDex() {
     });
     countEl.textContent = t('dex.count', { n: shown });
   };
-  chips.forEach((ch) => { ch.onclick = () => { dexState.type = ch.dataset.type; applyFilters(); }; });
+  chips.forEach((ch) => { ch.onclick = () => { state.dexState.type = ch.dataset.type; applyFilters(); }; });
 
   const searchInput = node.querySelector('[data-dex-search]');
-  searchInput.value = dexState.q || '';
-  searchInput.addEventListener('input', () => { dexState.q = searchInput.value; applyFilters(); });
+  searchInput.value = state.dexState.q || '';
+  searchInput.addEventListener('input', () => { state.dexState.q = searchInput.value; applyFilters(); });
 
   applyFilters();
 
@@ -2298,17 +2279,17 @@ function condText(cat) {
 }
 
 function viewDoku() {
-  if (!dokuState || !dokuState.seed) dokuState = { seed: newSeed(), hintMode: 'hint', play: 'practice', pits: null, challenge: null };
+  if (!state.dokuState || !state.dokuState.seed) state.dokuState = { seed: newSeed(), hintMode: 'hint', play: 'practice', pits: null, challenge: null };
   // 同 seed → 同盤；換 seed 才重算並清空作答。
-  if (!dokuState.puzzle || dokuState.puzzle.seed !== String(dokuState.seed)) {
-    dokuState.puzzle = generateDoku(dokuState.seed, nationalDex);
-    dokuState.picks = Array(9).fill(null);
-    dokuState.revealed = false;
+  if (!state.dokuState.puzzle || state.dokuState.puzzle.seed !== String(state.dokuState.seed)) {
+    state.dokuState.puzzle = generateDoku(state.dokuState.seed, DATA.nationalDex);
+    state.dokuState.picks = Array(9).fill(null);
+    state.dokuState.revealed = false;
   }
-  const pz = dokuState.puzzle;
-  const hintMode = dokuState.hintMode || 'hint';
-  const isAuthor = dokuState.play === 'trap-author';
-  const isSolve = dokuState.play === 'trap-solve';
+  const pz = state.dokuState.puzzle;
+  const hintMode = state.dokuState.hintMode || 'hint';
+  const isAuthor = state.dokuState.play === 'trap-author';
+  const isSolve = state.dokuState.play === 'trap-solve';
   const introText = isAuthor ? t('doku.trap.authoringHint') : isSolve ? t('doku.trap.challengeBody') : t('doku.intro');
 
   const node = el(`
@@ -2346,15 +2327,15 @@ function viewDoku() {
 
   // 開啟作答：提示＝搜尋清單、無提示＝純打字；挖坑挑戰要排除該格的「坑」。
   const fillCell = (idx) => {
-    const pit = isSolve && dokuState.pits ? dokuState.pits[idx] : null;
+    const pit = isSolve && state.dokuState.pits ? state.dokuState.pits[idx] : null;
     if (hintMode === 'nohint') openDokuTextInput(idx, rebuild, pit);
     else openDokuPicker(idx, rebuild, pit);
   };
 
   function buildDokuCell(idx) {
-    const pick = dokuState.picks[idx];
+    const pick = state.dokuState.picks[idx];
     // #3：揭露參考答案放在獨立小條，不蓋掉使用者原本填的（只在一般練習、答錯或空白時顯示）。
-    const ref = dokuState.revealed && (!pick || !pick.correct) ? pz.cells[idx] : null;
+    const ref = state.dokuState.revealed && (!pick || !pick.correct) ? pz.cells[idx] : null;
     const refStrip = ref ? `
       <span class="doku-ref-ans">
         <span class="doku-ref-label">${esc(t('doku.refLabel'))}</span>
@@ -2390,7 +2371,7 @@ function viewDoku() {
   }
 
   function updateStatus() {
-    const picks = dokuState.picks;
+    const picks = state.dokuState.picks;
     const filled = picks.filter(Boolean).length;
     const ok = picks.filter((p) => p && p.correct).length;
     const allFilled = picks.every(Boolean);
@@ -2404,7 +2385,7 @@ function viewDoku() {
       revealBtn.hidden = false;       // 出題時隨機補滿可重複按（每次重抽不同的坑）
       revealBtn.textContent = t('doku.trap.fillReveal');
       if (allValid) {
-        if (!dokuState.trapTracked) { dokuState.trapTracked = true; gaEvent('trap_create', { hint_mode: hintMode }); }
+        if (!state.dokuState.trapTracked) { state.dokuState.trapTracked = true; gaEvent('trap_create', { hint_mode: hintMode }); }
         // 坑＝每格填的那隻；全填滿且皆有效才產生挖坑代碼。
         const code = encodeDokuTrap({ seed: pz.seed, pits: picks.map((p) => p.key), hintMode });
         shareWrap.querySelector('[data-share-label]').textContent = t('doku.trap.yourCode');
@@ -2417,7 +2398,7 @@ function viewDoku() {
     }
 
     if (isSolve) {
-      if (allFilled && !dokuState.solveTracked) { dokuState.solveTracked = true; gaEvent('trap_solve_finish', { ok }); }
+      if (allFilled && !state.dokuState.solveTracked) { state.dokuState.solveTracked = true; gaEvent('trap_solve_finish', { ok }); }
       scoreEl.textContent = allFilled ? t('doku.trap.done', { ok }) : t('doku.trap.progress', { n: filled, ok });
       scoreEl.className = 'doku-score' + (allFilled ? ' doku-score--done' : '');
       revealBtn.hidden = true;       // 避坑挑戰不提供揭露（會破壞挑戰）
@@ -2428,10 +2409,10 @@ function viewDoku() {
     }
 
     // 一般練習
-    if (allFilled && !dokuState.tracked) { dokuState.tracked = true; gaEvent('doku_complete', { ok, hint_mode: hintMode }); }
+    if (allFilled && !state.dokuState.tracked) { state.dokuState.tracked = true; gaEvent('doku_complete', { ok, hint_mode: hintMode }); }
     scoreEl.textContent = allFilled ? t('doku.done', { ok }) : t('doku.progress', { n: filled, ok });
     scoreEl.className = 'doku-score' + (allFilled ? ' doku-score--done' : '');
-    revealBtn.hidden = dokuState.revealed || (allFilled && ok === 9);
+    revealBtn.hidden = state.dokuState.revealed || (allFilled && ok === 9);
     revealBtn.textContent = t('doku.reveal');
     trapNeed.hidden = true;
 
@@ -2441,8 +2422,8 @@ function viewDoku() {
     node.querySelector('[data-share-code]').textContent = code;
     shareWrap.hidden = false;
 
-    if (allFilled && dokuState.challenge) {
-      const them = dokuState.challenge.score;
+    if (allFilled && state.dokuState.challenge) {
+      const them = state.dokuState.challenge.score;
       const msg = ok > them ? t('challenge.beat', { you: ok, them })
         : ok === them ? t('challenge.tie', { you: ok })
           : t('challenge.lose', { you: ok, them });
@@ -2457,8 +2438,8 @@ function viewDoku() {
     if (isAuthor) {
       // 隨機補滿／重抽：手動填的格子保留，空格與先前「隨機填」的格子重抽新的合法解。
       // 可重複按 → 每次重新洗出不同的坑（手動指定的不動）。
-      const used = new Set(dokuState.picks.filter((p) => p && !p.byReveal).map((p) => p.ndex));
-      dokuState.picks = dokuState.picks.map((p, i) => {
+      const used = new Set(state.dokuState.picks.filter((p) => p && !p.byReveal).map((p) => p.ndex));
+      state.dokuState.picks = state.dokuState.picks.map((p, i) => {
         if (p && !p.byReveal) return p;
         const cands = cellEntries(i).filter((e) => !used.has(e.ndex));
         const pool = cands.length ? cands : cellEntries(i);
@@ -2467,18 +2448,18 @@ function viewDoku() {
         return { key: pick.key, ndex: pick.ndex, name: pick.nameZh, image: pick.image, mega: !!pick.mega, correct: true, byReveal: true };
       });
     } else {
-      dokuState.revealed = true;     // 一般練習：顯示參考答案（不蓋掉原本填的）
+      state.dokuState.revealed = true;     // 一般練習：顯示參考答案（不蓋掉原本填的）
     }
     rebuild();
   };
   node.querySelector('[data-act="newpuzzle"]').onclick = () => {
-    dokuState = { seed: newSeed(), hintMode, play: isAuthor ? 'trap-author' : 'practice', pits: null, challenge: null };
+    state.dokuState = { seed: newSeed(), hintMode, play: isAuthor ? 'trap-author' : 'practice', pits: null, challenge: null };
     viewDoku();
   };
 
   const copyBtn = node.querySelector('[data-act="copy-doku"]');
   copyBtn.onclick = async () => {
-    gaEvent('share_code', { kind: dokuState.play === 'trap-author' ? 'doku-trap' : 'doku' });
+    gaEvent('share_code', { kind: state.dokuState.play === 'trap-author' ? 'doku-trap' : 'doku' });
     const input = node.querySelector('[data-share-url]');
     try { await navigator.clipboard.writeText(input.value); }
     catch { input.select(); document.execCommand('copy'); }
@@ -2494,12 +2475,12 @@ function viewDoku() {
 // 重用 normalizeName 比對、dex 立繪渲染；互動照 searchable-select 合約（自動聚焦／↑↓／Enter／Esc），
 // 並套 ime-safe 合約（中文組字中的 Enter 屬於 IME，不誤送）。
 function openDokuPicker(idx, onPicked, pit = null) {
-  if (!dokuState || !dokuState.puzzle) return;
-  const pz = dokuState.puzzle;
+  if (!state.dokuState || !state.dokuState.puzzle) return;
+  const pz = state.dokuState.puzzle;
   const rowCat = pz.rows[Math.floor(idx / 3)], colCat = pz.cols[idx % 3];
-  const usedNdex = new Set(dokuState.picks.filter(Boolean).map((p) => p.ndex));
+  const usedNdex = new Set(state.dokuState.picks.filter(Boolean).map((p) => p.ndex));
   // 挖坑挑戰：把出題人挖的坑從候選中濾掉，朋友就不會（也不能）選到同一隻。
-  const entries = Object.entries(nationalDex).map(([key, v]) => ({ key, ...v })).filter((p) => !pit || p.key !== pit);
+  const entries = Object.entries(DATA.nationalDex).map(([key, v]) => ({ key, ...v })).filter((p) => !pit || p.key !== pit);
 
   const overlay = el(`
     <div class="modal-overlay" role="dialog" aria-modal="true" aria-label="${esc(t('doku.title'))}">
@@ -2532,7 +2513,7 @@ function openDokuPicker(idx, onPicked, pit = null) {
 
   const choose = (p) => {
     if (usedNdex.has(p.ndex)) { msg.textContent = t('doku.usedAlready', { name: p.nameZh }); msg.hidden = false; return; }
-    dokuState.picks[idx] = {
+    state.dokuState.picks[idx] = {
       key: p.key, ndex: p.ndex, name: p.nameZh, image: p.image, mega: !!p.mega,
       correct: cellSatisfied(p, rowCat, colCat),
     };
@@ -2597,18 +2578,18 @@ function openDokuPicker(idx, onPicked, pit = null) {
 
 // 某格所有合法解（全國圖鑑中同時滿足該列與該行條件者）。供挖坑揭露隨機補滿用。
 function cellEntries(idx) {
-  const pz = dokuState.puzzle;
+  const pz = state.dokuState.puzzle;
   const rowCat = pz.rows[Math.floor(idx / 3)], colCat = pz.cols[idx % 3];
-  return Object.entries(nationalDex).map(([key, v]) => ({ key, ...v })).filter((p) => cellSatisfied(p, rowCat, colCat));
+  return Object.entries(DATA.nationalDex).map(([key, v]) => ({ key, ...v })).filter((p) => cellSatisfied(p, rowCat, colCat));
 }
 
 // 無提示作答彈窗：純文字輸入、不給候選清單；查無對應寶可夢時，格子顯示使用者打的字。
 function openDokuTextInput(idx, onPicked, pit = null) {
-  if (!dokuState || !dokuState.puzzle) return;
-  const pz = dokuState.puzzle;
+  if (!state.dokuState || !state.dokuState.puzzle) return;
+  const pz = state.dokuState.puzzle;
   const rowCat = pz.rows[Math.floor(idx / 3)], colCat = pz.cols[idx % 3];
-  const usedNdex = new Set(dokuState.picks.filter(Boolean).map((p) => p.ndex));
-  const entries = Object.entries(nationalDex).map(([key, v]) => ({ key, ...v }));
+  const usedNdex = new Set(state.dokuState.picks.filter(Boolean).map((p) => p.ndex));
+  const entries = Object.entries(DATA.nationalDex).map(([key, v]) => ({ key, ...v }));
 
   const overlay = el(`
     <div class="modal-overlay" role="dialog" aria-modal="true" aria-label="${esc(t('doku.title'))}">
@@ -2644,10 +2625,10 @@ function openDokuTextInput(idx, onPicked, pit = null) {
     if (match) {
       if (pit && match.key === pit) { msg.textContent = t('doku.trap.isPit', { name: match.nameZh }); msg.hidden = false; return; }
       if (usedNdex.has(match.ndex)) { msg.textContent = t('doku.usedAlready', { name: match.nameZh }); msg.hidden = false; return; }
-      dokuState.picks[idx] = { key: match.key, ndex: match.ndex, name: match.nameZh, image: match.image, mega: !!match.mega, correct: cellSatisfied(match, rowCat, colCat) };
+      state.dokuState.picks[idx] = { key: match.key, ndex: match.ndex, name: match.nameZh, image: match.image, mega: !!match.mega, correct: cellSatisfied(match, rowCat, colCat) };
     } else {
       // 查無這隻：照規格在格子顯示使用者打的字（非立繪），視為未答對。
-      dokuState.picks[idx] = { key: null, ndex: null, name: raw, image: null, mega: false, correct: false, typed: true };
+      state.dokuState.picks[idx] = { key: null, ndex: null, name: raw, image: null, mega: false, correct: false, typed: true };
     }
     close();
     onPicked();
@@ -2668,8 +2649,8 @@ function openDokuTextInput(idx, onPicked, pit = null) {
 
 // ── 數獨準備畫面：選玩法（一般練習／挖坑出題）＋作答方式（提示／無提示）──
 function viewDokuSetup() {
-  if (!dokuSetup) dokuSetup = { play: 'practice', hintMode: 'hint', seed: newSeed() };
-  const { play, hintMode } = dokuSetup;
+  if (!state.dokuSetup) state.dokuSetup = { play: 'practice', hintMode: 'hint', seed: newSeed() };
+  const { play, hintMode } = state.dokuSetup;
 
   const optBtn = (val, cur, label, note) => `
     <button class="season-btn doku-opt" aria-pressed="${val === cur}" data-val="${val}">
@@ -2695,15 +2676,15 @@ function viewDokuSetup() {
     </section>`);
 
   node.querySelectorAll('[data-pick="play"] [data-val]').forEach((b) => {
-    b.onclick = () => { dokuSetup.play = b.dataset.val; viewDokuSetup(); };
+    b.onclick = () => { state.dokuSetup.play = b.dataset.val; viewDokuSetup(); };
   });
   node.querySelectorAll('[data-pick="hint"] [data-val]').forEach((b) => {
-    b.onclick = () => { dokuSetup.hintMode = b.dataset.val; viewDokuSetup(); };
+    b.onclick = () => { state.dokuSetup.hintMode = b.dataset.val; viewDokuSetup(); };
   });
   node.querySelector('[data-act="start"]').onclick = () => {
-    dokuState = {
-      seed: newSeed(), hintMode: dokuSetup.hintMode,
-      play: dokuSetup.play === 'trap' ? 'trap-author' : 'practice',
+    state.dokuState = {
+      seed: newSeed(), hintMode: state.dokuSetup.hintMode,
+      play: state.dokuSetup.play === 'trap' ? 'trap-author' : 'practice',
       pits: null, challenge: null,
     };
     go('#/doku');
@@ -2796,7 +2777,7 @@ function render() {
   const hash = location.hash;
 
   // 帶成績碼進站且尚未開始挑戰 → 顯示戰帖。消費掉 ?c= 避免站內導覽重複攔截。
-  if (code && !session && hash !== '#/quiz' && hash !== '#/result') {
+  if (code && !state.session && hash !== '#/quiz' && hash !== '#/result') {
     const decoded = decodeShare(code);
     history.replaceState(null, '', location.pathname + (hash || '#/'));
     if (decoded) { gaPageView('/challenge'); gaEvent('challenge_view', { kind: decoded.mode }); return viewChallenge(decoded); }
@@ -2830,7 +2811,7 @@ document.addEventListener('click', (e) => {
   const dest = nav.dataset.nav;
   if (dest === 'home') {
     // 回當前 section 首頁；已在 section 首頁則再上一層回母頁。重設進行中狀態。
-    session = null; setupState = null; dokuState = null; dokuSetup = null; masterState = null; builderState = null;
+    state.session = null; state.setupState = null; state.dokuState = null; state.dokuSetup = null; state.masterState = null; state.builderState = null;
     const home = SECTION_HOME[sectionOf(location.hash)];
     go(location.hash === home ? '#/' : home);
   } else if (dest === 'back') {
@@ -2862,15 +2843,15 @@ async function init() {
       fetch('./src/data/seasons.json'),
       fetch('./src/data/dex-national.json'),
     ]);
-    pokedex = await dexRes.json();
-    seasonsData = await seasonsRes.json();
-    nationalDex = await natRes.json();
+    DATA.pokedex = await dexRes.json();
+    DATA.seasonsData = await seasonsRes.json();
+    DATA.nationalDex = await natRes.json();
   } catch (e) {
     console.error('資料載入失敗', e);
   }
   // 使用率資料為次要功能（聯防補洞建議）；載入失敗不影響核心，靜默退化。
   try {
-    usageData = await (await fetch('./src/data/usage.json')).json();
+    DATA.usageData = await (await fetch('./src/data/usage.json')).json();
   } catch { /* 無 usage.json → 聯防不顯示補洞建議 */ }
   render();
 }
