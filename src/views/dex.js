@@ -1,7 +1,7 @@
 // 圖鑑：縮圖牆 + 類別/屬性過濾 + 名字模糊搜尋。
 import { TYPES, TYPE_META } from '../data/typechart.js';
 import { t, typeName } from '../i18n.js';
-import { poolLabel, seasonKeys, seasonLabel, whoPool } from '../pool.js';
+import { GENERATIONS, poolLabel, seasonKeys, seasonLabel, whoPool } from '../pool.js';
 import { normalizeName } from '../quiz.js';
 import { DATA, state } from '../state.js';
 import { el, esc, setView, typeIcon, uiIcon } from '../ui.js';

@@ -15,10 +15,6 @@ export function dokuTag(cat) {
   return cat.kind === 'type' ? badge(cat.value) : `<span class="doku-tag">${esc(cat.label)}</span>`;
 }
 
-// 搜尋彈窗標頭的條件文字（純文字，不放 badge）。
-export function condText(cat) {
-  return cat.kind === 'type' ? typeName(cat.value) : cat.label;
-}
 
 
 export function viewDoku() {

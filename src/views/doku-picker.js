@@ -1,9 +1,14 @@
 // 寶可夢數獨：填格用的搜尋彈窗（提示清單）與純打字輸入，含候選計算 cellEntries。
 import { PICK_RESULT_LIMIT, cellSatisfied } from '../doku.js';
-import { t } from '../i18n.js';
+import { t, typeName } from '../i18n.js';
 import { normalizeName } from '../quiz.js';
 import { DATA, state } from '../state.js';
 import { el, esc, uiIcon } from '../ui.js';
+
+// 搜尋彈窗標頭的條件文字（純文字，不放 badge）。
+function condText(cat) {
+  return cat.kind === 'type' ? typeName(cat.value) : cat.label;
+}
 
 
 
