@@ -3,6 +3,7 @@ import { TYPES, TYPE_META, formatMultiplier, multiplier, singleMultiplier } from
 import { t, typeName } from '../i18n.js';
 import { DATA } from '../state.js';
 import { badge, el, esc, setView, typeIcon, uiIcon } from '../ui.js';
+import { buildUsageRecommender } from './coverage-recommend.js';
 
 
 // ── 聯防小工具：攻擊方／防守方（屬性集合綜合）＋我的隊伍（逐隻分析）─
@@ -58,108 +59,6 @@ export function buildChartTool() {
     </div>`);
   card.querySelector('.ct-body').appendChild(buildTeamTool());
   return card;
-}
-
-
-// 攻擊方／防守方：選一組屬性，當成隊伍綜合（攻取 min＝最不痛一擊、防取 max＝最痛被打）。
-export function buildSetTool() {
-  const wrap = el(`
-    <div class="ct-set">
-      <p class="label ct-picked-label"></p>
-      <div class="ct-picked"></div>
-      <p class="muted ct-add-hint">${esc(t('chart.tool.add'))}</p>
-      <div class="type-grid ct-grid"></div>
-      <div class="ct-result"></div>
-    </div>`);
-  const pickedLabel = wrap.querySelector('.ct-picked-label');
-  const pickedBox = wrap.querySelector('.ct-picked');
-  const grid = wrap.querySelector('.ct-grid');
-  const resultBox = wrap.querySelector('.ct-result');
-  const isAtk = () => chartToolState.mode === 'atk';
-
-  const syncGrid = () => grid.querySelectorAll('.type-pick').forEach((b, i) =>
-    b.setAttribute('aria-pressed', String(chartToolState.picks.includes(TYPES[i]))));
-
-  const togglePick = (tk) => {
-    chartToolState.picks = chartToolState.picks.includes(tk)
-      ? chartToolState.picks.filter((x) => x !== tk)
-      : [...chartToolState.picks, tk];
-    syncGrid();
-    renderPicked();
-    renderResult();
-  };
-
-  const renderPicked = () => {
-    pickedLabel.textContent = t('chart.tool.picked', { n: chartToolState.picks.length });
-    pickedBox.innerHTML = '';
-    if (!chartToolState.picks.length) {
-      pickedBox.appendChild(el(`<span class="ct-empty">${esc(t('chart.tool.empty'))}</span>`));
-      return;
-    }
-    chartToolState.picks.forEach((tk) => {
-      const m = TYPE_META[tk];
-      const chip = el(`<button class="ct-chip" style="background:${m.color}" aria-label="${esc(t('chart.tool.remove', { name: typeName(tk) }))}">${typeIcon(tk)}<span>${esc(typeName(tk))}</span>${uiIcon('close')}</button>`);
-      chip.onclick = () => togglePick(tk);
-      pickedBox.appendChild(chip);
-    });
-  };
-
-  // 把選的屬性當成一個隊伍綜合：對每個「對手屬性」聚合成單一倍率。
-  // 攻擊方取 min（最不痛的一擊打多少）、防守方取 max（最痛被打多少）；對我方不利的那桶 highlight。
-  const buildCombined = () => {
-    const atk = isAtk();
-    const aggOf = (other) => {
-      const vals = chartToolState.picks.map((p) =>
-        atk ? singleMultiplier(p, other) : singleMultiplier(other, p));
-      return atk ? Math.min(...vals) : Math.max(...vals);
-    };
-    // 每桶：倍率、危險與否、好（安全）與否、文案；依危險度排序（危險者在前）。
-    const buckets = atk
-      ? [
-          { v: 0,   danger: true,  key: 'chart.tool.cov.none' },
-          { v: 0.5, danger: true,  key: 'chart.tool.cov.weak' },
-          { v: 1,   key: 'chart.tool.cov.ok1' },
-          { v: 2,   good: true,    key: 'chart.tool.cov.good' },
-        ]
-      : [
-          { v: 2,   danger: true,  key: 'chart.tool.def.hurt' },
-          { v: 1,   key: 'chart.tool.def.plain' },
-          { v: 0.5, good: true,    key: 'chart.tool.def.resist' },
-          { v: 0,   good: true,    key: 'chart.tool.def.immune' },
-        ];
-    const wrap = el('<div class="ct-combined"></div>');
-    wrap.appendChild(el(`<p class="ct-explain">${esc(atk ? t('chart.tool.atkExplain') : t('chart.tool.defExplain'))}</p>`));
-    buckets.forEach((b) => {
-      const list = TYPES.filter((other) => aggOf(other) === b.v);
-      if (!list.length) return;
-      const cls = b.danger ? ' ct-bucket--danger' : b.good ? ' ct-bucket--safe' : '';
-      wrap.appendChild(el(`<div class="ct-bucket${cls}">
-        <span class="ct-bucket__k">${esc(formatMultiplier(b.v))}<small>${esc(t(b.key))}</small></span>
-        <span class="ct-bucket__v">${list.map((o) => badge(o)).join('')}</span>
-      </div>`));
-    });
-    return wrap;
-  };
-
-  const renderResult = () => {
-    resultBox.innerHTML = '';
-    if (!chartToolState.picks.length) {
-      resultBox.appendChild(el(`<p class="ct-hint">${esc(t('chart.tool.pickPrompt'))}</p>`));
-      return;
-    }
-    resultBox.appendChild(buildCombined());
-  };
-
-  TYPES.forEach((tk) => {
-    const m = TYPE_META[tk];
-    const b = el(`<button class="type-pick" style="background:${m.color}" aria-pressed="${chartToolState.picks.includes(tk)}">${typeIcon(tk)}${esc(typeName(tk))}</button>`);
-    b.onclick = () => togglePick(tk);
-    grid.appendChild(b);
-  });
-
-  renderPicked();
-  renderResult();
-  return wrap;
 }
 
 
@@ -378,69 +277,4 @@ export function buildTeamTool() {
   renderMons();
   renderSummary();
   return wrap;
-}
-
-
-// 從 meta top-50（Champions Lab, VGC 雙打）挑最能補本隊攻守破洞的人，並點名補哪一招。
-// 防守補＝候選屬性抵抗（≤0.5×）某防守洞；攻擊補＝候選某招（含本系 STAB）打某攻擊洞 ≥2×。
-// 綜合分 = 防守補數 + 攻擊補數，兩邊都補再 ×1.5（優先度更高）。取 top 5。
-export function buildUsageRecommender(defHoles, offHoles) {
-  const list = DATA.usageData && DATA.usageData.list;
-  if (!list || !list.length) return null;
-  if (!defHoles.length && !offHoles.length) return null;
-
-  const scored = [];
-  for (const c of list) {
-    const types = c.types || [];
-    const defFix = defHoles.filter((a) => multiplier(a, types) <= 0.5);
-    const offFix = [];
-    for (const d of offHoles) {
-      let best = null;
-      for (const mv of c.moves || []) {
-        const mult = singleMultiplier(mv.type, d) * (types.includes(mv.type) ? 1.5 : 1);
-        if (mult >= 2 && (!best || mult > best.mult)) best = { hole: d, move: mv, mult };
-      }
-      if (best) offFix.push(best);
-    }
-    if (!defFix.length && !offFix.length) continue;
-    const dual = defFix.length > 0 && offFix.length > 0;
-    const score = (defFix.length + offFix.length) * (dual ? 1.5 : 1);
-    scored.push({ c, defFix, offFix, score, dual });
-  }
-  if (!scored.length) return null;
-  scored.sort((a, b) => b.score - a.score || (b.c.usagePct || 0) - (a.c.usagePct || 0));
-
-  const card = el(`<div class="ct-summary ct-rec">
-    <h3>${esc(t('chart.tool.team.recTitle'))}</h3>
-    <p class="ct-rec__sub">${esc(t('chart.tool.team.recSub'))}</p>
-  </div>`);
-  scored.slice(0, 5).forEach((s, i) => {
-    const c = s.c;
-    const img = (DATA.pokedex[c.key] && DATA.pokedex[c.key].image) || '';
-    const dualTag = s.dual ? `<span class="ct-rec__dual">${esc(t('chart.tool.team.recDual'))}</span>` : '';
-    const row = el(`<div class="ct-rec__row">
-      <div class="ct-rec__head">
-        <span class="ct-rec__rank">#${i + 1}</span>
-        ${img ? `<img class="ct-rec__art" src="${esc(img)}" alt="${esc(c.nameZh)}" loading="lazy" />` : ''}
-        <span class="ct-rec__name">${esc(c.nameZh)}</span>
-        <span class="ct-rec__use">${esc(t('chart.tool.team.recUse', { p: (c.usagePct ?? 0).toFixed(1) }))}</span>
-        ${dualTag}
-      </div>
-    </div>`);
-  const body = el('<div class="ct-rec__body"></div>');
-    if (s.defFix.length) {
-      body.insertAdjacentHTML('beforeend',
-        `<div class="ct-rec__line"><span class="ct-rec__k ct-rec__k--def">${esc(t('chart.tool.team.recDef'))}</span><span class="ct-rec__v">${s.defFix.map((a) => badge(a)).join('')}</span></div>`);
-    }
-    if (s.offFix.length) {
-      const items = s.offFix.map((f) =>
-        `<span class="ct-rec__atk">${badge(f.hole)}<span class="ct-rec__via">${esc(t('chart.tool.team.recVia'))}</span><span class="ct-rec__move" style="background:${TYPE_META[f.move.type].color}">${typeIcon(f.move.type)}${esc(f.move.nameZh || f.move.nameEn)}</span></span>`).join('');
-      body.insertAdjacentHTML('beforeend',
-        `<div class="ct-rec__line"><span class="ct-rec__k ct-rec__k--atk">${esc(t('chart.tool.team.recAtk'))}</span><span class="ct-rec__v">${items}</span></div>`);
-    }
-    row.appendChild(body);
-    card.appendChild(row);
-  });
-  card.insertAdjacentHTML('beforeend', `<p class="ct-rec__src">${esc(t('chart.tool.team.recSrc'))}</p>`);
-  return card;
 }
